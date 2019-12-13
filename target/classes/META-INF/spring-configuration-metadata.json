@@ -1,0 +1,119 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "name": "spring.datasource",
+      "type": "com.cointer.config.DBProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "name": "spring.datasource.connection-properties",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "name": "spring.datasource.driver-class-name",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "name": "spring.datasource.filters",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": 0,
+      "name": "spring.datasource.initial-size",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": 0,
+      "name": "spring.datasource.max-active",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": 0,
+      "name": "spring.datasource.max-pool-prepared-statement-per-connection-size",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": 0,
+      "name": "spring.datasource.max-wait",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": 0,
+      "name": "spring.datasource.min-evictable-idle-time-millis",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": 0,
+      "name": "spring.datasource.min-idle",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "name": "spring.datasource.password",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": false,
+      "name": "spring.datasource.pool-prepared-statements",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": false,
+      "name": "spring.datasource.test-on-borrow",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": false,
+      "name": "spring.datasource.test-on-return",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": false,
+      "name": "spring.datasource.test-while-idle",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": 0,
+      "name": "spring.datasource.time-between-eviction-runs-millis",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "name": "spring.datasource.url",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "defaultValue": false,
+      "name": "spring.datasource.use-global-data-source-stat",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "name": "spring.datasource.username",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cointer.config.DBProperties",
+      "name": "spring.datasource.validation-query",
+      "type": "java.lang.String"
+    }
+  ]
+}

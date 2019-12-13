@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>玩家流水</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<div style="width: 500px; margin: 20px auto; text-align: center">
+		<table align='center' border='1' cellspacing='0'>
+			<tr>
+				<td>id</td>
+				<td>玩家id</td>
+				<td>昵称</td>
+				<td>剩余</td>
+				<td>变化</td>
+				<td>类型</td>
+				<td>来源目标</td>
+				<td>描述</td>
+				<td>时间</td>
+			</tr>
+			<tr th:each="c:${page.list}">
+				<td th:text="${c.id}"></td>
+				<td th:text="${c.uid}"></td>
+				<td th:text="${c.nick}"></td>
+				<td th:text="${c.remain/100}"></td>
+				<td th:text="${c.cost/100}"></td>
+				<td th:text="${c.type}"></td>
+				<td th:text="${c.tagId}"></td>
+				<td th:text="${c.reason}"></td>
+				<td th:text="${#dates.format(c.time*1000, 'yyyy-MM-dd HH:mm:ss')}"></td>
+			</tr>
+			<form th:action="@{/exchange/billsList}" method="post">
+				<label for="begin">开始时间:</label><input name="begin" id="begin" type="date"/> 
+				<label for="end">结束时间:</label><input name="end" id="end" type="date"/> 
+				<input type="hidden" name="uid" th:value=${uid}>
+				<button type="submit">查询</button>
+			</form>
+		</table>
+		<br/>
+		<div>
+			<a th:href="@{/exchange/billsList(uid=${uid},start=0)}">[首 页]</a> <a th:href="@{/exchange/billsList(uid=${uid},start=${page.pageNum-1})}">[上一页]</a>
+			<a th:text="${page.pageNum}"></a> <a th:href="@{/exchange/billsList(uid=${uid},start=${page.pageNum+1})}">[下一页]</a>
+			<a th:text="${page.pages}"></a> <a th:href="@{/exchange/billsList(uid=${uid},start=${page.pages})}">[末 页]</a>
+		</div>
+		<br/>
+
+	</div>
+
+</body>
+</html>

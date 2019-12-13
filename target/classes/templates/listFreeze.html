@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>冻结资金列表</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+
+
+  
+<div style="width:500px;margin:20px auto;text-align: center">
+    <table align='center' border='1' cellspacing='0'>
+        <tr>
+            <td>id</td>
+            <td>玩家id</td>
+            <td>订单id</td>
+            <td>订单类型</td>
+            <td>金币</td>
+            <td>时间</td>
+            <td>编辑</td>
+            <td>编辑</td>
+        </tr>
+        <tr th:each="c:${page.list}">
+            <td th:text="${c.id}"></td>
+            <td th:text="${c.uid}"></td>
+            <td th:text="${c.orderId}"></td>
+            <td th:text="${c.orderType}"></td>
+            <td th:text="${c.coin/100}"></td>
+              <td th:text="${#dates.format(c.time*1000, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td><a th:href="@{/exchange/unfreeze(uid=${c.uid},id=${c.id})}">解冻资金</a></td>
+            <td><a th:href="@{/exchange/orderById(orderId=${c.id})}">查看订单</a></td>
+        </tr>
+    </table>
+    <br/>
+    <div>
+			<a th:href="@{/exchange/freezeList(uid=${uid},start=0)}">[首  页]</a>
+			<a th:href="@{/exchange/freezeList(uid=${uid},start=${page.pageNum-1})}">[上一页]</a>
+			<a th:text="${page.pageNum}" ></a>
+			<a th:href="@{/exchange/freezeList(uid=${uid},start=${page.pageNum+1})}">[下一页]</a>
+			<a th:text="${page.pages}" ></a>
+			<a th:href="@{/exchange/freezeList(uid=${uid},start=${page.pages})}">[末  页]</a>
+    </div>
+    <br/>    
+
+</div>
+
+</body>
+</html>

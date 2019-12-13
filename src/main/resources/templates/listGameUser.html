@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>玩家列表</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+
+
+  
+<div style="width:500px;margin:20px auto;text-align: center">
+    <table align='center' border='1' cellspacing='0'>
+        <tr>
+            <td>id</td>
+            <td>昵称</td>
+            <td>电话</td>
+            <td>email</td>
+            <td>金币</td>
+            <td>编辑</td>
+            <td>编辑</td>
+        </tr>
+        <tr th:each="c:${page.list}">
+            <td th:text="${c.id}"></td>
+            <td th:text="${c.nick}"></td>
+            <td th:text="${c.phone}"></td>
+            <td th:text="${c.email}"></td>
+            <td th:text="${c.coin/100}"></td>
+            <td><a th:href="@{/exchange/billsList(uid=${c.id})}">查看玩家账单</a></td>
+            <td><a th:href="@{/exchange/freezeList(uid=${c.id})}">管理冻结资金</a></td>
+        </tr>
+    </table>
+    <br/>
+    <div>
+			<a th:href="@{/gameUser/gameUserList(start=0)}">[首  页]</a>
+			<a th:href="@{/gameUser/gameUserList(start=${page.pageNum-1})}">[上一页]</a>
+			<a th:text="${page.pageNum}" ></a>
+			<a th:href="@{/gameUser/gameUserList(start=${page.pageNum+1})}">[下一页]</a>
+			<a th:text="${page.pages}" ></a>
+			<a th:href="@{/gameUser/gameUserList(start=${page.pages})}">[末  页]</a>
+    </div>
+    <br/>    
+
+</div>
+
+</body>
+</html>
