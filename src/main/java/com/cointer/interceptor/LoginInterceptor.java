@@ -30,7 +30,7 @@ public class LoginInterceptor extends BaseInterceptor implements HandlerIntercep
 	private static final Set<String> NOT_INTERCEPT_URI = new HashSet<>();//不拦截的URI
 
 	static {
-		NOT_INTERCEPT_URI.add("/CointerGameAccount/user/registOrLogin");
+		NOT_INTERCEPT_URI.add("/GameUser/user/registOrLogin");
 	}
 	@Autowired
 	private   IJedisClient jedisClient;
@@ -46,11 +46,11 @@ public class LoginInterceptor extends BaseInterceptor implements HandlerIntercep
 		}
 		String  session=request.getParameter(Constant._SESSION);
 		if(session == null) {
-			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆", null));
+			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆:"+uri, null));
 			return false;
 		}
 		if(RedisData.authSession(jedisClient, session)==null) {
-			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆", null));
+			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆:"+uri, null));
 			return false;
 		}
 		return true;
