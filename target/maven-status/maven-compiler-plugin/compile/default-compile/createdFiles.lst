@@ -59,14 +59,12 @@ com\cointer\util\ObjUtil.class
 com\cointer\pojo\po\tradeOrder.class
 com\cointer\service\impl\ChargeCallBack.class
 com\cointer\controller\base\BaseController.class
-com\cointer\service\impl\UserService$1.class
 com\cointer\pojo\po\gameRec.class
 com\cointer\pojo\po\mineralBills.class
 com\cointer\exception\TransException.class
 com\cointer\interceptor\BaseInterceptor.class
 com\cointer\service\impl\MineralService.class
 com\cointer\interceptor\LoginInterceptor.class
-com\cointer\service\impl\UserService$2.class
 com\cointer\pojo\po\mineralCode.class
 com\cointer\service\IMineralService.class
 com\cointer\config\SessionFactoryConfig.class
@@ -81,7 +79,6 @@ com\cointer\service\impl\UserService.class
 com\cointer\eventer\ExecutorHandle.class
 com\cointer\pojo\po\gamePresenter.class
 com\cointer\controller\DealController.class
-com\cointer\service\impl\UserService$3.class
 com\cointer\eventer\EventDistributor.class
 com\cointer\util\SqlUtil.class
 com\cointer\pojo\po\userMineral.class

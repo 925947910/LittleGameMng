@@ -105,3 +105,216 @@ Verify the connector's configuration, identify and stop any process that's liste
 2020-01-03 12:27:26.511 org.yliu.mui.mapper: debug 10436 --- [restartedMain] ConfigServletWebServerApplicationContext : Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@10211ccf: startup date [Fri Jan 03 12:27:24 CST 2020]; root of context hierarchy
 2020-01-03 12:27:26.511 org.yliu.mui.mapper: debug 10436 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
 2020-01-03 12:27:26.511 org.yliu.mui.mapper: debug 10436 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans
+2020-01-03 14:00:10.489 org.yliu.mui.mapper: debug 4328 --- [restartedMain] com.cointer.Application                  : Starting Application on SKY-20190119SNG with PID 4328 (D:\workSpace\LittleGameMng\target\classes started by Administrator in D:\workSpace\LittleGameMng)
+2020-01-03 14:00:10.490 org.yliu.mui.mapper: debug 4328 --- [restartedMain] com.cointer.Application                  : The following profiles are active: pro
+2020-01-03 14:00:10.526 org.yliu.mui.mapper: debug 4328 --- [restartedMain] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@522ca4ce: startup date [Fri Jan 03 14:00:10 CST 2020]; root of context hierarchy
+2020-01-03 14:00:11.146 org.yliu.mui.mapper: debug 4328 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2020-01-03 14:00:11.435 org.yliu.mui.mapper: debug 4328 --- [restartedMain] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$74036e90] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-01-03 14:00:11.729 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8088 (http)
+2020-01-03 14:00:11.743 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-01-03 14:00:11.743 org.yliu.mui.mapper: debug 4328 --- [restartedMain] org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/8.5.34
+2020-01-03 14:00:11.747 org.yliu.mui.mapper: debug 4328 --- [localhost-startStop-1] o.a.catalina.core.AprLifecycleListener   : The APR based Apache Tomcat Native library which allows optimal performance in production environments was not found on the java.library.path: [C:\Program Files\Java\jdk1.8.0_181\bin;C:\windows\Sun\Java\bin;C:\windows\system32;C:\windows;C:/Program Files/Java/jre1.8.0_181/bin/server;C:/Program Files/Java/jre1.8.0_181/bin;C:/Program Files/Java/jre1.8.0_181/lib/amd64;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Java\jdk1.8.0_181\bin;C:\Program Files\Java\jdk1.8.0_181\jre\bin;C:\Program Files\Redis;D:\Git\cmd;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;C:\Program Files\erl10.4\bin; ;D:\eclipse;;.]
+2020-01-03 14:00:11.821 org.yliu.mui.mapper: debug 4328 --- [localhost-startStop-1] o.a.c.c.C.[.[localhost].[/GameUser]      : Initializing Spring embedded WebApplicationContext
+2020-01-03 14:00:11.822 org.yliu.mui.mapper: debug 4328 --- [localhost-startStop-1] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1296 ms
+2020-01-03 14:00:11.833 org.yliu.mui.mapper: debug 4328 --- [localhost-startStop-1] com.cointer.config.DruidConfig           : init Druid Servlet Configuration 
+2020-01-03 14:00:11.887 org.yliu.mui.mapper: debug 4328 --- [localhost-startStop-1] o.s.b.w.servlet.ServletRegistrationBean  : Servlet statViewServlet mapped to [/druid/*]
+2020-01-03 14:00:11.888 org.yliu.mui.mapper: debug 4328 --- [localhost-startStop-1] o.s.b.w.servlet.ServletRegistrationBean  : Servlet dispatcherServlet mapped to [/]
+2020-01-03 14:00:11.890 org.yliu.mui.mapper: debug 4328 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'characterEncodingFilter' to: [/*]
+2020-01-03 14:00:11.891 org.yliu.mui.mapper: debug 4328 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'webStatFilter' to urls: [/*]
+2020-01-03 14:00:11.891 org.yliu.mui.mapper: debug 4328 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'corsFilter' to: [/*]
+2020-01-03 14:00:11.947 org.yliu.mui.mapper: debug 4328 --- [restartedMain] com.cointer.config.RedisConfig           : JedisPool注入成功！MaxTotal:32
+2020-01-03 14:00:11.947 org.yliu.mui.mapper: debug 4328 --- [restartedMain] com.cointer.config.RedisConfig           : redis地址：127.0.0.1:6379
+2020-01-03 14:00:12.286 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/coin/freezeList]}" onto public java.lang.String com.cointer.controller.CoinInfoController.freezeList(java.lang.String)
+2020-01-03 14:00:12.287 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/coin/unfreeze]}" onto public java.lang.String com.cointer.controller.CoinInfoController.unFreeze(java.lang.String)
+2020-01-03 14:00:12.287 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/coin/billsList]}" onto public java.lang.String com.cointer.controller.CoinInfoController.billsList(java.lang.String)
+2020-01-03 14:00:12.288 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/deal/recover]}" onto public java.lang.String com.cointer.controller.DealController.coinRecover(java.lang.String)
+2020-01-03 14:00:12.288 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/deal/extractOrder]}" onto public java.lang.String com.cointer.controller.DealController.extractOrder(java.lang.String)
+2020-01-03 14:00:12.288 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/deal/extractPwd]}" onto public java.lang.String com.cointer.controller.DealController.extractPwd(java.lang.String)
+2020-01-03 14:00:12.289 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/deal/coinDeal]}" onto public java.lang.String com.cointer.controller.DealController.coinDeal(java.lang.String)
+2020-01-03 14:00:12.290 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/exchange/extract]}" onto public java.lang.String com.cointer.controller.ExchangeController.extract(java.lang.String)
+2020-01-03 14:00:12.290 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/exchange/chargeOrder]}" onto public java.lang.String com.cointer.controller.ExchangeController.chargeOrder(java.lang.String)
+2020-01-03 14:00:12.290 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/exchange/orderInfo]}" onto public java.lang.String com.cointer.controller.ExchangeController.orderInfo(java.lang.String)
+2020-01-03 14:00:12.291 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/exchange/checkFreeze]}" onto public java.lang.String com.cointer.controller.ExchangeController.checkFreeze(java.lang.String)
+2020-01-03 14:00:12.291 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/useMineralCode]}" onto public java.lang.String com.cointer.controller.MineralController.useMineralCode(java.lang.String)
+2020-01-03 14:00:12.291 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/getMineral]}" onto public java.lang.String com.cointer.controller.MineralController.getMineral(java.lang.String)
+2020-01-03 14:00:12.292 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/presenterMembers]}" onto public java.lang.String com.cointer.controller.MineralController.presenterMembers(java.lang.String)
+2020-01-03 14:00:12.292 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/mineralBillsList]}" onto public java.lang.String com.cointer.controller.MineralController.mineralBillsList(java.lang.String)
+2020-01-03 14:00:12.292 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/digMineral]}" onto public java.lang.String com.cointer.controller.MineralController.digMineral(java.lang.String)
+2020-01-03 14:00:12.293 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/remotePlatUserInfo]}" onto public java.lang.String com.cointer.controller.UserController.remotePlatUserInfo(java.lang.String)
+2020-01-03 14:00:12.293 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/addPhoto]}" onto public java.lang.String com.cointer.controller.UserController.addPhoto(java.lang.String)
+2020-01-03 14:00:12.293 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/registOrLogin]}" onto public java.lang.String com.cointer.controller.UserController.login(java.lang.String)
+2020-01-03 14:00:12.293 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/bindRemoteUser]}" onto public java.lang.String com.cointer.controller.UserController.bindRemoteUser(java.lang.String)
+2020-01-03 14:00:12.293 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/remotePlats]}" onto public java.lang.String com.cointer.controller.UserController.remotePlats(java.lang.String)
+2020-01-03 14:00:12.296 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2020-01-03 14:00:12.297 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2020-01-03 14:00:12.348 org.yliu.mui.mapper: debug 4328 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : Looking for @ControllerAdvice: org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@522ca4ce: startup date [Fri Jan 03 14:00:10 CST 2020]; root of context hierarchy
+2020-01-03 14:00:12.763 org.yliu.mui.mapper: debug 4328 --- [restartedMain] org.thymeleaf.templatemode.TemplateMode  : [THYMELEAF][restartedMain] Template Mode 'HTML5' is deprecated. Using Template Mode 'HTML' instead.
+2020-01-03 14:00:12.874 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2020-01-03 14:00:12.896 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2020-01-03 14:00:12.897 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Bean with name 'dataSource' has been autodetected for JMX exposure
+2020-01-03 14:00:12.901 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Located MBean 'dataSource': registering with JMX server as MBean [com.alibaba.druid.pool:name=dataSource,type=DruidDataSource]
+2020-01-03 14:00:12.914 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.apache.catalina.core.StandardService   : Failed to start connector [Connector[HTTP/1.1-8088]]
+
+org.apache.catalina.LifecycleException: Failed to start component [Connector[HTTP/1.1-8088]]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:167) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.addPreviouslyRemovedConnectors(TomcatWebServer.java:261) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.start(TomcatWebServer.java:198) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.startWebServer(ServletWebServerApplicationContext.java:300) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.finishRefresh(ServletWebServerApplicationContext.java:162) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:551) [spring-context-5.0.10.RELEASE.jar:5.0.10.RELEASE]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:140) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:386) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:307) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1242) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1230) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at com.cointer.Application.main(Application.java:16) [classes/:na]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.8.0_181]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[na:1.8.0_181]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.8.0_181]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[na:1.8.0_181]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:49) [spring-boot-devtools-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+Caused by: org.apache.catalina.LifecycleException: Protocol handler start failed
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1020) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	... 18 common frames omitted
+Caused by: java.net.BindException: Address already in use: bind
+	at sun.nio.ch.Net.bind0(Native Method) ~[na:1.8.0_181]
+	at sun.nio.ch.Net.bind(Net.java:433) ~[na:1.8.0_181]
+	at sun.nio.ch.Net.bind(Net.java:425) ~[na:1.8.0_181]
+	at sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:223) ~[na:1.8.0_181]
+	at sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:74) ~[na:1.8.0_181]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:219) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:1151) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:591) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1018) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	... 19 common frames omitted
+
+2020-01-03 14:00:12.916 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2020-01-03 14:00:12.929 org.yliu.mui.mapper: debug 4328 --- [restartedMain] ConditionEvaluationReportLoggingListener : 
+
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+2020-01-03 14:00:12.932 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The Tomcat connector configured to listen on port 8088 failed to start. The port may already be in use or the connector may be misconfigured.
+
+Action:
+
+Verify the connector's configuration, identify and stop any process that's listening on port 8088, or configure this application to listen on another port.
+
+2020-01-03 14:00:12.933 org.yliu.mui.mapper: debug 4328 --- [restartedMain] ConfigServletWebServerApplicationContext : Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@522ca4ce: startup date [Fri Jan 03 14:00:10 CST 2020]; root of context hierarchy
+2020-01-03 14:00:12.941 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
+2020-01-03 14:00:12.942 org.yliu.mui.mapper: debug 4328 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans
+2020-01-03 14:00:43.518 org.yliu.mui.mapper: debug 13556 --- [restartedMain] com.cointer.Application                  : Starting Application on SKY-20190119SNG with PID 13556 (D:\workSpace\LittleGameMng\target\classes started by Administrator in D:\workSpace\LittleGameMng)
+2020-01-03 14:00:43.519 org.yliu.mui.mapper: debug 13556 --- [restartedMain] com.cointer.Application                  : The following profiles are active: pro
+2020-01-03 14:00:43.521 org.yliu.mui.mapper: debug 13556 --- [restartedMain] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@485c60e4: startup date [Fri Jan 03 14:00:43 CST 2020]; root of context hierarchy
+2020-01-03 14:00:43.796 org.yliu.mui.mapper: debug 13556 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2020-01-03 14:00:43.862 org.yliu.mui.mapper: debug 13556 --- [restartedMain] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$94b8bb14] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-01-03 14:00:43.942 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8088 (http)
+2020-01-03 14:00:43.943 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-01-03 14:00:43.943 org.yliu.mui.mapper: debug 13556 --- [restartedMain] org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/8.5.34
+2020-01-03 14:00:43.965 org.yliu.mui.mapper: debug 13556 --- [localhost-startStop-1] o.a.c.c.C.[.[localhost].[/GameUser]      : Initializing Spring embedded WebApplicationContext
+2020-01-03 14:00:43.966 org.yliu.mui.mapper: debug 13556 --- [localhost-startStop-1] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 445 ms
+2020-01-03 14:00:43.974 org.yliu.mui.mapper: debug 13556 --- [localhost-startStop-1] com.cointer.config.DruidConfig           : init Druid Servlet Configuration 
+2020-01-03 14:00:43.986 org.yliu.mui.mapper: debug 13556 --- [localhost-startStop-1] o.s.b.w.servlet.ServletRegistrationBean  : Servlet statViewServlet mapped to [/druid/*]
+2020-01-03 14:00:43.987 org.yliu.mui.mapper: debug 13556 --- [localhost-startStop-1] o.s.b.w.servlet.ServletRegistrationBean  : Servlet dispatcherServlet mapped to [/]
+2020-01-03 14:00:43.987 org.yliu.mui.mapper: debug 13556 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'characterEncodingFilter' to: [/*]
+2020-01-03 14:00:43.987 org.yliu.mui.mapper: debug 13556 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'webStatFilter' to urls: [/*]
+2020-01-03 14:00:43.987 org.yliu.mui.mapper: debug 13556 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'corsFilter' to: [/*]
+2020-01-03 14:00:44.016 org.yliu.mui.mapper: debug 13556 --- [restartedMain] com.cointer.config.RedisConfig           : JedisPool注入成功！MaxTotal:32
+2020-01-03 14:00:44.016 org.yliu.mui.mapper: debug 13556 --- [restartedMain] com.cointer.config.RedisConfig           : redis地址：127.0.0.1:6379
+2020-01-03 14:00:44.116 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/coin/freezeList]}" onto public java.lang.String com.cointer.controller.CoinInfoController.freezeList(java.lang.String)
+2020-01-03 14:00:44.117 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/coin/billsList]}" onto public java.lang.String com.cointer.controller.CoinInfoController.billsList(java.lang.String)
+2020-01-03 14:00:44.117 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/coin/unfreeze]}" onto public java.lang.String com.cointer.controller.CoinInfoController.unFreeze(java.lang.String)
+2020-01-03 14:00:44.117 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/deal/extractPwd]}" onto public java.lang.String com.cointer.controller.DealController.extractPwd(java.lang.String)
+2020-01-03 14:00:44.117 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/deal/recover]}" onto public java.lang.String com.cointer.controller.DealController.coinRecover(java.lang.String)
+2020-01-03 14:00:44.117 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/deal/extractOrder]}" onto public java.lang.String com.cointer.controller.DealController.extractOrder(java.lang.String)
+2020-01-03 14:00:44.117 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/deal/coinDeal]}" onto public java.lang.String com.cointer.controller.DealController.coinDeal(java.lang.String)
+2020-01-03 14:00:44.118 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/exchange/extract]}" onto public java.lang.String com.cointer.controller.ExchangeController.extract(java.lang.String)
+2020-01-03 14:00:44.118 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/exchange/chargeOrder]}" onto public java.lang.String com.cointer.controller.ExchangeController.chargeOrder(java.lang.String)
+2020-01-03 14:00:44.118 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/exchange/orderInfo]}" onto public java.lang.String com.cointer.controller.ExchangeController.orderInfo(java.lang.String)
+2020-01-03 14:00:44.118 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/exchange/checkFreeze]}" onto public java.lang.String com.cointer.controller.ExchangeController.checkFreeze(java.lang.String)
+2020-01-03 14:00:44.119 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/presenterMembers]}" onto public java.lang.String com.cointer.controller.MineralController.presenterMembers(java.lang.String)
+2020-01-03 14:00:44.119 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/getMineral]}" onto public java.lang.String com.cointer.controller.MineralController.getMineral(java.lang.String)
+2020-01-03 14:00:44.119 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/useMineralCode]}" onto public java.lang.String com.cointer.controller.MineralController.useMineralCode(java.lang.String)
+2020-01-03 14:00:44.119 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/mineralBillsList]}" onto public java.lang.String com.cointer.controller.MineralController.mineralBillsList(java.lang.String)
+2020-01-03 14:00:44.119 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/mineral/digMineral]}" onto public java.lang.String com.cointer.controller.MineralController.digMineral(java.lang.String)
+2020-01-03 14:00:44.120 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/remotePlatUserInfo]}" onto public java.lang.String com.cointer.controller.UserController.remotePlatUserInfo(java.lang.String)
+2020-01-03 14:00:44.120 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/registOrLogin]}" onto public java.lang.String com.cointer.controller.UserController.login(java.lang.String)
+2020-01-03 14:00:44.120 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/bindRemoteUser]}" onto public java.lang.String com.cointer.controller.UserController.bindRemoteUser(java.lang.String)
+2020-01-03 14:00:44.120 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/remotePlats]}" onto public java.lang.String com.cointer.controller.UserController.remotePlats(java.lang.String)
+2020-01-03 14:00:44.120 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/user/addPhoto]}" onto public java.lang.String com.cointer.controller.UserController.addPhoto(java.lang.String)
+2020-01-03 14:00:44.122 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2020-01-03 14:00:44.122 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2020-01-03 14:00:44.138 org.yliu.mui.mapper: debug 13556 --- [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : Looking for @ControllerAdvice: org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@485c60e4: startup date [Fri Jan 03 14:00:43 CST 2020]; root of context hierarchy
+2020-01-03 14:00:44.209 org.yliu.mui.mapper: debug 13556 --- [restartedMain] org.thymeleaf.templatemode.TemplateMode  : [THYMELEAF][restartedMain] Template Mode 'HTML5' is deprecated. Using Template Mode 'HTML' instead.
+2020-01-03 14:00:44.242 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2020-01-03 14:00:44.258 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2020-01-03 14:00:44.259 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Bean with name 'dataSource' has been autodetected for JMX exposure
+2020-01-03 14:00:44.262 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Located MBean 'dataSource': registering with JMX server as MBean [com.alibaba.druid.pool:name=dataSource,type=DruidDataSource]
+2020-01-03 14:00:44.268 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.apache.catalina.core.StandardService   : Failed to start connector [Connector[HTTP/1.1-8088]]
+
+org.apache.catalina.LifecycleException: Failed to start component [Connector[HTTP/1.1-8088]]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:167) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.addPreviouslyRemovedConnectors(TomcatWebServer.java:261) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.start(TomcatWebServer.java:198) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.startWebServer(ServletWebServerApplicationContext.java:300) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.finishRefresh(ServletWebServerApplicationContext.java:162) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:551) [spring-context-5.0.10.RELEASE.jar:5.0.10.RELEASE]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:140) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:386) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:307) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1242) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1230) [spring-boot-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+	at com.cointer.Application.main(Application.java:16) [classes/:na]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.8.0_181]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[na:1.8.0_181]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.8.0_181]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[na:1.8.0_181]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:49) [spring-boot-devtools-2.0.6.RELEASE.jar:2.0.6.RELEASE]
+Caused by: org.apache.catalina.LifecycleException: Protocol handler start failed
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1020) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	... 18 common frames omitted
+Caused by: java.net.BindException: Address already in use: bind
+	at sun.nio.ch.Net.bind0(Native Method) ~[na:1.8.0_181]
+	at sun.nio.ch.Net.bind(Net.java:433) ~[na:1.8.0_181]
+	at sun.nio.ch.Net.bind(Net.java:425) ~[na:1.8.0_181]
+	at sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:223) ~[na:1.8.0_181]
+	at sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:74) ~[na:1.8.0_181]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:219) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:1151) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:591) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1018) ~[tomcat-embed-core-8.5.34.jar:8.5.34]
+	... 19 common frames omitted
+
+2020-01-03 14:00:44.270 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2020-01-03 14:00:44.279 org.yliu.mui.mapper: debug 13556 --- [restartedMain] ConditionEvaluationReportLoggingListener : 
+
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+2020-01-03 14:00:44.283 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The Tomcat connector configured to listen on port 8088 failed to start. The port may already be in use or the connector may be misconfigured.
+
+Action:
+
+Verify the connector's configuration, identify and stop any process that's listening on port 8088, or configure this application to listen on another port.
+
+2020-01-03 14:00:44.284 org.yliu.mui.mapper: debug 13556 --- [restartedMain] ConfigServletWebServerApplicationContext : Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@485c60e4: startup date [Fri Jan 03 14:00:43 CST 2020]; root of context hierarchy
+2020-01-03 14:00:44.287 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
+2020-01-03 14:00:44.288 org.yliu.mui.mapper: debug 13556 --- [restartedMain] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans
