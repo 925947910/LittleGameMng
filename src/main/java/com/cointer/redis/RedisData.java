@@ -15,12 +15,12 @@ public  class RedisData {
 
 
 
-	public static final int     DB1_0=0;
-	public static final int     DB1_1=1;
-	public static final int     DB1_2=2;
-	public static final int     DB1_3=3;
-	public static final int     DB1_4=4;
-	public static final int     DB1_5=5;
+	public static final int     DB1_0=10;
+	public static final int     DB1_1=11;
+	public static final int     DB1_2=12;
+	public static final int     DB1_3=13;
+	public static final int     DB1_4=14;
+	public static final int     DB1_5=15;
 	public static final String  User  = "user:";
 	public static final String  GameUserId  = "gameUserId";
 	public static final String  OrderId  = "orderId";
