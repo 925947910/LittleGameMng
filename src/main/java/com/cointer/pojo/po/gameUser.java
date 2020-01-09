@@ -3,6 +3,7 @@ package com.cointer.pojo.po;
 public class gameUser {
 	private  Integer    id;
 	private  String acc;
+	private  String pwd;
 	private  Integer    aid;
 	private  Integer    plat;
 	private  String phone="";
@@ -25,6 +26,12 @@ public class gameUser {
 	}
 	public void setAcc(String acc) {
 		this.acc = acc;
+	}
+	public String getPwd() {
+		return pwd;
+	}
+	public void setPwd(String pwd) {
+		this.pwd = pwd;
 	}
 	public Integer getAid() {
 		return aid;

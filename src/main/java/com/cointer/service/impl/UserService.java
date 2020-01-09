@@ -53,16 +53,10 @@ public class UserService implements IUserService {
 	@Override
 	public  Object   registOrLogin(String  RequestJsonData) throws Exception  {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
-		int platFrom=reqData.getIntValue("plat");
+		int platFrom=0;
 		loginUserDto loginDto=new loginUserDto();
 		loginDto.setToken(reqData.getString(Constant._TOKEN));
-		
 		loginDto.setPlat(platFrom);
-		// 非第三方登录+++++++++++++++++
-		loginDto.setAcc(reqData.getString("acc"));
-		loginDto.setNick(reqData.getString("nick"));
-		loginDto.setPresenterId(reqData.getIntValue("presenterId"));
-		loginDto.setPhone(reqData.getString("phone"));
 		// +++++++++++++++++
 		//token获取缓存玩家信息登录++++++++++
 		Map<String,String> tokenInfo=RedisData.authToken(jedisClient,platFrom, loginDto.getToken());
@@ -72,47 +66,19 @@ public class UserService implements IUserService {
 		// +++++++++++++++++
 		//token无效 查询玩家信息
 		if(loginDto.getId()==null) {
-			initLoginUser(loginDto);
-			//缓存玩家信息不存在 数据库查询用户
-			if(loginDto.getId()==null) {
-				loginDto.setId(regist(loginDto.getAid(), loginDto.getAcc(), platFrom,loginDto.getPlatName(),loginDto.getNick(),loginDto.getPhone(),loginDto.getEmail()));
-				if(loginDto.getPresenterId()!=null) {
-					try {
-						gameUserMapper.bindPresenter(loginDto.getId(), loginDto.getPresenterId(), (new Date().getTime()/1000));
-					} catch (Exception e) {
-						log.warn("!!!!!!!!!!!!!!!!!!!login_rebindPresenter");
-					}
-				}
-			}
+			loginDto.setAcc(reqData.getString("acc"));
+			loginDto.setPwd(reqData.getString("pwd"));
+			loginDto.setNick(reqData.getString("nick"));
+			loginDto.setPhone(reqData.getString("phone"));
+			loginDto.setSex(1);
+			Integer newId=regist(loginDto);
+			loginDto.setId(newId);
+			loginDto.setToken(TokenMaker.getInstance().makeToken());
 		}
 		return login(loginDto.getId(), loginDto.getToken());
 	}
 
-	public   void  initLoginUser(loginUserDto loginDto) throws Exception {
- 		String  platName=RedisData.AuthPlatNo(jedisClient,loginDto.getPlat());
-		loginDto.setPlatName(platName);
-		switch (platName) {
-		case "_PLAT_LITTLE_GAME":
-			String regExp = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$";
-			if(loginDto.getAcc()==null||!loginDto.getAcc().matches(regExp)){
-				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登录验证失败acc非法", null);
-			}
-			if(!StringUtil.isPhone("+86",loginDto.getPhone())) {
-				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登录验证失败手机号码非法", null);
-			}
-			loginDto.setToken(TokenMaker.getInstance().makeToken());
-			loginDto.setEmail("");
-			loginDto.setAid(0);
-			//快速查看id找到用户
-			Integer uid=RedisData.getAccId(jedisClient,loginDto.getPlat(), loginDto.getAcc());
-			Map<String, String> map=RedisData.userInfo(jedisClient, uid);
-			if(loginDto.getPhone().equals(map.get("phone"))) {
-				loginDto.setId(uid);	
-			}
-			break;
-		default:throw new ServiceException(StatusCode.FAILED,"无效第三方", null);
-		}
-	}
+
 
 
 	public   Object  login(int id,String token) throws Exception {
@@ -126,41 +92,50 @@ public class UserService implements IUserService {
 	}
 
 
-	public   Integer  regist(int aid,String acc,int plat,String platName,String nick,String phone,String email) throws Exception {
-		List<gameUser> DBUsers=gameUserMapper.checkRegist(acc, plat);
+	public   Integer  regist(loginUserDto loginDto) throws Exception {
+		String regExp = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$";
+		if(loginDto.getAcc()==null||!loginDto.getAcc().matches(regExp)){
+			throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登录验证失败acc非法", null);
+		}
+		
+		List<gameUser> DBUsers=gameUserMapper.checkRegist(loginDto.getAcc(), loginDto.getPlat());
 		gameUser DBUser=new gameUser();
 		Integer id;
 		if(DBUsers.size()!=0){
 			//找到用户信息
 			DBUser= DBUsers.get(0);
-			if(!DBUser.getPhone().equals(phone)){
-				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登陆失败请输入正确手机号码", null);
+			if(!DBUser.getPwd().equals(loginDto.getPwd())){
+				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登陆失败请输入正确密码", null);
 			}
 			id=DBUser.getId();
 
 		}else{
 			//注册用户
-			if(StringUtils.isBlank(nick)) {
+			if(!StringUtil.isPhone("+86",loginDto.getPhone())) {
+				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登录验证失败手机号码非法", null);
+			}
+			if(StringUtils.isBlank(loginDto.getNick())) {
 				throw new ServiceException(StatusCode.REGIST_FAILED,"注册失败请输入昵称", null);
 			}
 			id= RedisData.genAccId(jedisClient);
 			DBUser.setId(id);
-			DBUser.setAid(aid);
-			DBUser.setPlat(plat);
-			DBUser.setSex(1);
-			DBUser.setAcc(acc);
-			DBUser.setNick(nick);
+			DBUser.setAid(0);
+			DBUser.setPlat(loginDto.getPlat());
+			DBUser.setSex(loginDto.getSex());
+			DBUser.setAcc(loginDto.getAcc());
+			DBUser.setPwd(loginDto.getPwd());
+			DBUser.setNick(loginDto.getNick());
 			DBUser.setCoin(0);
 			DBUser.setPhoto("");
-			DBUser.setPhone(phone);
-			DBUser.setEmail(email);
+			DBUser.setPhone(loginDto.getPhone());
+			DBUser.setEmail("");
 			DBUser.setRegTime((new Date().getTime()/1000));
 			if(gameUserMapper.registGameUser(DBUser)!=1){
 				throw new ServiceException(StatusCode.REGIST_FAILED,"注册失败", null);
 			}
 		}
 		RedisData.updateUser(jedisClient,DBUser); 
-		RedisData.setAccKey(jedisClient,id, plat, acc);
+		RedisData.setAccKey(jedisClient,id, loginDto.getPlat(), loginDto.getAcc());
 		return id;
 	}
 

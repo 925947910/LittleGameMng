@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import com.cointer.pojo.po.tradeOrder;
+import com.cointer.trans.TransExchange;
 @Mapper
 public interface tradeOrderMapper {
 
@@ -31,8 +32,8 @@ public interface tradeOrderMapper {
     
 	@Update("update tradeOrder set status=#{status},orderRemote=#{orderRemote}  where id=#{id} and status=#{needStatus}")
 	public int  updateStatusWithOrderRemote(int id,int needStatus, int status,String orderRemote);
-	
-	@Insert("insert into tradeOrder(id,orderLocal,orderRemote,plat,uid,cost,currency,coin,accountOut,accountIn,orderType,freezeId,time,status) values (#{id},#{orderLocal},#{orderRemote},#{plat},#{uid},#{cost},#{currency},#{coin},#{accountOut},#{accountIn},#{orderType},#{freezeId},#{time},#{status})")
+
+	@Insert("insert into tradeOrder(id,uid,coin,accountOut,accountIn,orderType,time,status) values (#{id},#{uid},#{coin},#{accountOut},#{accountIn},#{orderType},#{time},#{status})")
 	public int  insertTradeOrder(tradeOrder tradeOrder);
 
 	

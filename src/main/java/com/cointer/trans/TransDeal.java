@@ -14,8 +14,10 @@ import com.cointer.eventer.EventProcesser;
 import com.cointer.exception.TransException;
 import com.cointer.mapper.freezeMapper;
 import com.cointer.mapper.gameUserMapper;
+import com.cointer.mapper.tradeOrderMapper;
 import com.cointer.pojo.po.freeze;
 import com.cointer.pojo.po.gameUser;
+import com.cointer.pojo.po.tradeOrder;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 @Component
@@ -28,7 +30,7 @@ public class TransDeal {
 	@Autowired
 	private   IJedisClient jedisClient;
 	@Autowired
-	private   freezeMapper  freezeMapper;
+	private   tradeOrderMapper tradeOrderMapper;
 	@Transactional
 	public   void  tranDealCoin( int uid,int tagUid, int excoin,String pwd) throws Exception {
 		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
@@ -61,6 +63,8 @@ public class TransDeal {
 		gameUser DBUser=DBUsers.get(0);
 		int version = DBUser.getVersion();
 		int oldCoin = DBUser.getCoin();
+		String acc =  DBUser.getAcc();
+		String nick =  DBUser.getNick();
 		int newCoin = oldCoin-excoin;
 		if(newCoin<0) {
 			throw new TransException("金币不足");
@@ -68,18 +72,20 @@ public class TransDeal {
 		if(gameUserMapper.coinChange(uid, newCoin, version)!=1) {
 			throw new TransException("修改金币失败");
 		}
-		int fId = RedisData.genFreezeId(jedisClient);
+		int OrderId = RedisData.genOrderId(jedisClient);
 		long now=	new Date().getTime()/1000;
-		freeze freezeBean= new freeze();
-		freezeBean.setId(fId);
-		freezeBean.setUid(uid);
-		freezeBean.setOrderId(0);
-		freezeBean.setCoin(excoin);
-		freezeBean.setOrderType(TransExchange.ORDEROUT);
-		freezeBean.setTime(now);
-		if(freezeMapper.insertFreeze(freezeBean)!=1) {
-			throw new TransException("资金冻结失败");
+		tradeOrder order= new tradeOrder();
+		order.setId(OrderId);
+		order.setUid(uid);
+		order.setAccountOut(acc);
+		order.setAccountIn(nick);
+		order.setCoin(excoin);
+		order.setStatus(TransExchange.ORDER_PROCESSING);
+		order.setOrderType(TransExchange.ORDEROUT);
+		order.setTime(now);
+		if(tradeOrderMapper.insertTradeOrder(order)!=1) {
+			throw new TransException("金币回收失败");
 		}
-		EventProcesser.writeBill(uid,-excoin, newCoin, EventProcesser.EVENT_COIN_RECOVER, 0,"金币回收冻结","","");
+		EventProcesser.writeBill(uid,-excoin, newCoin, EventProcesser.EVENT_COIN_RECOVER, 0,"金币回收","","");
 	}
 }
