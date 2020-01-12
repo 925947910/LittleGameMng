@@ -8,6 +8,7 @@ public class gameUser {
 	private  Integer    plat;
 	private  String phone="";
 	private  String email="";
+	private  String address="";
 	private  String nick="";
 	private  Integer    sex;
 	private  String photo="";
@@ -56,6 +57,12 @@ public class gameUser {
 	}
 	public void setEmail(String email) {
 		this.email = email;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
 	}
 	public String getNick() {
 		return nick;

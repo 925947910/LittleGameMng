@@ -66,11 +66,12 @@ public class UserService implements IUserService {
 		// +++++++++++++++++
 		//token无效 查询玩家信息
 		if(loginDto.getId()==null) {
-			loginDto.setAcc(reqData.getString("acc"));
+			loginDto.setAcc(reqData.getString("phone"));
 			loginDto.setPwd(reqData.getString("pwd"));
 			loginDto.setNick(reqData.getString("nick"));
 			loginDto.setPhone(reqData.getString("phone"));
-			loginDto.setSex(1);
+			loginDto.setSex(reqData.getIntValue("sex"));
+			loginDto.setAddress(reqData.getString("address"));
 			Integer newId=regist(loginDto);
 			loginDto.setId(newId);
 			loginDto.setToken(TokenMaker.getInstance().makeToken());
@@ -129,6 +130,7 @@ public class UserService implements IUserService {
 			DBUser.setPhoto("");
 			DBUser.setPhone(loginDto.getPhone());
 			DBUser.setEmail("");
+			DBUser.setAddress(loginDto.getAddress());
 			DBUser.setRegTime((new Date().getTime()/1000));
 			if(gameUserMapper.registGameUser(DBUser)!=1){
 				throw new ServiceException(StatusCode.REGIST_FAILED,"注册失败", null);

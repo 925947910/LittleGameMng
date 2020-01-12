@@ -28,7 +28,7 @@ public interface gameUserMapper {
 	@Select("SELECT id  FROM gameUser WHERE aid =#{aid} and plat= #{plat}")
 	public List<gameUser> getIdByRemoteAid(int aid,int plat);
 
-	@Insert("insert into gameUser(id,acc,pwd,aid,plat,phone,email,nick,sex,photo,coin,extractPwd,regTime) values (#{id},#{acc},#{pwd},#{aid},#{plat},#{phone},#{email},#{nick},#{sex},#{photo},#{coin},#{extractPwd},#{regTime})")
+	@Insert("insert into gameUser(id,acc,pwd,aid,plat,phone,email,address,nick,sex,photo,coin,extractPwd,regTime) values (#{id},#{acc},#{pwd},#{aid},#{plat},#{phone},#{email},#{address},#{nick},#{sex},#{photo},#{coin},#{extractPwd},#{regTime})")
 	public int  registGameUser(gameUser user);
 
 	@Update("update gameUser set coin=#{coin},version=#{version}+1  where id=#{id} and version=#{version}")
