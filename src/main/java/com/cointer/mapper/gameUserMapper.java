@@ -23,10 +23,8 @@ public interface gameUserMapper {
 	public int  updateUserBaseInfo(gameUser user);
 
 	@Select("select * from gameUser where acc=#{acc} and plat=#{plat}")
-	public List<gameUser> checkRegist(String acc,int plat);
+	public List<gameUser> checkAcc(String acc,int plat);
 
-	@Select("SELECT id  FROM gameUser WHERE aid =#{aid} and plat= #{plat}")
-	public List<gameUser> getIdByRemoteAid(int aid,int plat);
 
 	@Insert("insert into gameUser(id,acc,pwd,aid,plat,phone,email,address,nick,sex,photo,coin,extractPwd,regTime) values (#{id},#{acc},#{pwd},#{aid},#{plat},#{phone},#{email},#{address},#{nick},#{sex},#{photo},#{coin},#{extractPwd},#{regTime})")
 	public int  registGameUser(gameUser user);
@@ -46,7 +44,7 @@ public interface gameUserMapper {
 	@Update("update gameUser  set extractPwd=#{extractPwd} where id=#{id}")
 	public int  resetPwd(int id,String extractPwd);
 	
-	@Select("select acc,nick,coin,version FROM gameUser where id=#{id}")
+	@Select("select acc,nick,coin,version,pwd,extractPwd FROM gameUser where id=#{id}")
 	public List<gameUser> checkCoin(int id);
 
 	@Insert("insert into gamePresenter(uid,presenterId,time) values (#{uid},#{presenterId},#{time})")

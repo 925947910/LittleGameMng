@@ -183,18 +183,9 @@ public class TransExchange {
 		
 	
 	@Transactional
-	public   void  tranChargeSucc(int orderId,int uid,int fId,int coin,boolean check) throws Exception {
-		if(check) {
-			if(tradeOrderMapper.updateStatus(orderId, ORDER_SUCC)!=1) {
-				throw new TransException("订单状态修改失败");
-			}
-		}else {
-			if(tradeOrderMapper.updateStatusByStatus(orderId, ORDER_PROCESSING, ORDER_SUCC)!=1) {
-				throw new TransException("订单状态修改失败");
-			}
-		}
-		if(freezeMapper.delFreeze(fId)!=1) {
-			throw new TransException("删除冻结资金失败");
+	public   void  tranChargeSucc(int orderId,int uid,int coin) throws Exception {
+		if(tradeOrderMapper.updateStatusByStatus(orderId, ORDER_PROCESSING, ORDER_SUCC)!=1) {
+			throw new TransException("订单状态修改失败");
 		}
 		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
 		gameUser DBUser=DBUsers.get(0);
@@ -222,26 +213,23 @@ public class TransExchange {
 		}
 	}
 	@Transactional
-	public   tradeOrder tranGenOrderIn(int uid,int plat,BigDecimal cost,int coin,String orderFrom,String currency) throws Exception {
-		List<tradeOrder> tradeOrderData= tradeOrderMapper.OrderStatusByOrderRemote(orderFrom);
-		if(tradeOrderData!=null&&tradeOrderData.size()!=0) {
-			throw new TransException("订单已存在");
-		}
+	public   tradeOrder tranGenOrderIn(int uid,String accIn,String accOut,BigDecimal cost,int coin,String orderFrom,String currency) throws Exception {
+		
 		long now=	new Date().getTime()/1000;
 		int orderId = RedisData.genOrderId(jedisClient);
 		String order=CommTypeUtils.getOrderNo("OrderIn");
 		tradeOrder  orderBean= new tradeOrder();
 		orderBean.setId(orderId);
+		orderBean.setAccountIn(accIn);
+		orderBean.setAccountOut(accOut);
 		orderBean.setOrderLocal(order);
 		orderBean.setOrderRemote(orderFrom);
-		orderBean.setPlat(plat);
 		orderBean.setUid(uid);
 		orderBean.setCost(cost);
 		orderBean.setCoin(coin);
 		orderBean.setCurrency(currency);
 		orderBean.setOrderType(ORDERIN);
-		orderBean.setFreezeId(0);
-		orderBean.setStatus(ORDER_MATCHED);  // 0 初始  1 订单对接成功    2转账中  3成功   4失败
+		orderBean.setStatus(ORDER_PROCESSING);  // 0 初始  1 订单对接成功    2转账中  3成功   4失败
 		orderBean.setTime(now);
 		if(tradeOrderMapper.insertTradeOrder(orderBean)!=1) {
 			throw new TransException("生成订单失败");

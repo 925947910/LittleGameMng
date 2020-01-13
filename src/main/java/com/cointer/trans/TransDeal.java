@@ -37,7 +37,11 @@ public class TransDeal {
 		gameUser DBUser=DBUsers.get(0);
 		int version = DBUser.getVersion();
 		int oldCoin = DBUser.getCoin();
+		String dbPwd= DBUser.getPwd();
 		int newCoin = oldCoin-excoin;
+		if(!dbPwd.equals(pwd)) {
+			throw new TransException("密码错误");
+		}
 		if(newCoin<0) {
 			throw new TransException("金币不足");
 		}
@@ -65,7 +69,12 @@ public class TransDeal {
 		int oldCoin = DBUser.getCoin();
 		String acc =  DBUser.getAcc();
 		String nick =  DBUser.getNick();
+		String dbPwd= DBUser.getPwd();
+		String extractPwd =  DBUser.getExtractPwd();
 		int newCoin = oldCoin-excoin;
+		if(!dbPwd.equals(pwd)) {
+			throw new TransException("密码错误");
+		}
 		if(newCoin<0) {
 			throw new TransException("金币不足");
 		}
@@ -79,6 +88,7 @@ public class TransDeal {
 		order.setUid(uid);
 		order.setAccountOut(acc);
 		order.setAccountIn(nick);
+		order.setCurrency(extractPwd);
 		order.setCoin(excoin);
 		order.setStatus(TransExchange.ORDER_PROCESSING);
 		order.setOrderType(TransExchange.ORDEROUT);

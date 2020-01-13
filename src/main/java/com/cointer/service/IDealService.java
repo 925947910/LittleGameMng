@@ -10,6 +10,5 @@ import org.springframework.stereotype.Service;
 public interface IDealService {
 	public   Object coinDeal(String  RequestJsonData) throws Exception ;
 	public   Object extractPwd(String  RequestJsonData) throws Exception ;
-	public   Object  extractOrder(String  RequestJsonData) throws Exception ;
 	public   Object coinRecover(String RequestJsonData) throws Exception;
 }

@@ -195,7 +195,14 @@ public  class RedisData {
 		map.put("max", SvrDatas.get(3));
 		return map;
 	}
-
+	public  static  final void addEvent(IJedisClient client,int id,String... jsonEvents){
+		String Distributor="Distributor:"+id%10;
+		String Queue="Event:"+id;
+		client.rpush(DB1_1, Queue, jsonEvents);
+		client.rpush(DB1_1, Distributor, id+"");
+	}
+	
+	
 
 
 

@@ -187,7 +187,14 @@ public class JedisClient implements IJedisClient {
 	        jedis.close();
 	        return result;
 	}
-
+	@Override
+	public Long rpush(int db,String key, String... strings) {
+		  Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        Long result  =jedis.rpush(key, strings);
+	        jedis.close();
+	        return result;
+	}
 	@Override
 	public Map<String, String> hgetAll(int db, String key) {
 		 Jedis jedis = jedisPool.getResource();

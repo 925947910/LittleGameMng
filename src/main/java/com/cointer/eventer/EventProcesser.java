@@ -2,6 +2,7 @@ package com.cointer.eventer;
 
 
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,11 +23,13 @@ import com.cointer.mapper.billsMapper;
 import com.cointer.mapper.gameRecMapper;
 import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.mineralBills;
+import com.cointer.pojo.po.mineralCode;
 import com.cointer.pojo.po.userMineral;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 import com.cointer.pojo.po.bills;
 import com.cointer.pojo.po.coinFailed;
+import com.cointer.pojo.po.gamePresenter;
 import com.cointer.pojo.po.gameRec;
 import com.cointer.util.StringUtil;
 
@@ -55,6 +58,7 @@ public class EventProcesser {
 	public static final int   EVENT_MINERAL_GM_CHARGE=13; // 后台充值矿石返点
 	public static final int   EVENT_INIT_GAME=14; // 游戏记录初始化
 	public static final int   EVENT_CLEAN_GAME=15; // 游戏记录结算信息
+	public static final int   EVENT_PRESENTER_REBATE=16; // 邀请返利
 	private static final Logger log = LoggerFactory.getLogger(EventProcesser.class);
 	//  Event={obj,[{"uid",Uid},{"E",?EVENT_WIN},{"price",Price},{"game",GameId},{"desc","play_game"}]},
 	//	Event={obj,[{"uid",Uid},{"E",?EVENT_PAY},{"pay",Coin},{"game","GameId"},{"desc","play_game"}]},
@@ -80,7 +84,7 @@ public class EventProcesser {
 				try {
 					JSONObject  EventObj =  JSON.parseObject(DataStr);
 					int type = EventObj.getIntValue("E");
-				
+
 					process(type, EventObj);
 				} catch (Exception e) {
 					log.error("EventProcess error DataStr:"+DataStr , e);
@@ -101,7 +105,7 @@ public class EventProcesser {
 		int uid;
 		switch (event) {
 		case EVENT_PAY:
-		    uid = data.getIntValue("uid");
+			uid = data.getIntValue("uid");
 			cost=-data.getIntValue("pay");
 			reason=data.getString("desc");
 			tagId= data.getIntValue("game");
@@ -110,16 +114,16 @@ public class EventProcesser {
 				for (int i = 0; i < 10; i++) {
 					try {
 						remain = gameCoinChange(uid, cost, EVENT_PAY, tagId, reason);
+						break;
 					} catch (Exception e) {
 						log.error("EVENT_PAY",e);
-					}
-					if(remain!=null) {
-						break;
 					}
 				}
 				if (remain == null) {
 					writeCoinFailed(uid, cost, EVENT_PAY, tagId, reason);
 					log.warn("EVENT_PAY_FAILED uid:" + uid + "===cost:" + cost);
+				}else {
+					addPresenterEvent(uid, -cost);
 				}
 			}
 			break;
@@ -133,11 +137,9 @@ public class EventProcesser {
 				for (int i = 0; i < 10; i++) {
 					try {
 						remain = gameCoinChange(uid, cost, EVENT_WIN, tagId, reason);
+						break;
 					} catch (Exception e) {
 						log.error("EVENT_WIN",e);
-					}
-					if(remain!=null) {
-						break;
 					}
 				}
 				if (remain == null) {
@@ -150,39 +152,50 @@ public class EventProcesser {
 			int gameId = data.getIntValue("game");
 			String recCode=data.getString("recCode");
 			long beginTime=data.getLongValue("time");
-			try {
-				gameInit(gameId, beginTime, recCode);
-			} catch (Exception e) {
-				log.error("EVENT_INIT_GAME",e);
-			}
+			gameInit(gameId, beginTime, recCode);
 			break;
 		case EVENT_CLEAN_GAME:
 			log.info("EVENT_CLEAN_GAME");
-		    recCode=data.getString("recCode");
+			recCode=data.getString("recCode");
 			long endTime=data.getLongValue("time");
 			String gameResult=data.getString("gameResult");
-			log.info("EVENT_CLEAN_GAME recCode:"+recCode+"endTime:"+endTime+"gameResult:"+gameResult);
-			try {
-				gameClean(gameResult, endTime, recCode);
-			} catch (Exception e) {
-				log.error("EVENT_CLEAN_GAME",e);
+			gameClean(gameResult, endTime, recCode);
+			break;
+			//		case EVENT_DIG_MINERAL:
+			//			tagId= data.getIntValue("game");
+			//			reason=data.getString("desc");
+			//			try {
+			//				dig_mineral(uid, EVENT_DIG_MINERAL, tagId, reason);
+			//			} catch (Exception e) {
+			//				log.error("",e);
+			//			}
+			//			break;
+		case EVENT_PRESENTER_REBATE:
+			uid = data.getIntValue("uid");
+			cost= data.getIntValue("coin");
+			tagId=data.getIntValue("uidFrom");
+			if (cost != 0) {
+				Integer remain = null;
+				for (int i = 0; i < 10; i++) {
+					try {
+						remain = gameCoinChange(uid, cost, EVENT_PRESENTER_REBATE, tagId,"目标Id为被抽水玩家");
+						break;
+					} catch (Exception e) {
+						log.error("EVENT_PRESENTER_REBATE",e);
+					}
+				}
+				if (remain == null) {
+					writeCoinFailed(uid, cost, EVENT_PRESENTER_REBATE, tagId, "目标Id为被抽水玩家");
+					log.warn("EVENT_PRESENTER_REBATE_FAILED uid:" + uid + "===cost:" + cost);
+				}
 			}
 			break;
-//		case EVENT_DIG_MINERAL:
-//			tagId= data.getIntValue("game");
-//			reason=data.getString("desc");
-//			try {
-//				dig_mineral(uid, EVENT_DIG_MINERAL, tagId, reason);
-//			} catch (Exception e) {
-//				log.error("",e);
-//			}
-//			break;
 		default:
 			break;
 		}
 	}
 
-	
+
 	@Transactional
 	public  void gameInit(int gameId,long beginTime,String recCode) throws Exception {
 		gameRec  gameRec=new gameRec();
@@ -190,7 +203,7 @@ public class EventProcesser {
 		gameRec.setGameId(gameId);
 		gameRec.setRecordCode(recCode);
 		gameRecMapper.initGameRec(gameRec);
-		
+
 	}
 	@Transactional
 	public  void gameClean(String gameResult,long endTime,String recCode) throws Exception {
@@ -210,7 +223,7 @@ public class EventProcesser {
 		List<userMineral> l=mineralMapper.getUserMineral(uid);
 		int num=0;
 		if(l.size()!=0) {
-		    num=l.get(0).getMineral()/10;
+			num=l.get(0).getMineral()/10;
 			if(num<100) {
 				num=100;
 			}
@@ -301,6 +314,28 @@ public class EventProcesser {
 		coinChange.setReason(reason);
 		coinChange.setTime(new Date().getTime()/1000);
 		gameUserMapper.saveFailedCoin(coinChange);
+	}
+
+
+	public   void  addPresenterEvent(int uid,int coin ) throws Exception {
+		Map<String,String> perMap=RedisData.sysConfig(jedisClient);
+		int currUid=uid;
+		for (int i = 6; i > 0; i--) {
+			List<gamePresenter>  gamePresenterL= mineralMapper.getPresenter(currUid);
+			if(gamePresenterL==null||gamePresenterL.size()==0) {
+				break;
+			}
+			currUid=gamePresenterL.get(0).getPresenterId();
+			int addCoin=(Integer.parseInt(perMap.get("presenterPer"+i))*coin)/1000;
+			JSONObject jsonEvent= new JSONObject();
+			jsonEvent.put("E", EVENT_PRESENTER_REBATE);
+			jsonEvent.put("uid", currUid);
+			jsonEvent.put("coin", addCoin);
+			jsonEvent.put("uidFrom", uid);
+			RedisData.addEvent(jedisClient, currUid, jsonEvent.toString());
+		}
+
+
 	}
 
 

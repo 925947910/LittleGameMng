@@ -46,20 +46,7 @@ public class CoinInfoService implements ICoinInfoService {
 	private   billsMapper billsMapper;
 
 
-	@Override
-	public   Object  unFreeze(String  RequestJsonData) throws Exception {
-		JSONObject reqData=JSON.parseObject(RequestJsonData);
-		//		int id=reqData.getIntValue("freezeId");
-				Integer uid=reqData.getIntValue("uid");
-		//		int start=reqData.getIntValue("start");
-		//		int num=reqData.getIntValue("num");
-		ExchangeService.checkFreeze(RequestJsonData);
-		if(!uid.equals(null)) {
-			return freezeList(RequestJsonData);
-		} else {
-			return null;
-		}	
-	}
+
 	@Override
 	public   Object  freezeList(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);

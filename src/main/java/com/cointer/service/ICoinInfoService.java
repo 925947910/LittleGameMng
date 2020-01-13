@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ICoinInfoService   {
 
-	Object unFreeze(String RequestJsonData) throws Exception;
 
 	Object freezeList(String RequestJsonData) throws Exception;
 

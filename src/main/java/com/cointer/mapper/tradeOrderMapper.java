@@ -33,7 +33,7 @@ public interface tradeOrderMapper {
 	@Update("update tradeOrder set status=#{status},orderRemote=#{orderRemote}  where id=#{id} and status=#{needStatus}")
 	public int  updateStatusWithOrderRemote(int id,int needStatus, int status,String orderRemote);
 
-	@Insert("insert into tradeOrder(id,uid,coin,accountOut,accountIn,orderType,time,status) values (#{id},#{uid},#{coin},#{accountOut},#{accountIn},#{orderType},#{time},#{status})")
+	@Insert("insert into tradeOrder(id,uid,coin,cost,accountOut,accountIn,orderLocal,orderRemote,currency,orderType,time,status) values (#{id},#{uid},#{coin},#{cost},#{accountOut},#{accountIn},#{orderLocal},#{orderRemote},#{currency},#{orderType},#{time},#{status})")
 	public int  insertTradeOrder(tradeOrder tradeOrder);
 
 	

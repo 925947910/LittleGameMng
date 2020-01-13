@@ -57,6 +57,7 @@ public class UserService implements IUserService {
 		loginUserDto loginDto=new loginUserDto();
 		loginDto.setToken(reqData.getString(Constant._TOKEN));
 		loginDto.setPlat(platFrom);
+		loginDto.setPresenterId(reqData.getIntValue("presenterId"));
 		// +++++++++++++++++
 		//token获取缓存玩家信息登录++++++++++
 		Map<String,String> tokenInfo=RedisData.authToken(jedisClient,platFrom, loginDto.getToken());
@@ -73,6 +74,14 @@ public class UserService implements IUserService {
 			loginDto.setSex(reqData.getIntValue("sex"));
 			loginDto.setAddress(reqData.getString("address"));
 			Integer newId=regist(loginDto);
+			try {
+				if(loginDto.getPresenterId()!=null&&loginDto.getPresenterId()!=0) {
+					gameUserMapper.bindPresenter(loginDto.getId(), loginDto.getPresenterId(), (new Date().getTime()/1000));
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			
 			loginDto.setId(newId);
 			loginDto.setToken(TokenMaker.getInstance().makeToken());
 		}
@@ -99,7 +108,7 @@ public class UserService implements IUserService {
 			throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登录验证失败acc非法", null);
 		}
 		
-		List<gameUser> DBUsers=gameUserMapper.checkRegist(loginDto.getAcc(), loginDto.getPlat());
+		List<gameUser> DBUsers=gameUserMapper.checkAcc(loginDto.getAcc(), loginDto.getPlat());
 		gameUser DBUser=new gameUser();
 		Integer id;
 		if(DBUsers.size()!=0){

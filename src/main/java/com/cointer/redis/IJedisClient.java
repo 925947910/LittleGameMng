@@ -60,6 +60,8 @@ public interface IJedisClient {
 
 	Set<String> keys(int db, String key);
 
+	Long rpush(int db, String key, String... strings);
+
     
 
 	
