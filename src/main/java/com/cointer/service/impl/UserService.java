@@ -103,8 +103,8 @@ public class UserService implements IUserService {
 
 
 	public   Integer  regist(loginUserDto loginDto) throws Exception {
-		String regExp = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$";
-		if(loginDto.getAcc()==null||!loginDto.getAcc().matches(regExp)){
+//		String regExp = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$";
+		if(StringUtils.isBlank(loginDto.getAcc())){
 			throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登录验证失败acc非法", null);
 		}
 		
@@ -168,8 +168,26 @@ public class UserService implements IUserService {
 		return plats;
 	}
 	
+	public   Object  userInfo(String  RequestJsonData) throws Exception {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);
+		int uid=reqData.getIntValue("uid");
+		
+		Map<String,String> MapResult=RedisData.userInfo(jedisClient, uid);
 
-
+		return MapResult;
+	}
+	public   Object  rank(String  RequestJsonData) throws Exception {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);
+		int uid=reqData.getIntValue("uid");
+		
+		ArrayList<JSONObject> rankData=RedisData.rank(jedisClient, uid, 10);
+        JSONObject resData= new JSONObject();
+        resData.put("rank", rankData);
+        resData.put("myRank", rankData.get(rankData.size()-1));
+        rankData.remove(rankData.size()-1);
+		return resData;
+	}
+	
 	
 	
 }

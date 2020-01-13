@@ -25,23 +25,13 @@ public class UserController extends  BaseController{
 	@Autowired 
 	private IUserService UserService;
 
-
+	
 
 	@RequestMapping("/registOrLogin")
 	@ResponseBody
 	public String login(@RequestParam String param) {
 	return 	serviceRun(UserService, "registOrLogin", param);
-//		try {
-//			Object resultParam = UserService.registOrLogin(param);
-//			return succ(StatusCode.SUCC, "", resultParam);
-//		} catch (ServiceException e) {
-//			return failed(e.getCode(), e.getMsg(), e.getParaMap());
-//		} catch (TransException e) {
-//			return failed(StatusCode.TRANS_ERROR, e.getMsg(), null);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return failed(StatusCode.FAILED, "系统异常", null);
-//		} 
+ 
 	}
 
 	@RequestMapping("/addPhoto")
@@ -64,5 +54,15 @@ public class UserController extends  BaseController{
 	@ResponseBody
 	public String bindRemoteUser(@RequestParam String param) {
 		return 	serviceRun(UserService, "bindRemoteUser", param);
+	}
+	@RequestMapping("/userInfo")
+	@ResponseBody
+	public String userInfo(@RequestParam String param) {
+	return 	serviceRun(UserService, "userInfo", param);
+	}
+	@RequestMapping("/rank")
+	@ResponseBody
+	public String rank(@RequestParam String param) {
+	return 	serviceRun(UserService, "rank", param);
 	}
 }

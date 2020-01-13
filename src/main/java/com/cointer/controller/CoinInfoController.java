@@ -31,50 +31,20 @@ public class CoinInfoController extends  BaseController{
 	@ResponseBody
 	public String unFreeze(@RequestParam String param) {
 	return 	serviceRun(CoinInfoService, "unFreeze", param);
-//		try {
-//			Object resultParam = CoinInfoService.unFreeze(param);
-//			return succ(StatusCode.SUCC, "", resultParam);
-//		} catch (ServiceException e) {
-//			return failed(e.getCode(), e.getMsg(), e.getParaMap());
-//		} catch (TransException e) {
-//			return failed(StatusCode.TRANS_ERROR, e.getMsg(), null);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return failed(StatusCode.FAILED, "系统异常", null);
-//		} 
+
 	}
 
 	@RequestMapping("/freezeList")
 	@ResponseBody
 	public String freezeList(@RequestParam String param) {
 		return 	serviceRun(CoinInfoService, "freezeList", param);
-//		try {
-//			Object resultParam = CoinInfoService.freezeList(param);
-//			return succ(StatusCode.SUCC, "", resultParam);
-//		} catch (ServiceException e) {
-//			return failed(e.getCode(), e.getMsg(), e.getParaMap());
-//		} catch (TransException e) {
-//			return failed(StatusCode.TRANS_ERROR, e.getMsg(), null);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return failed(StatusCode.FAILED, "系统异常", null);
-//		} 
+
 	}
 	@RequestMapping("/billsList")
 	@ResponseBody
 	public String billsList(@RequestParam String param) {
 		return 	serviceRun(CoinInfoService, "billsList", param);
-//		try {
-//			Object resultParam = CoinInfoService.billsList(param);
-//			return succ(StatusCode.SUCC, "", resultParam);
-//		}catch (ServiceException e) {
-//			return failed(e.getCode(), e.getMsg(), e.getParaMap());
-//		} catch (TransException e) {
-//			return failed(StatusCode.TRANS_ERROR, e.getMsg(), null);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return failed(StatusCode.FAILED, "系统异常", null);
-//		} 
+
 	}
 
 

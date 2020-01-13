@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import com.cointer.redis.IJedisClient;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Tuple;
 
 import java.util.List;
 import java.util.Map;
@@ -210,5 +211,29 @@ public class JedisClient implements IJedisClient {
 	        Set<String> result  =jedis.keys(key);
 	        jedis.close();
 	        return result;
+	}
+	@Override
+	public Set<String> zrevrange(int db, String key, long start,  long stop) {
+		 Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        Set<String> result=jedis.zrevrange(key,start, stop);
+	        jedis.close();
+	        return result;
+	}
+	@Override
+	public Long zrevrank(int db, String key,String member) {
+		 Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        Long result=jedis.zrevrank(key, member);
+	        jedis.close();
+	        return result;
+	}
+	@Override
+	public Double zincrby(int db, String key,Double increment,String member) {
+		Jedis jedis = jedisPool.getResource();
+		jedis.select(db);
+		Double result= jedis.zincrby(key, increment, member);
+		jedis.close();
+		return result;
 	}
 }

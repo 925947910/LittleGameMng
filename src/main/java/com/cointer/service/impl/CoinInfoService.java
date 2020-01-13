@@ -14,6 +14,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.cointer.mapper.billsMapper;
 import com.cointer.mapper.freezeMapper;
+import com.cointer.mapper.gameUserMapper;
+import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.vo.billsInfo;
 import com.cointer.pojo.vo.freezeInfo;
 import com.cointer.service.ICoinInfoService;
@@ -44,7 +46,8 @@ public class CoinInfoService implements ICoinInfoService {
 
 	@Autowired
 	private   billsMapper billsMapper;
-
+	@Autowired
+	private   gameUserMapper gameUserMapper;
 
 
 	@Override
@@ -69,7 +72,19 @@ public class CoinInfoService implements ICoinInfoService {
 		int num=reqData.getIntValue("num");
 		PageHelper.startPage(start,num);
 		List<billsInfo> bills=billsMapper.billsList(uid, begin, end);
-		return new PageInfo<>(bills);
+		
+		
+		
+		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
+		gameUser DBUser=DBUsers.get(0);
+		int Coin = DBUser.getCoin();
+		String extractPwd =  DBUser.getExtractPwd();
+		
+		JSONObject resData=new JSONObject();
+		resData.put("bills", new PageInfo<>(bills));
+		resData.put("coin", Coin);
+		resData.put("extractPwd", extractPwd);
+		return resData;
 	}
 
 

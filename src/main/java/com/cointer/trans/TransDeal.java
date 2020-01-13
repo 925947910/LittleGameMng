@@ -1,6 +1,7 @@
 package com.cointer.trans;
 
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.tradeOrder;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
+import com.cointer.util.CommTypeUtils;
 @Component
 public class TransDeal {
 	@Autowired
@@ -84,12 +86,16 @@ public class TransDeal {
 		int OrderId = RedisData.genOrderId(jedisClient);
 		long now=	new Date().getTime()/1000;
 		tradeOrder order= new tradeOrder();
+		String orderNo=CommTypeUtils.getOrderNo("OrderOut");
 		order.setId(OrderId);
 		order.setUid(uid);
 		order.setAccountOut(acc);
 		order.setAccountIn(nick);
 		order.setCurrency(extractPwd);
+		order.setCost(new BigDecimal(0));
 		order.setCoin(excoin);
+		order.setOrderLocal(orderNo);
+		order.setOrderRemote(orderNo);
 		order.setStatus(TransExchange.ORDER_PROCESSING);
 		order.setOrderType(TransExchange.ORDEROUT);
 		order.setTime(now);

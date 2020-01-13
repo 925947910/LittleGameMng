@@ -124,6 +124,7 @@ public class EventProcesser {
 					log.warn("EVENT_PAY_FAILED uid:" + uid + "===cost:" + cost);
 				}else {
 					addPresenterEvent(uid, -cost);
+					RedisData.inRank(jedisClient, uid, -cost);
 				}
 			}
 			break;

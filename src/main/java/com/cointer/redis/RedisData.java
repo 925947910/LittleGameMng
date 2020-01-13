@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.cointer.pojo.po.gameUser;
 
 public  class RedisData {
@@ -201,8 +202,36 @@ public  class RedisData {
 		client.rpush(DB1_1, Queue, jsonEvents);
 		client.rpush(DB1_1, Distributor, id+"");
 	}
-	
-	
+	public static final ArrayList<JSONObject>  rank(IJedisClient client,int uid,int rankSize){
+		int count=rankSize;
+		ArrayList<JSONObject> resultData= new ArrayList<JSONObject>();
+		Set<String > rank=client.zrevrange(DB1_2, "rank", 0, -1);
+		Iterator<String> i=rank.iterator();
+		while (i.hasNext()&& count>0) {
+			int id = Integer.parseInt((String) i.next());
+			JSONObject obj= new JSONObject();
+			int coin=client.zscore(DB1_2, "rank", id+"").intValue();
+			String nick=client.hget(DB1_0, User+id, "nick");
+			obj.put("uid", id);
+			obj.put("coin", coin);
+			obj.put("nick", nick);
+			resultData.add(obj);
+			count--;
+		}
+		JSONObject obj= new JSONObject();
+		int coin=client.zscore(DB1_2, "rank", uid+"").intValue();
+		Long myRank=client.zrevrank(DB1_2, "rank", uid+"");
+		String nick=client.hget(DB1_0, User+uid, "nick");
+		obj.put("uid", uid);
+		obj.put("coin", coin);
+		obj.put("nick", nick);
+		obj.put("myRank", myRank);
+		resultData.add(obj);
+		return  resultData;
+	}
+	public static final void  inRank(IJedisClient client,int uid,int coin){
+		Double myRank=client.zincrby(DB1_2, "rank", Double.valueOf(coin), uid+"");
+	}
 
 
 

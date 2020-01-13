@@ -62,6 +62,12 @@ public interface IJedisClient {
 
 	Long rpush(int db, String key, String... strings);
 
+	Set<String> zrevrange(int db, String key, long start, long stop);
+
+	Long zrevrank(int db, String key, String member);
+
+	Double zincrby(int db, String key, Double increment, String member);
+
     
 
 	
