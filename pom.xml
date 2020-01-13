@@ -6,7 +6,7 @@
 
 	<groupId>com.cointer</groupId>
 	<artifactId>LittleGameMng</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>2.0.1</version>
 	<name>LittleGameMng</name>
 	<description>LittleGameMng</description>
 	<packaging>jar</packaging>
