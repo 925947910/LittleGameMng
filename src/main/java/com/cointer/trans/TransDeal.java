@@ -38,6 +38,10 @@ public class TransDeal {
 		int version = DBUser.getVersion();
 		int oldCoin = DBUser.getCoin();
 		int newCoin = oldCoin-excoin;
+		String ExtractPwd=DBUser.getExtractPwd();
+		if(!ExtractPwd.equals(pwd)) {
+			throw new TransException("资金密码错误");
+		}
 		if(newCoin<0) {
 			throw new TransException("金币不足");
 		}
@@ -66,6 +70,10 @@ public class TransDeal {
 		String acc =  DBUser.getAcc();
 		String nick =  DBUser.getNick();
 		int newCoin = oldCoin-excoin;
+		String ExtractPwd=DBUser.getExtractPwd();
+		if(!ExtractPwd.equals(pwd)) {
+			throw new TransException("资金密码错误");
+		}
 		if(newCoin<0) {
 			throw new TransException("金币不足");
 		}

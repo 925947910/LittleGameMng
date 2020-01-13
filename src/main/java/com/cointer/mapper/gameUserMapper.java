@@ -46,7 +46,7 @@ public interface gameUserMapper {
 	@Update("update gameUser  set extractPwd=#{extractPwd} where id=#{id}")
 	public int  resetPwd(int id,String extractPwd);
 	
-	@Select("select acc,nick,coin,version FROM gameUser where id=#{id}")
+	@Select("select acc,nick,coin,version,extractPwd FROM gameUser where id=#{id}")
 	public List<gameUser> checkCoin(int id);
 
 	@Insert("insert into gamePresenter(uid,presenterId,time) values (#{uid},#{presenterId},#{time})")

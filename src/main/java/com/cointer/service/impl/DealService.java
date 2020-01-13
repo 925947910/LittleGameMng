@@ -201,12 +201,12 @@ public class DealService implements IDealService {
 		if(RedisData.inGame(jedisClient,uid)) {
 			throw new ServiceException(StatusCode.EXTRACT_IN_GAME,"游戏中不允许转账", null);
 		}
-		String extractPwd=Base64.getEncoder().encodeToString(reqData.getString("extractPwd").getBytes());
+		String extractPwd=reqData.getString("extractPwd");
 		TransDeal.tranDealCoin(uid, tagUid, coin, extractPwd);
 		return null;
 
 	}
-	//游戏内转账
+	//游戏内提现
 	@Override
 	public   Object  coinRecover(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
