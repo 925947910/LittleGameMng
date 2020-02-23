@@ -218,13 +218,19 @@ public  class RedisData {
 			resultData.add(obj);
 			count--;
 		}
+		
 		JSONObject obj= new JSONObject();
-		int coin=client.zscore(DB1_2, "rank", uid+"").intValue();
-		Long myRank=client.zrevrank(DB1_2, "rank", uid+"");
+		Double c=client.zscore(DB1_2, "rank", uid+"");
+		int coin=0;
+		Long myRank=0L;
+		if (c!=null) {
+		 coin=client.zscore(DB1_2, "rank", uid+"").intValue();
+		 myRank=client.zrevrank(DB1_2, "rank", uid+"");
+		}
 		String nick=client.hget(DB1_0, User+uid, "nick");
 		obj.put("uid", uid);
-		obj.put("coin", coin);
 		obj.put("nick", nick);
+		obj.put("coin", coin);
 		obj.put("myRank", myRank);
 		resultData.add(obj);
 		return  resultData;

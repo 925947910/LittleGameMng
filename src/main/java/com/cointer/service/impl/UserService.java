@@ -75,9 +75,7 @@ public class UserService implements IUserService {
 			loginDto.setAddress(reqData.getString("address"));
 			Integer newId=regist(loginDto);
 			try {
-				if(loginDto.getPresenterId()!=null&&loginDto.getPresenterId()!=0) {
-					gameUserMapper.bindPresenter(loginDto.getId(), loginDto.getPresenterId(), (new Date().getTime()/1000));
-				}
+				gameUserMapper.bindPresenter(loginDto.getId(), loginDto.getPresenterId(), (new Date().getTime()/1000));
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
@@ -107,7 +105,6 @@ public class UserService implements IUserService {
 		if(StringUtils.isBlank(loginDto.getAcc())){
 			throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登录验证失败acc非法", null);
 		}
-		
 		List<gameUser> DBUsers=gameUserMapper.checkAcc(loginDto.getAcc(), loginDto.getPlat());
 		gameUser DBUser=new gameUser();
 		Integer id;
@@ -126,6 +123,9 @@ public class UserService implements IUserService {
 			}
 			if(StringUtils.isBlank(loginDto.getNick())) {
 				throw new ServiceException(StatusCode.REGIST_FAILED,"注册失败请输入昵称", null);
+			}
+			if(loginDto.getPresenterId()==null||loginDto.getPresenterId()==0){
+				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"登录验证失败请填选邀请者Id", null);
 			}
 			id= RedisData.genAccId(jedisClient);
 			DBUser.setId(id);

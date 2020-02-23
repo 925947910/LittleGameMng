@@ -81,13 +81,16 @@ public class DealService implements IDealService {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
 		
 		int  uid=reqData.getIntValue("uid");
-		int  tagUid=reqData.getIntValue("tagUid");
+		String extractPwd =reqData.getString("extractPwd");
 		int  coin=reqData.getIntValue("coin");
 		String pwd=reqData.getString("pwd");
 		if(RedisData.inGame(jedisClient,uid)) {
 			throw new ServiceException(StatusCode.EXTRACT_IN_GAME,"游戏中不允许转账", null);
 		}
-		TransDeal.tranDealCoin(uid, tagUid, coin, pwd);
+		if(StringUtils.isBlank(extractPwd)) {
+			throw new ServiceException(StatusCode.FAILED,"钱包地址不能为空", null);
+		}
+		TransDeal.tranDealCoin(uid, extractPwd, coin, pwd);
 		return null;
 
 	}

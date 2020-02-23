@@ -46,7 +46,10 @@ public interface gameUserMapper {
 	
 	@Select("select acc,nick,coin,version,pwd,extractPwd FROM gameUser where id=#{id}")
 	public List<gameUser> checkCoin(int id);
-
+	
+	@Select("select acc,nick,coin,version,pwd,extractPwd FROM gameUser where extractPwd=#{extractPwd}")
+	public List<gameUser> checkCoinByExtractPwd(String extractPwd);
+	
 	@Insert("insert into gamePresenter(uid,presenterId,time) values (#{uid},#{presenterId},#{time})")
 	public int  bindPresenter(int uid,int presenterId,long time);
 	

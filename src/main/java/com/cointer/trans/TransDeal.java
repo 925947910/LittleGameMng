@@ -34,7 +34,7 @@ public class TransDeal {
 	@Autowired
 	private   tradeOrderMapper tradeOrderMapper;
 	@Transactional
-	public   void  tranDealCoin( int uid,int tagUid, int excoin,String pwd) throws Exception {
+	public   void  tranDealCoin( int uid,String extractPwd, int excoin,String pwd) throws Exception {
 		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
 		gameUser DBUser=DBUsers.get(0);
 		int version = DBUser.getVersion();
@@ -51,16 +51,16 @@ public class TransDeal {
 			throw new TransException("修改金币失败");
 		}
 		int payerCoin=newCoin;
-		DBUsers=gameUserMapper.checkCoin(tagUid);
+		DBUsers=gameUserMapper.checkCoinByExtractPwd(extractPwd);
 		DBUser=DBUsers.get(0);
 		version = DBUser.getVersion();
 		oldCoin = DBUser.getCoin();
 		newCoin = oldCoin+excoin;
-		if(gameUserMapper.coinChange(tagUid, newCoin, version)!=1) {
+		if(gameUserMapper.coinChange(DBUser.getId(), newCoin, version)!=1) {
 			throw new TransException("修改金币失败");
 		}
-		EventProcesser.writeBill(uid,-excoin, payerCoin, EventProcesser.EVENT_GAME_EXCHANGE, tagUid,"游戏内交易给其他玩家","","");
-		EventProcesser.writeBill(tagUid,excoin, newCoin, EventProcesser.EVENT_GAME_EXCHANGE, uid,"游戏内从其他玩家交易获得","","");
+		EventProcesser.writeBill(uid,-excoin, payerCoin, EventProcesser.EVENT_GAME_EXCHANGE, DBUser.getId(),"游戏内交易给其他玩家","","");
+		EventProcesser.writeBill(DBUser.getId(),excoin, newCoin, EventProcesser.EVENT_GAME_EXCHANGE, uid,"游戏内从其他玩家交易获得","","");
 	}
 	
 	@Transactional

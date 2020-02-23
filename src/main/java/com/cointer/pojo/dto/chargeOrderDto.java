@@ -9,13 +9,12 @@ public class chargeOrderDto {
 	private String accIn;
 	//用户昵称
 	private String accOut;
-	//转入游戏玩家id
-	private Integer uid;
+
 	//订单号
 	private String remoteOrderNo;
 	//钱包地址
 	private String currency;
-	//充值金币数量
+	//充值金币数量 分为单位
 	private Integer coin;
 	//签名
 	private String sign;
@@ -65,14 +64,10 @@ public class chargeOrderDto {
 	public void setSign(String sign) {
 		this.sign = sign;
 	}
-	public Integer getUid() {
-		return uid;
-	}
-	public void setUid(Integer uid) {
-		this.uid = uid;
-	}
-	
-	
+    // 充值接口 "status":"200"  成功   
+	// http://47.99.220.0:8089/GameUser/exchange/charge?param={%22accIn%22:%2218570603854%22,%22accOut%22:%2218570603854%22,%22remoteOrderNo%22:%22123%22,%22currency%22:%22123%22,%22coin%22:%221000%22,%22cost%22:%2210%22}
+	// 查询充值订单   返回0  成功   1 失败  2  其他
+	// http://47.99.220.0:8089/GameUser/exchange/orderInfo?param={%22orderNo%22:%22123%22}
 	
 }
 

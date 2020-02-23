@@ -35,10 +35,10 @@ public class ExchangeController extends  BaseController{
 	private   IJedisClient jedisClient;
 
 
-	@RequestMapping("/chargeOrder")
+	@RequestMapping("/charge")
 	@ResponseBody
 	public String chargeOrder(@RequestParam String param) {
-		return 	serviceRun(ExchangeService, "chargeOrder", param);
+		return 	serviceRun(ExchangeService, "charge", param);
 //		try {
 //			Object resultParam = ExchangeService.chargeOrder(param);
 //			return succ(StatusCode.SUCC, "", resultParam);

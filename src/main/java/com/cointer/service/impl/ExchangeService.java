@@ -67,10 +67,10 @@ public class ExchangeService  implements IExchangeService{
 		chargeOrderDto Dto = JSONObject.parseObject(RequestJsonData,chargeOrderDto.class);
 		String signStr = Dto.getAccIn()+Dto.getCoin()+Dto.getRemoteOrderNo()+Dto.getCurrency();
 		//验证签名是否正确
-		boolean verify = RSAUtils.pubKeyVerSign(signStr, Dto.getSign(),RSAUtils.publicKeys);
-		if (!verify) {
-			throw new ServiceException(StatusCode.SIGN_ERROR,"签名错误", null);
-		}
+//		boolean verify = RSAUtils.pubKeyVerSign(signStr, Dto.getSign(),RSAUtils.publicKeys);
+//		if (!verify) {
+//			throw new ServiceException(StatusCode.SIGN_ERROR,"签名错误", null);
+//		}
 		List <gameUser> DBUsers=gameUserMapper.checkAcc(Dto.getAccIn(), 0);
 		if(DBUsers==null || DBUsers.size()==0) {
 			throw new ServiceException(StatusCode.ORDER_ACC_ERROR,"游戏账户不存在", null);
@@ -107,6 +107,7 @@ public class ExchangeService  implements IExchangeService{
 				break;
 			}
 			JSONObject data=new JSONObject();
+			//0 成功 1 失败 2 处理中
 			data.put("orderStatus", orderStatus);
 			return data;
 		

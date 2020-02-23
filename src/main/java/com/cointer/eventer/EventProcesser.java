@@ -59,6 +59,7 @@ public class EventProcesser {
 	public static final int   EVENT_INIT_GAME=14; // 游戏记录初始化
 	public static final int   EVENT_CLEAN_GAME=15; // 游戏记录结算信息
 	public static final int   EVENT_PRESENTER_REBATE=16; // 邀请返利
+	public static final int   EVENT_PLAT_REBATE=17; // 平台抽水
 	private static final Logger log = LoggerFactory.getLogger(EventProcesser.class);
 	//  Event={obj,[{"uid",Uid},{"E",?EVENT_WIN},{"price",Price},{"game",GameId},{"desc","play_game"}]},
 	//	Event={obj,[{"uid",Uid},{"E",?EVENT_PAY},{"pay",Coin},{"game","GameId"},{"desc","play_game"}]},
@@ -191,6 +192,28 @@ public class EventProcesser {
 				}
 			}
 			break;
+		case EVENT_PLAT_REBATE:
+			uid = data.getIntValue("uid");
+			cost=data.getIntValue("price");
+			reason=data.getString("desc");
+			tagId= data.getIntValue("game");
+			log.info("EVENT_PLAT_REBATE uid:"+uid+"price:"+cost);
+			if (cost != 0) {
+				Integer remain = null;
+				for (int i = 0; i < 10; i++) {
+					try {
+						remain = gameCoinChange(uid, cost, EVENT_PLAT_REBATE, tagId, reason);
+						break;
+					} catch (Exception e) {
+						log.error("EVENT_PLAT_REBATE",e);
+					}
+				}
+				if (remain == null) {
+					writeCoinFailed(uid, cost, EVENT_PLAT_REBATE, tagId, reason);
+					log.warn("EVENT_PLAT_REBATE_FAILED uid:" + uid + "===cost:" + cost);
+				}
+			}
+			break;
 		default:
 			break;
 		}
@@ -216,7 +239,14 @@ public class EventProcesser {
 	}
 	@Transactional
 	public  Integer gameCoinChange(int uid, int cost, int type, int tagId,String reason) throws Exception {
-		return coinChange(uid, cost, type, tagId, reason);
+		List<gameUser> DBUsers=gameUserMapper.userById(uid);
+		gameUser DBUser=DBUsers.get(0);
+		int newCoin = DBUser.getCoin()+cost;
+		if (gameUserMapper.coinChange(uid, newCoin, DBUser.getVersion())!=1) {
+			throw new TransException("金币修改失败");
+		}
+		writeBill(uid, cost, newCoin, type, tagId, reason, "", "");
+		return newCoin;
 	}
 
 	@Transactional
@@ -229,28 +259,23 @@ public class EventProcesser {
 				num=100;
 			}
 			mineralChange(uid, -num, type, tagId, reason);
-			coinChange(uid, num, type, tagId, reason);
+			List<gameUser> DBUsers=gameUserMapper.userById(uid);
+			gameUser DBUser=DBUsers.get(0);
+			int newCoin = DBUser.getCoin()+num;
+			if (gameUserMapper.coinChange(uid, newCoin, DBUser.getVersion())!=1) {
+				throw new TransException("金币修改失败");
+			}
+			writeBill(uid, num, newCoin, type, tagId, reason, "", "");
 		}
 		return num;
 	}
 
-	public  Integer coinChange(int uid, int cost, int type, int tagId,String reason) throws Exception {
-		List<gameUser> DBUsers=gameUserMapper.userById(uid);
-		gameUser DBUser=DBUsers.get(0);
-		int newCoin = DBUser.getCoin()+cost;
-		if (gameUserMapper.coinChange(uid, newCoin, DBUser.getVersion())!=1) {
-			throw new TransException("金币修改失败");
-		}
-		writeBill(uid, cost, newCoin, type, tagId, reason, "", "");
-		return newCoin;	
-	}
+
 
 
 
 	public  void writeBill(int Uid,int Cost ,int Remain, int Type, int TagId,String Reason,String accountOut,String accountIn) throws Exception {	
 		Map<String, String> map =new HashMap<String, String>();
-		map.put("coin", Remain+"");
-		RedisData.updateUser(jedisClient, Uid, map);
 		map=RedisData.userInfo(jedisClient, Uid);
 		bills  bills= new  bills();
 		bills.setUid(Uid);
@@ -264,6 +289,9 @@ public class EventProcesser {
 		bills.setReason(Reason);
 		bills.setTime(new Date().getTime()/1000);
 		billsMapper.writeBills(bills);
+		map.clear();
+		map.put("coin", Remain+"");
+		RedisData.updateUser(jedisClient, Uid, map);
 	}
 
 	public void  mineralChange(int uid,int Num,int type,int tagId,String Reason) throws Exception  {
@@ -317,7 +345,7 @@ public class EventProcesser {
 		gameUserMapper.saveFailedCoin(coinChange);
 	}
 
-
+//六级代理返利事件
 	public   void  addPresenterEvent(int uid,int coin ) throws Exception {
 		Map<String,String> perMap=RedisData.sysConfig(jedisClient);
 		int currUid=uid;
