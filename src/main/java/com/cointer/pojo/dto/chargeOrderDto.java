@@ -9,7 +9,6 @@ public class chargeOrderDto {
 	private String accIn;
 	//用户昵称
 	private String accOut;
-
 	//订单号
 	private String remoteOrderNo;
 	//钱包地址

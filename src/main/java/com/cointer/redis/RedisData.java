@@ -155,7 +155,14 @@ public  class RedisData {
 		String uri=client.hget(DB1_4,INTERFACE_URI+Plat, "remoteOrderInfoUri");
 		return uri;
 	}
-
+	public static final String  getWalletUri(IJedisClient client,int Plat){
+		String uri=client.hget(DB1_4,INTERFACE_URI+Plat, "getWalletUri");
+		return uri;
+	}
+	public static final String  chargeRecordUri(IJedisClient client,int Plat){
+		String uri=client.hget(DB1_4,INTERFACE_URI+Plat, "chargeRecordUri");
+		return uri;
+	}
 	public static final int  genFreezeId(IJedisClient client){
 		int id=client.incr(DB1_4,FreezeId).intValue();
 		return id;

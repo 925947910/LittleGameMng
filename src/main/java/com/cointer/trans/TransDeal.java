@@ -64,7 +64,7 @@ public class TransDeal {
 	}
 	
 	@Transactional
-	public   void  coinRecover( int uid, int excoin,String pwd) throws Exception {
+	public   void  coinRecover( int uid, int excoin,String pwd,String extractPwd) throws Exception {
 		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
 		gameUser DBUser=DBUsers.get(0);
 		int version = DBUser.getVersion();
@@ -72,7 +72,6 @@ public class TransDeal {
 		String acc =  DBUser.getAcc();
 		String nick =  DBUser.getNick();
 		String dbPwd= DBUser.getPwd();
-		String extractPwd =  DBUser.getExtractPwd();
 		int newCoin = oldCoin-excoin;
 		if(!dbPwd.equals(pwd)) {
 			throw new TransException("密码错误");

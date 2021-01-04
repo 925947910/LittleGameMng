@@ -10,11 +10,9 @@ package com.cointer.service.impl;
 
 import java.math.BigDecimal;
 import java.util.Base64;
-
+import java.util.HashMap;
 import java.util.List;
-
-
-
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,10 +65,21 @@ public class DealService implements IDealService {
 	@Override
 	public   Object extractPwd(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
-		String extractPwd =reqData.getString("extractPwd");
 		int  uid=reqData.getIntValue("uid");
-		if(gameUserMapper.resetPwd(uid, extractPwd)!=1) {
-			throw new ServiceException(StatusCode.SET_EXTRACT_PWD_ERROR,"设置钱包失败", null);
+		String extractPwd;
+		try {
+			HttpClientUtil client=HttpClientUtil.getInstance();
+			String uri= RedisData.getWalletUri(jedisClient, 0)+"?userId="+uid;
+			String JsonAuth=client.doGetWithJsonResult(uri);
+			JSONObject AuthData=JSON.parseObject(JsonAuth);
+			System.out.println(JsonAuth);
+			int resultCode=AuthData.getIntValue("code");
+			extractPwd=AuthData.getString("data");
+			if(gameUserMapper.resetPwd(uid, extractPwd)!=1) {
+				throw new ServiceException(StatusCode.SET_EXTRACT_PWD_ERROR,"设置钱包失败", null);
+			}
+		} catch (Exception e) {
+			throw new ServiceException(StatusCode.SET_EXTRACT_PWD_ERROR,"获取钱包地址失败", null);
 		}
 		return null;
 	}
@@ -101,10 +110,14 @@ public class DealService implements IDealService {
 		int  uid=reqData.getIntValue("uid");
 		int  coin=reqData.getIntValue("coin");
 		String pwd=reqData.getString("pwd");
+		String extractPwd =reqData.getString("extractPwd");
+		if(StringUtils.isBlank(extractPwd)) {
+			throw new ServiceException(StatusCode.FAILED,"钱包地址不能为空", null);
+		}
 		if(RedisData.inGame(jedisClient,uid)) {
 			throw new ServiceException(StatusCode.EXTRACT_IN_GAME,"游戏中不允许转账", null);
 		}
-	   TransDeal.coinRecover(uid,coin,pwd);
+	   TransDeal.coinRecover(uid,coin,pwd,extractPwd);
 		return null;
 	}
 

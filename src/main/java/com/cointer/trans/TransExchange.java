@@ -232,7 +232,7 @@ public class TransExchange {
 		orderBean.setStatus(ORDER_PROCESSING);  // 0 初始  1 订单对接成功    2转账中  3成功   4失败
 		orderBean.setTime(now);
 		if(tradeOrderMapper.insertTradeOrder(orderBean)!=1) {
-			throw new TransException("生成订单失败");
+			throw new TransException("生成订单失败订单号:"+orderFrom);
 		}
        return orderBean;
 	}

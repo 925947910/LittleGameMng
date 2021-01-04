@@ -79,7 +79,7 @@ public class DealController extends  BaseController{
 //		} 
 	}
 
-	@RequestMapping("/recover")
+	@RequestMapping("/coinRecover")
 	@ResponseBody
 	public String coinRecover(@RequestParam String param) {
 		return 	serviceRun(DealService, "coinRecover", param);
