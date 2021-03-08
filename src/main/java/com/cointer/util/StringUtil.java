@@ -166,6 +166,24 @@ public class StringUtil {
        return true;
 	}
 	
+	public static boolean MobileNumber(String nationalCode, String mobileNumber){
+        boolean isMobileNumber = false;
+        if (isEmpty(mobileNumber)){
+            return isMobileNumber;
+        }
+        for (MobileRegularExp regularExp : MobileRegularExp.values()) {
+            Pattern pattern = Pattern.compile(regularExp.getRegularExp());
+            Matcher matcher = pattern.matcher(new StringBuilder().append(nationalCode).append(mobileNumber).toString());
+            if (matcher.matches()) {
+                isMobileNumber = true;
+                // 枚举中把最常用的国际区号拍在前面可以减少校验开销
+                break;
+            }
+        }
+        return isMobileNumber;
+    }
+	
+	
 	/**
 	 * 首字母大写
 	 * @param str

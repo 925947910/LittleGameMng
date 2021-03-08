@@ -69,7 +69,7 @@ public class DealService implements IDealService {
 		String extractPwd;
 		try {
 			HttpClientUtil client=HttpClientUtil.getInstance();
-			String uri= RedisData.getWalletUri(jedisClient, 0)+"?userId="+uid;
+			String uri= RedisData.getUri(jedisClient, 0,"wallet")+"?userId="+uid;
 			String JsonAuth=client.doGetWithJsonResult(uri);
 			JSONObject AuthData=JSON.parseObject(JsonAuth);
 			System.out.println(JsonAuth);

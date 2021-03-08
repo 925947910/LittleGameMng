@@ -11,6 +11,5 @@ public interface IMineralService {
 
 	Object presenterMembers(String RequestJsonData) throws Exception;
 
-	Object digMineral(String RequestJsonData) throws Exception;
 
 }

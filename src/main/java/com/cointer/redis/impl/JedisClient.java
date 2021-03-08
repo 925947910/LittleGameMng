@@ -105,10 +105,19 @@ public class JedisClient implements IJedisClient {
         jedis.close();
         return result;
     }
+    @Override
     public String hmset(int db,String key,Map<String,String> map) {
         Jedis jedis = jedisPool.getResource();
         jedis.select(db);
         String result = jedis.hmset(key, map);
+        jedis.close();
+        return result;
+    }
+    @Override
+    public Long hincrBy(int db,String key,String field ,long value) {
+        Jedis jedis = jedisPool.getResource();
+        jedis.select(db);
+        Long result = jedis.hincrBy(key, field, value);
         jedis.close();
         return result;
     }
@@ -156,7 +165,7 @@ public class JedisClient implements IJedisClient {
     }
 
     @Override
-    public Long del(int db,String key) {
+    public Long del(int db,String... key) {
         Jedis jedis = jedisPool.getResource();
         jedis.select(db);
         Long result = jedis.del(key);
@@ -181,10 +190,42 @@ public class JedisClient implements IJedisClient {
 	        return result;
 	}
 	@Override
+	public Long llen(int db,String key) {
+		  Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        Long result  =jedis.llen(key);
+	        jedis.close();
+	        return result;
+	}
+	@Override
+	public String lindex(int db,String key,long index) {
+		  Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        String result  =jedis.lindex(key, index);
+	        jedis.close();
+	        return result;
+	}
+	@Override
+	public String lpop(int db,String key) {
+		  Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        String result  =jedis.lpop(key);
+	        jedis.close();
+	        return result;
+	}
+	@Override
 	public List<String> lrange(int db,String key, int start, int stop) {
 		  Jedis jedis = jedisPool.getResource();
 	        jedis.select(db);
 	        List<String> result  =jedis.lrange(key, start, stop);
+	        jedis.close();
+	        return result;
+	}
+	@Override
+	public Long lpush(int db,String key, String... strings) {
+		  Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        Long result  =jedis.lpush(key, strings);
 	        jedis.close();
 	        return result;
 	}
@@ -196,6 +237,17 @@ public class JedisClient implements IJedisClient {
 	        jedis.close();
 	        return result;
 	}
+	
+	@Override
+	public String ltrim(int db, String key,long start, long stop){
+		Jedis jedis = jedisPool.getResource();
+		jedis.select(db);
+		String result=jedis.ltrim(key, start, stop);
+		jedis.close();
+		return result;
+
+	};
+
 	@Override
 	public Map<String, String> hgetAll(int db, String key) {
 		 Jedis jedis = jedisPool.getResource();
@@ -235,5 +287,21 @@ public class JedisClient implements IJedisClient {
 		Double result= jedis.zincrby(key, increment, member);
 		jedis.close();
 		return result;
+	}
+	@Override
+	public long sadd(int db, String key,String... members) {
+		  Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        long result  =jedis.sadd(key, members);
+	        jedis.close();
+	        return result;
+	}
+	@Override
+	public  Set<String> smembers(int db, String key) {
+		  Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        Set<String> result = jedis.smembers(key);
+	        jedis.close();
+	        return result;
 	}
 }

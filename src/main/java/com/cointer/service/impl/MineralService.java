@@ -83,21 +83,7 @@ public class MineralService implements IMineralService {
 		List<mineralBills> mineralBills=mineralMapper.mineralBillsList(uid, begin, end);
 		return new PageInfo<>(mineralBills);
 	}
-	@Override
-	public   Object  digMineral(String  RequestJsonData) throws Exception {
-		JSONObject reqData=JSON.parseObject(RequestJsonData);
-		Integer uid=reqData.getIntValue("uid");
-		Integer tagId=reqData.getIntValue("gameId");
-		String  desc=reqData.getString("desc");
-		int num=0;
-		try {
-			num=EventProcesser.dig_mineral(uid, EventProcesser.EVENT_DIG_MINERAL, tagId,desc);
-		} catch (Exception e) {
-		}
-		Map<String,String> resMap=  new HashMap<String, String>();
-		resMap.put("digCoin", num+"");
-		return resMap;
-	}
+
 	@Override
 	public Object presenterMembers(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);

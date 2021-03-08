@@ -50,7 +50,7 @@ public interface IJedisClient {
 
     List<String> hvals(int db,String key);
 
-    Long del(int db,String key);
+    Long del(int db,String... key);
     
     Double zscore(int db,String key,String member);
     
@@ -61,12 +61,30 @@ public interface IJedisClient {
 	Set<String> keys(int db, String key);
 
 	Long rpush(int db, String key, String... strings);
-
+	
+	Long lpush(int db, String key, String... strings);
+	
+	String ltrim(int db, String key, long start, long stop);
+	
 	Set<String> zrevrange(int db, String key, long start, long stop);
 
 	Long zrevrank(int db, String key, String member);
 
 	Double zincrby(int db, String key, Double increment, String member);
+
+	long sadd(int db, String key, String... members);
+
+	Set<String> smembers(int db, String key);
+
+	Long hincrBy(int db, String key, String field, long value);
+
+	Long llen(int db, String key);
+
+	String lindex(int db, String key, long index);
+
+	String lpop(int db, String key);
+
+	
 
     
 

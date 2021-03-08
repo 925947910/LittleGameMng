@@ -3,6 +3,7 @@ package com.cointer;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 //https://www.cnblogs.com/yliucnblogs/p/9881540.html
 @SpringBootApplication
 @EnableTransactionManagement
+@EnableScheduling
 @MapperScan("com.cointer.mapper")
 public class Application {
 	 public static void main(String[] args) {

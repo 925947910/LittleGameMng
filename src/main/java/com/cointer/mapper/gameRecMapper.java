@@ -14,8 +14,8 @@ public interface gameRecMapper {
 
 
     
-    @Insert("insert into gameRec(gameId,recordCode,beginTime) values (#{gameId},#{recordCode},#{beginTime})")
+    @Insert("insert into gamerec(gameId,recordCode,beginTime) values (#{gameId},#{recordCode},#{beginTime})")
 	public int  initGameRec(gameRec gameRec);
-	@Update("update gameRec set endTime= #{endTime},gameResult= #{gameResult} where recordCode= #{recordCode} ")
+	@Update("update gamerec set endTime= #{endTime},gameResult= #{gameResult} where recordCode= #{recordCode} ")
     public int  gameCleanRec(gameRec gameRec);
 }

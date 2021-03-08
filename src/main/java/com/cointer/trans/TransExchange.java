@@ -44,199 +44,155 @@ public class TransExchange {
 	private EventProcesser EventProcesser;
 	
 
-	@Transactional
-	public   int tranChargeFreeze(int orderId,int uid,int coin) throws Exception {
-		int fId = RedisData.genFreezeId(jedisClient);
-		if(tradeOrderMapper.updateStatusWithFreezeId(orderId, ORDER_MATCHED, ORDER_PROCESSING, fId)!=1) {
-			
-		}
-		long now  = new Date().getTime()/1000;
-		freeze freezeBean= new freeze();
-		freezeBean.setId(fId);
-		freezeBean.setUid(uid);
-		freezeBean.setOrderId(orderId);
-		freezeBean.setCoin(coin);
-		freezeBean.setOrderType(ORDERIN);
-		freezeBean.setTime(now);
-		if(freezeMapper.insertFreeze(freezeBean)!=1) {
-			throw new TransException("资金冻结失败");
-		}
-		return fId;
-	}
-	@Transactional
-	public   void  tranExtractFailed(int orderId,int uid,int fId,int excoin,boolean check) throws Exception {
-			if(check) {
-				if(tradeOrderMapper.updateStatus(orderId, ORDER_FAILED)!=1) {
-					throw new TransException("订单状态修改失败");
-				}
-			}else {
-				if(tradeOrderMapper.updateStatusByStatus(orderId, ORDER_PROCESSING, ORDER_FAILED)!=1) {
-					throw new TransException("订单状态修改失败");
-				}
-			}
-			List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
-			gameUser DBUser=DBUsers.get(0);
-			int version = DBUser.getVersion();
-			int oldCoin = DBUser.getCoin();
-			int newCoin = oldCoin+excoin;
-			
-			if(gameUserMapper.coinChange(uid, newCoin, version)!=1) {
-				throw new TransException("金币修改失败");
-			}
-			if(freezeMapper.delFreeze(fId)!=1) {
-				throw new TransException("删除冻结资金失败");
-			}
-			EventProcesser.writeBill(uid, excoin, newCoin, EventProcesser.EVENT_FREEZE_REBACK, orderId,"提现失败返还冻结资金","","");
-	}
-	@Transactional
-	public   void  tranExtractSucc(int orderId, int uid, int fId, int excoin,boolean check) throws Exception {
-		if(check) {
-			if(tradeOrderMapper.updateStatus(orderId, ORDER_SUCC)!=1) {
-				throw new TransException("订单状态修改失败");
-			}
-		}else {
-			if(tradeOrderMapper.updateStatusByStatus(orderId, ORDER_PROCESSING, ORDER_SUCC)!=1) {
-				throw new TransException("订单状态修改失败");
-			}
-		}
-		if(freezeMapper.delFreeze(fId)!=1) {
-			throw new TransException("删除冻结资金失败");
-		}
-		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
-		gameUser DBUser=DBUsers.get(0);
-		int oldCoin = DBUser.getCoin();
-		EventProcesser.writeBill(uid,0, oldCoin, EventProcesser.EVENT_EXTRACT, orderId,"提现成功解除冻结资金自身金币数量不变","","");
+
 	
-	}
-	@Transactional
-	public   void  tranExtractOrderFailed(int orderId,int uid,int fId,int excoin) throws Exception {
-		if(tradeOrderMapper.updateStatusByStatus(orderId, ORDER_INIT, ORDER_FAILED)!=1) {
-			throw new TransException("订单状态修改失败");
-		}
-		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
-		gameUser DBUser=DBUsers.get(0);
-		int version = DBUser.getVersion();
-		int oldCoin = DBUser.getCoin();
-			int newCoin = oldCoin+excoin;
-			if(gameUserMapper.coinChange(uid, newCoin, version)!=1) {
-				throw new TransException("金币修改失败");
-			}
-			if(freezeMapper.delFreeze(fId)!=1) {
-				throw new TransException("删除冻结资金失败");
-			}
-			EventProcesser.writeBill(uid, excoin, newCoin, EventProcesser.EVENT_FREEZE_REBACK, orderId,"提现订单验证失败返还冻结资金","","");
-		
-	}
-	@Transactional
-	public   void  tranExtractOrderSucc(int orderId,int uid,String OrderRemote) throws Exception {
-		if(tradeOrderMapper.updateStatusWithOrderRemote(orderId, ORDER_INIT, ORDER_PROCESSING, OrderRemote)!=1) {
-			throw new TransException("订单状态修改失败");
-		}	
-	}   
-	@Transactional
-	public   tradeOrder  tranGenOrderOut(int uid,int plat,BigDecimal cost,int excoin,String currency) throws Exception {
-		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
-		gameUser DBUser=DBUsers.get(0);
-		int version = DBUser.getVersion();
-		int oldCoin = DBUser.getCoin();
-		int newCoin = oldCoin-excoin;
-		if(newCoin<0) {
-			throw new TransException("金币不足");
-		}
-		if(gameUserMapper.coinChange(uid, newCoin, version)!=1) {
-			throw new TransException("金币修改失败");
-		}
-		int fId = RedisData.genFreezeId(jedisClient);
-		long now=	new Date().getTime()/1000;
-		int orderId = RedisData.genOrderId(jedisClient);
-		freeze freezeBean= new freeze();
-		freezeBean.setId(fId);
-		freezeBean.setUid(uid);
-		freezeBean.setOrderId(orderId);
-		freezeBean.setCoin(excoin);
-		freezeBean.setOrderType(ORDEROUT);
-		freezeBean.setTime(now);
-		if(freezeMapper.insertFreeze(freezeBean)!=1) {
-			throw new TransException("资金冻结失败");
-		}
-		String order=CommTypeUtils.getOrderNo("OrderOut");
-		tradeOrder  orderBean= new tradeOrder();
-		orderBean.setId(orderId);
-		orderBean.setOrderLocal(order);
-		orderBean.setOrderRemote("");
-		orderBean.setPlat(plat);
-		orderBean.setUid(uid);
-		orderBean.setCost(cost);
-		orderBean.setCoin(excoin);
-		orderBean.setCurrency(currency);
-		orderBean.setOrderType(ORDEROUT);
-		orderBean.setFreezeId(fId);
-		orderBean.setStatus(ORDER_INIT);  // 0 初始  1 订单对接成功    2转账中  3成功   4失败
-		orderBean.setTime(now);
-		int res=tradeOrderMapper.insertTradeOrder(orderBean);
-		if(res!=1) {
-			throw new TransException("生成订单失败");
-		}
-		EventProcesser.writeBill(uid, -excoin, newCoin, EventProcesser.EVENT_FREEZE, orderId,"生成提现订单冻结提现资金","","");
-		return orderBean;
-	}
+	
 		
 	
 	@Transactional
-	public   void  tranChargeSucc(int orderId,int uid,int coin) throws Exception {
-		if(tradeOrderMapper.updateStatusByStatus(orderId, ORDER_PROCESSING, ORDER_SUCC)!=1) {
-			throw new TransException("订单状态修改失败");
+	public   int  tranChargeSucc(String orderLocal,int uid,int coin,float cost) throws Exception {
+		if(tradeOrderMapper.updateStatusCostByOrder(orderLocal,cost, ORDER_PROCESSING, ORDER_SUCC)!=1) {
+			throw new TransException("status_update_failed");
 		}
 		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
 		gameUser DBUser=DBUsers.get(0);
 		int version = DBUser.getVersion();
 		int oldCoin = DBUser.getCoin();
+		int isTourist=DBUser.getIsTourist();
 		int newCoin = oldCoin+coin;
+		if(isTourist==1){
+			newCoin=coin;
+			if(gameUserMapper.updateTourist(uid, 0)!=1) {
+				throw new TransException("tourist_status_update_failed");
+			}
+			RedisData.updateUserField(jedisClient, uid, "isTourist", "0");
+		}
 		if(gameUserMapper.coinChange(uid, newCoin, version)!=1) {
-			throw new TransException("金币修改失败");
+			throw new TransException("coin_modify_failed");
 		}
-		EventProcesser.writeBill(uid, coin, newCoin, EventProcesser.EVENT_CHARGE, orderId,"充值成功","","");
+		EventProcesser.writeBill(uid,DBUser.getNick(),DBUser.getAgentId(), coin, newCoin, EventProcesser.EVENT_CHARGE, 0,"充值成功orderLocal:"+orderLocal,"","");
+		return  DBUser.getPresenterId();
 	}
 	@Transactional
-	public   void  tranChargeFailed(int orderId,int fId,boolean check) throws Exception {
-		if(check) {
-			if(tradeOrderMapper.updateStatus(orderId, ORDER_FAILED)!=1) {
-				throw new TransException("订单状态修改失败");
-			}
-		}else {
-			if(tradeOrderMapper.updateStatusByStatus(orderId, ORDER_PROCESSING, ORDER_FAILED)!=1) {
-				throw new TransException("订单状态修改失败");
-			}
+	public   void  tranChargeFailed(String orderLocal) throws Exception {
+		if(tradeOrderMapper.updateStatusByOrder(orderLocal, ORDER_PROCESSING, ORDER_FAILED)!=1) {
+			throw new TransException("tourist_status_update_failed");
 		}
-		if(freezeMapper.delFreeze(fId)!=1) {
-			throw new TransException("删除冻结资金失败");
-		}
+		
 	}
+	
+	
 	@Transactional
-	public   tradeOrder tranGenOrderIn(int uid,String accIn,String accOut,BigDecimal cost,int coin,String orderFrom,String currency) throws Exception {
+	public   tradeOrder tranGenOrderIn(int uid,int agentId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
 		
 		long now=	new Date().getTime()/1000;
 		int orderId = RedisData.genOrderId(jedisClient);
-		String order=CommTypeUtils.getOrderNo("OrderIn");
+		
 		tradeOrder  orderBean= new tradeOrder();
 		orderBean.setId(orderId);
 		orderBean.setAccountIn(accIn);
 		orderBean.setAccountOut(accOut);
-		orderBean.setOrderLocal(order);
-		orderBean.setOrderRemote(orderFrom);
+		orderBean.setOrderLocal(orderid);
+		orderBean.setOrderRemote(transactionid);
+		orderBean.setPlat(0);
 		orderBean.setUid(uid);
+		orderBean.setAgentId(agentId);
 		orderBean.setCost(cost);
+		orderBean.setFreezeId(0);
 		orderBean.setCoin(coin);
 		orderBean.setCurrency(currency);
 		orderBean.setOrderType(ORDERIN);
 		orderBean.setStatus(ORDER_PROCESSING);  // 0 初始  1 订单对接成功    2转账中  3成功   4失败
 		orderBean.setTime(now);
 		if(tradeOrderMapper.insertTradeOrder(orderBean)!=1) {
-			throw new TransException("生成订单失败订单号:"+orderFrom);
+			throw new TransException("gen_order_failed:"+transactionid);
 		}
        return orderBean;
 	}
 	
 	
+	@Transactional                        
+	public   tradeOrder  tranGenOrderOut(int uid,int agentId,int fId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
+		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
+		gameUser DBUser=DBUsers.get(0);
+		int version = DBUser.getVersion();
+		int oldCoin = DBUser.getCoin();
+		int newCoin = oldCoin-coin;
+		if(newCoin<0) {
+			throw new TransException("coin_not_enough");
+		}
+		if(gameUserMapper.coinChange(uid, newCoin, version)!=1) {
+			throw new TransException("coin_modify_failed");
+		}
+		long now=	new Date().getTime()/1000;
+		
+		int orderId = RedisData.genOrderId(jedisClient);
+		freeze freezeBean= new freeze();
+		freezeBean.setId(fId);
+		freezeBean.setUid(uid);
+		freezeBean.setOrderId(orderId);
+		freezeBean.setCoin(coin);
+		freezeBean.setOrderType(ORDEROUT);
+		freezeBean.setTime(now);
+		if(freezeMapper.insertFreeze(freezeBean)!=1) {
+			throw new TransException("freeze_coin_failed");
+		}
+		tradeOrder  orderBean= new tradeOrder();
+		orderBean.setId(orderId);
+		orderBean.setOrderLocal(orderid);
+		orderBean.setOrderRemote(transactionid);
+		orderBean.setPlat(0);
+		orderBean.setUid(uid);
+		orderBean.setAgentId(agentId);
+		orderBean.setCost(cost);
+		orderBean.setCoin(coin);
+		orderBean.setAccountOut(accOut);
+		orderBean.setCurrency(currency);
+		orderBean.setOrderType(ORDEROUT);
+		orderBean.setFreezeId(fId);
+		orderBean.setStatus(ORDER_PROCESSING);  // 0 初始  1 订单对接成功    2转账中  3成功   4失败
+		orderBean.setTime(now);
+		int res=tradeOrderMapper.insertTradeOrder(orderBean);
+		if(res!=1) {
+			throw new TransException("gen_order_failed");
+		}
+		EventProcesser.writeBill(uid,DBUser.getNick(),agentId, -coin, newCoin, EventProcesser.EVENT_FREEZE, orderId,"生成提现订单冻结提现资金","","");
+		return orderBean;
+	}
+	@Transactional
+	public   void  tranExtractSucc(String orderLocal,int fId,int uid,int coin,float cost) throws Exception {
+		if(tradeOrderMapper.updateStatusCostByOrder(orderLocal,cost ,ORDER_PROCESSING, ORDER_SUCC)!=1) {
+			throw new TransException("status_update_failed");
+		}
+		if(freezeMapper.delFreeze(fId)!=1) {
+			throw new TransException("unfreeze_failed");
+		}
+		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
+		gameUser DBUser=DBUsers.get(0);
+		int oldCoin = DBUser.getCoin();
+		EventProcesser.writeBill(uid,DBUser.getNick(),DBUser.getAgentId(),0, oldCoin, EventProcesser.EVENT_EXTRACT, 0,"提现成功orderLocal:"+orderLocal,"","");
+	
+	}
+	@Transactional
+	public   void  tranExtractFailed(String orderLocal,int fId,int uid,int coin) throws Exception {
+	
+		if(tradeOrderMapper.updateStatusByOrder(orderLocal, ORDER_PROCESSING, ORDER_FAILED)!=1) {
+			throw new TransException("status_update_failed");
+		}
+			List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
+			gameUser DBUser=DBUsers.get(0);
+			int version = DBUser.getVersion();
+			int oldCoin = DBUser.getCoin();
+			int newCoin = oldCoin+coin;
+			if(gameUserMapper.coinChange(uid, newCoin, version)!=1) {
+				throw new TransException("coin_modify_failed");
+			}
+			
+			if(freezeMapper.delFreeze(fId)!=1) {
+				throw new TransException("unfreeze_failed");
+			}
+			EventProcesser.writeBill(uid,DBUser.getNick(),DBUser.getAgentId(), coin, newCoin, EventProcesser.EVENT_FREEZE_REBACK, 0,"提现失败orderLocal:"+orderLocal,"","");
+	}
+
 	
 }

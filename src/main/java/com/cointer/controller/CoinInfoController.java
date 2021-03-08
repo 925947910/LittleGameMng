@@ -46,6 +46,16 @@ public class CoinInfoController extends  BaseController{
 		return 	serviceRun(CoinInfoService, "billsList", param);
 
 	}
+	@RequestMapping("/personalInfo")
+	@ResponseBody
+	public String personalInfo(@RequestParam String param) {
+		return 	serviceRun(CoinInfoService, "personalInfo", param);
 
+	}
+	@RequestMapping("/currCoin")
+	@ResponseBody
+	public String currCoin(@RequestParam String param) {
+		return 	serviceRun(CoinInfoService, "currCoin", param);
 
+	}
 }

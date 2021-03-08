@@ -12,6 +12,10 @@ public interface ICoinInfoService   {
 
 	Object billsList(String RequestJsonData) throws Exception;
 
+	Object personalInfo(String RequestJsonData) throws Exception;
+
+	Object currCoin(String RequestJsonData) throws Exception;
+
 
 
 	

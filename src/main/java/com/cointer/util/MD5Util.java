@@ -1,12 +1,18 @@
 package com.cointer.util;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 
 public class MD5Util {
@@ -16,6 +22,27 @@ public class MD5Util {
     private static final int HASH_ITERATIONS = 2159;
     public  static final String SALT = "keyinttoken2019&";
 	private static final Logger log = LoggerFactory.getLogger(MD5Util.class);   
+	
+	/**
+     * 参数名ASCII码从小到大排序（字典序）
+     *
+     * @param params
+     * @return 例如：a=1005&c=190010002&d=1400000001
+     */
+    public static String paramsSort(Map<String, String> params) {
+        StringBuilder sb = new StringBuilder();
+        List<String> paramKeys = new ArrayList<>(params.keySet());
+        Collections.sort(paramKeys);
+        Iterator<String> iterator = paramKeys.iterator();
+        while (iterator.hasNext()){
+            String key = iterator.next();
+            sb.append("&").append(key).append("=").append(MapUtils.getString(params,key, ""));
+        }
+        String data = sb.toString();
+        data = data.substring(1, data.length());
+        return data;
+    }
+	
     /**
      * 获取String的MD5值
      *

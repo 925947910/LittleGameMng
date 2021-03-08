@@ -2,7 +2,7 @@ package com.cointer.eventer;
 
 
 
-import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,16 +21,18 @@ import com.cointer.mapper.mineralMapper;
 import com.cointer.exception.TransException;
 import com.cointer.mapper.billsMapper;
 import com.cointer.mapper.gameRecMapper;
+import com.cointer.mapper.rbBallMapper;
 import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.mineralBills;
-import com.cointer.pojo.po.mineralCode;
 import com.cointer.pojo.po.userMineral;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
+import com.cointer.service.impl.RedGreenBallService;
 import com.cointer.pojo.po.bills;
 import com.cointer.pojo.po.coinFailed;
 import com.cointer.pojo.po.gamePresenter;
 import com.cointer.pojo.po.gameRec;
+import com.cointer.pojo.po.rbBallBet;
 import com.cointer.util.StringUtil;
 
 
@@ -60,6 +62,13 @@ public class EventProcesser {
 	public static final int   EVENT_CLEAN_GAME=15; // 游戏记录结算信息
 	public static final int   EVENT_PRESENTER_REBATE=16; // 邀请返利
 	public static final int   EVENT_PLAT_REBATE=17; // 平台抽水
+	
+	public static final int   EVENT_REDGREENBALL_BET=20; // 红绿球下注
+	public static final int   EVENT_BENZBMW_BET=21; // 奔驰宝马下注
+	public static final int   EVENT_CROWDFUND_BET=22; // 一元购下注
+	public static final int   EVENT_REDGREENBALL_DRAW=23; // 红绿球中奖
+	public static final int   EVENT_BENZBMW_DRAW=24; // 奔驰宝马中奖
+	public static final int   EVENT_PRESENTER_ADD=25; // 邀请反水
 	private static final Logger log = LoggerFactory.getLogger(EventProcesser.class);
 	//  Event={obj,[{"uid",Uid},{"E",?EVENT_WIN},{"price",Price},{"game",GameId},{"desc","play_game"}]},
 	//	Event={obj,[{"uid",Uid},{"E",?EVENT_PAY},{"pay",Coin},{"game","GameId"},{"desc","play_game"}]},
@@ -73,7 +82,11 @@ public class EventProcesser {
 	@Autowired
 	private   mineralMapper mineralMapper;
 	@Autowired
+	private   rbBallMapper rbBallMapper;
+	@Autowired
 	private   gameRecMapper gameRecMapper;
+	@Autowired
+	private   RedGreenBallService RedGreenBallService;
 	@Autowired
 	private   IJedisClient jedisClient;
 	public  void routeEvent(Jedis jedis,String id) {
@@ -104,6 +117,9 @@ public class EventProcesser {
 		String  reason;
 		int tagId;
 		int uid;
+		String result;
+		long issue;
+		Integer remain=null;
 		switch (event) {
 		case EVENT_PAY:
 			uid = data.getIntValue("uid");
@@ -111,7 +127,6 @@ public class EventProcesser {
 			reason=data.getString("desc");
 			tagId= data.getIntValue("game");
 			if (cost != 0) {
-				Integer remain = null;
 				for (int i = 0; i < 10; i++) {
 					try {
 						remain = gameCoinChange(uid, cost, EVENT_PAY, tagId, reason);
@@ -125,7 +140,6 @@ public class EventProcesser {
 					log.warn("EVENT_PAY_FAILED uid:" + uid + "===cost:" + cost);
 				}else {
 					addPresenterEvent(uid, -cost);
-					RedisData.inRank(jedisClient, uid, -cost);
 				}
 			}
 			break;
@@ -135,7 +149,6 @@ public class EventProcesser {
 			reason=data.getString("desc");
 			tagId= data.getIntValue("game");
 			if (cost != 0) {
-				Integer remain = null;
 				for (int i = 0; i < 10; i++) {
 					try {
 						remain = gameCoinChange(uid, cost, EVENT_WIN, tagId, reason);
@@ -177,7 +190,6 @@ public class EventProcesser {
 			cost= data.getIntValue("coin");
 			tagId=data.getIntValue("uidFrom");
 			if (cost != 0) {
-				Integer remain = null;
 				for (int i = 0; i < 10; i++) {
 					try {
 						remain = gameCoinChange(uid, cost, EVENT_PRESENTER_REBATE, tagId,"目标Id为被抽水玩家");
@@ -199,7 +211,6 @@ public class EventProcesser {
 			tagId= data.getIntValue("game");
 			log.info("EVENT_PLAT_REBATE uid:"+uid+"price:"+cost);
 			if (cost != 0) {
-				Integer remain = null;
 				for (int i = 0; i < 10; i++) {
 					try {
 						remain = gameCoinChange(uid, cost, EVENT_PLAT_REBATE, tagId, reason);
@@ -214,6 +225,70 @@ public class EventProcesser {
 				}
 			}
 			break;
+		case EVENT_REDGREENBALL_DRAW:
+			 uid = data.getIntValue("uid");
+			 result = data.getString("result");
+			 issue = data.getLongValue("issue");
+				cost=RedGreenBallService.getPrice(uid, issue, result);
+				if (cost != 0) {
+					for (int i = 0; i < 10; i++) {
+						try {
+							remain = gameCoinChange(uid, cost, EVENT_REDGREENBALL_DRAW, 0, "Red and Green Ball issue:"+issue);
+							break;
+						} catch (Exception e) {
+							log.error("EVENT_REDGREENBALL_DRAW",e);
+						}
+					}
+					if (remain == null) {
+						writeCoinFailed(uid, cost, EVENT_REDGREENBALL_DRAW, 0, "Red and Green Ball issue:"+issue);
+						log.warn("EVENT_REDGREENBALL_DRAW_FAILED uid:" + uid + "===cost:" + cost);
+					}
+				}
+		
+			break;
+		case EVENT_BENZBMW_DRAW:
+			uid = data.getIntValue("uid");
+		    result = data.getString("result");
+			issue = data.getLongValue("issue");
+			uid = data.getIntValue("uid");
+			cost=data.getIntValue("num");
+				if (cost != 0 &&uid<10000000) {
+					for (int i = 0; i < 10; i++) {
+						try {                                                       
+							remain = gameCoinChange(uid, cost, EVENT_BENZBMW_DRAW, 0, "Benz BMW Issue"+issue);
+							break;
+						} catch (Exception e) {
+							log.error("EVENT_BENZBMW_DRAW",e);
+						}
+					}
+					if (remain == null) {
+						writeCoinFailed(uid, cost, EVENT_BENZBMW_DRAW, 0, "Benz BMW Issue"+issue);
+						log.warn("EVENT_BENZBMW_DRAW_FAILED uid:" + uid + "===cost:" + cost);
+					}
+					
+				}
+			break;	
+		case EVENT_PRESENTER_ADD:
+			uid = data.getIntValue("uid");
+			cost= data.getIntValue("coin");
+			int chargerId = data.getIntValue("chargerId");
+			if (cost != 0) {
+				for (int i = 0; i < 10; i++) {
+					try {
+						remain = gameCoinChange(uid, cost, EVENT_PRESENTER_ADD, chargerId, "Invite rebates,Recharger ID:"+chargerId);
+						break;
+					} catch (Exception e) {
+						log.error("EVENT_PAY",e);
+					}
+				}
+				if (remain == null) {
+					writeCoinFailed(uid, cost, EVENT_PRESENTER_ADD, chargerId, "Invite rebates,Recharger ID:"+chargerId);
+					log.warn("EVENT_PRESENTER_ADD_FAILED uid:" + uid + "===cost:" + cost);
+				}
+			}
+			break;	
+			
+			
 		default:
 			break;
 		}
@@ -243,43 +318,24 @@ public class EventProcesser {
 		gameUser DBUser=DBUsers.get(0);
 		int newCoin = DBUser.getCoin()+cost;
 		if (gameUserMapper.coinChange(uid, newCoin, DBUser.getVersion())!=1) {
-			throw new TransException("金币修改失败");
+			throw new TransException("coin_modify_failed");
 		}
-		writeBill(uid, cost, newCoin, type, tagId, reason, "", "");
+		writeBill(uid,DBUser.getNick(),DBUser.getAgentId(), cost, newCoin, type, tagId, reason, "", "");
 		return newCoin;
 	}
 
-	@Transactional
-	public int  dig_mineral(int uid, int type, int tagId,String reason) throws Exception {
-		List<userMineral> l=mineralMapper.getUserMineral(uid);
-		int num=0;
-		if(l.size()!=0) {
-			num=l.get(0).getMineral()/10;
-			if(num<100) {
-				num=100;
-			}
-			mineralChange(uid, -num, type, tagId, reason);
-			List<gameUser> DBUsers=gameUserMapper.userById(uid);
-			gameUser DBUser=DBUsers.get(0);
-			int newCoin = DBUser.getCoin()+num;
-			if (gameUserMapper.coinChange(uid, newCoin, DBUser.getVersion())!=1) {
-				throw new TransException("金币修改失败");
-			}
-			writeBill(uid, num, newCoin, type, tagId, reason, "", "");
-		}
-		return num;
-	}
 
 
 
 
 
-	public  void writeBill(int Uid,int Cost ,int Remain, int Type, int TagId,String Reason,String accountOut,String accountIn) throws Exception {	
-		Map<String, String> map =new HashMap<String, String>();
-		map=RedisData.userInfo(jedisClient, Uid);
+
+	public  void writeBill(int Uid,String nick,int agentId,int Cost ,int Remain, int Type, int TagId,String Reason,String accountOut,String accountIn) throws Exception {	
+
 		bills  bills= new  bills();
 		bills.setUid(Uid);
-		bills.setNick(map.get("nick"));
+		bills.setAgentId(agentId);
+		bills.setNick(nick);
 		bills.setRemain(Remain);
 		bills.setCost(Cost);
 		bills.setType(Type);
@@ -289,9 +345,7 @@ public class EventProcesser {
 		bills.setReason(Reason);
 		bills.setTime(new Date().getTime()/1000);
 		billsMapper.writeBills(bills);
-		map.clear();
-		map.put("coin", Remain+"");
-		RedisData.updateUser(jedisClient, Uid, map);
+		RedisData.updateUserField(jedisClient, Uid, "coin", Remain+"");
 	}
 
 	public void  mineralChange(int uid,int Num,int type,int tagId,String Reason) throws Exception  {

@@ -1,6 +1,6 @@
 package com.cointer.pojo.po;
 
-import java.math.BigDecimal;
+
 
 public class tradeOrder {
 	
@@ -10,7 +10,8 @@ public class tradeOrder {
 	private String  orderRemote="";
 	private Integer plat;
 	private Integer uid;
-	private BigDecimal cost;
+	private Integer agentId;
+	private float cost;
 	private String  currency="";
 	private Integer  coin;
 	private String  accountOut="";
@@ -49,10 +50,16 @@ public class tradeOrder {
 	public void setUid(Integer uid) {
 		this.uid = uid;
 	}
-	public BigDecimal getCost() {
+	public Integer getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(Integer agentId) {
+		this.agentId = agentId;
+	}
+	public float getCost() {
 		return cost;
 	}
-	public void setCost(BigDecimal cost) {
+	public void setCost(float cost) {
 		this.cost = cost;
 	}
 	public String getCurrency() {

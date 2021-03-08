@@ -14,26 +14,34 @@ import com.cointer.trans.TransExchange;
 @Mapper
 public interface tradeOrderMapper {
 
-	@Select("SELECT id,uid,freezeId,coin FROM tradeOrder WHERE orderLocal = #{orderLocal}")
+	
+	@Select("SELECT * FROM tradeorder WHERE id = #{orderId}")
+	public List<tradeOrder> tradeOrderById(int orderId);
+	
+	@Select("SELECT id,uid,freezeId,coin FROM tradeorder WHERE orderLocal = #{orderLocal}")
 	public List<tradeOrder> tradeOrderByOrderLocal(String orderLocal);  
 	
-	@Select("SELECT id,status  FROM tradeOrder WHERE orderRemote = #{orderRemote}")
+	@Select("SELECT id,status  FROM tradeorder WHERE orderRemote = #{orderRemote}")
 	public List<tradeOrder> OrderStatusByOrderRemote(String orderRemote); 
 	
 	
-	@Update("update tradeOrder set status=#{status} ,freezeId=#{freezeId} where id=#{id} and status=#{needStatus}")
+	@Update("update tradeorder set status=#{status} ,freezeId=#{freezeId} where id=#{id} and status=#{needStatus}")
 	public int  updateStatusWithFreezeId(int id,int needStatus, int status,int freezeId);
 	
-	@Update("update tradeOrder set status=#{status}  where id=#{id} and status=#{needStatus}")
-	public int  updateStatusByStatus(int id,int needStatus, int status);
-
-	@Update("update tradeOrder set status=#{status}  where id=#{id} ")
+	@Update("update tradeorder set status=#{status}  where orderLocal=#{order} and status=#{needStatus}")
+	public int  updateStatusByOrder(String order,int needStatus, int status);
+	
+	@Update("update tradeorder set status=#{status} ,cost=#{cost}  where orderLocal=#{order} and status=#{needStatus}")
+	public int  updateStatusCostByOrder(String order,float cost,int needStatus, int status);
+	
+	
+	@Update("update tradeorder set status=#{status}  where id=#{id} ")
 	public int  updateStatus(int id, int status);
     
-	@Update("update tradeOrder set status=#{status},orderRemote=#{orderRemote}  where id=#{id} and status=#{needStatus}")
-	public int  updateStatusWithOrderRemote(int id,int needStatus, int status,String orderRemote);
+	@Update("update tradeorder set orderRemote=#{orderRemote}  where id=#{id}")
+	public int  updateOrderRemote(int id,String orderRemote);
 
-	@Insert("insert into tradeOrder(id,uid,coin,cost,accountOut,accountIn,orderLocal,orderRemote,currency,orderType,time,status) values (#{id},#{uid},#{coin},#{cost},#{accountOut},#{accountIn},#{orderLocal},#{orderRemote},#{currency},#{orderType},#{time},#{status})")
+	@Insert("insert into tradeorder(id,uid,agentId,freezeId,coin,cost,accountOut,accountIn,orderLocal,orderRemote,currency,orderType,time,status) values (#{id},#{uid},#{agentId},#{freezeId},#{coin},#{cost},#{accountOut},#{accountIn},#{orderLocal},#{orderRemote},#{currency},#{orderType},#{time},#{status})")
 	public int  insertTradeOrder(tradeOrder tradeOrder);
 
 	

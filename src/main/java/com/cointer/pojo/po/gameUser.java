@@ -4,16 +4,17 @@ public class gameUser {
 	private  Integer    id;
 	private  String acc;
 	private  String pwd;
-	private  Integer    aid;
 	private  Integer    plat;
 	private  String phone="";
-	private  String email="";
-	private  String address="";
 	private  String nick="";
 	private  Integer    sex;
 	private  String photo="";
+	private  Integer    freezed;
+	private  Integer    isTourist;
+	private  Integer    isLeader;
 	private  Integer    coin;
-	private  String extractPwd="";
+	private  Integer    agentId;
+	private  Integer    presenterId;
 	private  Long   regTime;
 	private  Integer    version;
 	public Integer getId() {
@@ -34,12 +35,6 @@ public class gameUser {
 	public void setPwd(String pwd) {
 		this.pwd = pwd;
 	}
-	public Integer getAid() {
-		return aid;
-	}
-	public void setAid(Integer aid) {
-		this.aid = aid;
-	}
 	public Integer getPlat() {
 		return plat;
 	}
@@ -51,18 +46,6 @@ public class gameUser {
 	}
 	public void setPhone(String phone) {
 		this.phone = phone;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	public String getAddress() {
-		return address;
-	}
-	public void setAddress(String address) {
-		this.address = address;
 	}
 	public String getNick() {
 		return nick;
@@ -82,17 +65,41 @@ public class gameUser {
 	public void setPhoto(String photo) {
 		this.photo = photo;
 	}
+	public Integer getFreezed() {
+		return freezed;
+	}
+	public void setFreezed(Integer freezed) {
+		this.freezed = freezed;
+	}
+	public Integer getIsTourist() {
+		return isTourist;
+	}
+	public void setIsTourist(Integer isTourist) {
+		this.isTourist = isTourist;
+	}
+	public Integer getIsLeader() {
+		return isLeader;
+	}
+	public void setIsLeader(Integer isLeader) {
+		this.isLeader = isLeader;
+	}
 	public Integer getCoin() {
 		return coin;
 	}
 	public void setCoin(Integer coin) {
 		this.coin = coin;
 	}
-	public String getExtractPwd() {
-		return extractPwd;
+	public Integer getAgentId() {
+		return agentId;
 	}
-	public void setExtractPwd(String extractPwd) {
-		this.extractPwd = extractPwd;
+	public void setAgentId(Integer agentId) {
+		this.agentId = agentId;
+	}
+	public Integer getPresenterId() {
+		return presenterId;
+	}
+	public void setPresenterId(Integer presenterId) {
+		this.presenterId = presenterId;
 	}
 	public Long getRegTime() {
 		return regTime;
@@ -106,7 +113,7 @@ public class gameUser {
 	public void setVersion(Integer version) {
 		this.version = version;
 	}
-	
+
 	
 
 }

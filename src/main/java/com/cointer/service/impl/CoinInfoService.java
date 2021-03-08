@@ -12,12 +12,15 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.cointer.eventer.EventProcesser;
 import com.cointer.mapper.billsMapper;
 import com.cointer.mapper.freezeMapper;
 import com.cointer.mapper.gameUserMapper;
 import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.vo.billsInfo;
 import com.cointer.pojo.vo.freezeInfo;
+import com.cointer.redis.IJedisClient;
+import com.cointer.redis.RedisData;
 import com.cointer.service.ICoinInfoService;
 import com.cointer.service.IExchangeService;
 import com.github.pagehelper.PageHelper;
@@ -38,8 +41,8 @@ public class CoinInfoService implements ICoinInfoService {
 	@Autowired
 	private   IExchangeService ExchangeService;
 	// 注入Jedis接口用来操作缓存
-	//	@Autowired
-	//	private   IJedisClient jedisClient;
+		@Autowired
+		private   IJedisClient jedisClient;
 
 	@Autowired
 	private   freezeMapper freezeMapper;
@@ -61,7 +64,35 @@ public class CoinInfoService implements ICoinInfoService {
 		return  new PageInfo<>(freezes);
 	}
 
+	@Override
+	public Object currCoin(String  RequestJsonData) throws Exception {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);	
+		int uid=reqData.getIntValue("uid");
+		String coin=RedisData.userField(jedisClient, uid, "coin");
+		JSONObject resData=new JSONObject();
+		resData.put("coin", coin);
+		return resData;
+		}
+	@Override
+	public Object personalInfo(String  RequestJsonData) throws Exception {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);
+	
+		int uid=reqData.getIntValue("uid");
 
+		List<billsInfo> bills=billsMapper.billsListByTypes(uid, EventProcesser.EVENT_REDGREENBALL_DRAW,EventProcesser.EVENT_BENZBMW_DRAW);
+		
+		String isLeader=RedisData.userField(jedisClient, uid, "isLeader");
+		String agentId=RedisData.userField(jedisClient, uid, "agentId");
+		
+		String url=RedisData.getUri(jedisClient, 0, "shareUrl");
+		
+		JSONObject resData=new JSONObject();
+		resData.put("bills", bills);
+		resData.put("isLeader", isLeader);
+		resData.put("shareUrl", url+"?agentId="+agentId+"&presenterId="+uid);
+		return resData;
+		}
+	
 	@Override
 	public Object billsList(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
@@ -78,7 +109,7 @@ public class CoinInfoService implements ICoinInfoService {
 		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
 		gameUser DBUser=DBUsers.get(0);
 		int Coin = DBUser.getCoin();
-		String extractPwd =  DBUser.getExtractPwd();
+		String extractPwd =  DBUser.getPwd();
 		
 		JSONObject resData=new JSONObject();
 		resData.put("bills", new PageInfo<>(bills));

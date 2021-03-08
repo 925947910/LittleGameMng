@@ -26,4 +26,6 @@ public interface StatusCode {
 	int								ORDER_NOEXSIST = 220;
 	int								DEAL_FAILED = 221;
 	int								TRANS_ERROR = 222;
+	int								LAID_FAILED = 223;
+	int								GET_DRAW_FAILED = 224;
 }

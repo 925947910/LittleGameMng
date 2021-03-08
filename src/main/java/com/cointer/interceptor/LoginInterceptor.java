@@ -2,6 +2,7 @@ package com.cointer.interceptor;
 
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +31,8 @@ public class LoginInterceptor extends BaseInterceptor implements HandlerIntercep
 	private static final Set<String> NOT_INTERCEPT_URI = new HashSet<>();//不拦截的URI
 
 	static {
-		NOT_INTERCEPT_URI.add("/GameUser/user/registOrLogin");
+		NOT_INTERCEPT_URI.add("/GameUser/user/regist");
+		NOT_INTERCEPT_URI.add("/GameUser/user/login");
 	}
 	@Autowired
 	private   IJedisClient jedisClient;
@@ -49,7 +51,8 @@ public class LoginInterceptor extends BaseInterceptor implements HandlerIntercep
 			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆:"+uri, null));
 			return false;
 		}
-		if(RedisData.authSession(jedisClient, session)==null) {
+		Map<String,String> sessionData=RedisData.authSession(jedisClient, session);
+		if(sessionData==null||sessionData.size()==0) {
 			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆:"+uri, null));
 			return false;
 		}

@@ -43,11 +43,11 @@ public abstract class BaseController {
 				return failed(StatusCode.TRANS_ERROR, ((TransException) excpetion).getMsg(), null);
 			}else {
 				log.error("Error in Service:"+Service.getClass().getName()+"func:"+func, e);
-				return failed(StatusCode.FAILED, "系统异常", null);
+				return failed(StatusCode.FAILED, "SystemException", null);
 			}
 		}catch (Exception e) {
 			log.error("Error in Service:"+Service.getClass().getName()+"func:"+func, e);
-			return failed(StatusCode.FAILED, "系统异常", null);
+			return failed(StatusCode.FAILED, "SystemException", null);
 		}
 		
 	}

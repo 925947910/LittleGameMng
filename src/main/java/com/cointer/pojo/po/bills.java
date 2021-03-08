@@ -3,6 +3,7 @@ package com.cointer.pojo.po;
 public class bills {
 	private   Integer  id;
 	private   Integer uid;
+	private   Integer agentId;
 	private   String nick="";
 	private   Integer remain;
 	private   Integer cost;
@@ -23,6 +24,12 @@ public class bills {
 	}
 	public void setUid(Integer uid) {
 		this.uid = uid;
+	}
+	public Integer getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(Integer agentId) {
+		this.agentId = agentId;
 	}
 	public String getNick() {
 		return nick;

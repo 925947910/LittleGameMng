@@ -4,14 +4,17 @@ package com.cointer.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONObject;
 import com.cointer.constant.StatusCode;
 import com.cointer.controller.base.BaseController;
 import com.cointer.exception.ServiceException;
 import com.cointer.exception.TransException;
+import com.cointer.pojo.po.gameUser;
 import com.cointer.service.IUserService;
 
 
@@ -27,13 +30,33 @@ public class UserController extends  BaseController{
 
 	
 
-	@RequestMapping("/registOrLogin")
+	
+	 @RequestMapping("/regist")//注册
+	    public String register(Model model,gameUser gameUser){
+		 
+		 JSONObject obj= (JSONObject) JSONObject.toJSON(gameUser); 
+		 String resultStr= serviceRun(UserService, "regist", obj.toString());
+		 obj=JSONObject.parseObject(resultStr);
+		 if ((boolean)obj.get("succ")==true){
+			 model.addAttribute("message", obj.getJSONObject("param").getString("message"));
+		     model.addAttribute("gameUrl", obj.getJSONObject("param").getString("gameUrl"));
+		 }else{
+			 model.addAttribute("message", obj.getString("message"));
+		     model.addAttribute("gameUrl", "");
+		 }
+		 
+		 return "user_regist_succ";
+				 
+				
+	    }
+	
+	
+	@RequestMapping("/login")
 	@ResponseBody
 	public String login(@RequestParam String param) {
-	return 	serviceRun(UserService, "registOrLogin", param);
+	return 	serviceRun(UserService, "login", param);
  
 	}
-
 	@RequestMapping("/addPhoto")
 	@ResponseBody
 	public String addPhoto(@RequestParam String param) {
