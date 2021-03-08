@@ -1,6 +1,7 @@
 package com.cointer.task;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -119,6 +120,7 @@ public class SchedulingRedGreenBall {
 				jsonEvent.put("E", EventProcesser.EVENT_REDGREENBALL_DRAW);
 				jsonEvent.put("uid", uid);
 				jsonEvent.put("result", result);
+				jsonEvent.put("issue", issue);
 				RedisData.addEvent(jedisClient, uid, jsonEvent.toString());
 			}
     		
@@ -163,9 +165,9 @@ public class SchedulingRedGreenBall {
          result.put("bet8", "0");
          result.put("bet9", "0");
          result.put("bet0", "0");
-         result.put("betRed", "0");
-         result.put("betGreen", "0");
-         result.put("betPurple", "0");
+         result.put("betred", "0");
+         result.put("betgreen", "0");
+         result.put("betpurple", "0");
          result.put("issue", issue+"");
          result.put("betStart", nowSec+"");
          result.put("betEnd", (nowSec+150)+"");
@@ -193,39 +195,29 @@ public class SchedulingRedGreenBall {
     	int bet8=	Integer.parseInt(issueMap.get("bet8"));
     	int bet9=	Integer.parseInt(issueMap.get("bet9"));
     	
-    	int betRed=	Integer.parseInt(issueMap.get("betRed"));
-    	int betGreen=	Integer.parseInt(issueMap.get("betGreen"));
-    	int betPurple=	Integer.parseInt(issueMap.get("betPurple"));
+    	int betRed=	Integer.parseInt(issueMap.get("betred"));
+    	int betGreen=	Integer.parseInt(issueMap.get("betgreen"));
+    	int betPurple=	Integer.parseInt(issueMap.get("betpurple"));
     	int total=bet0+bet1+bet2+bet3+bet4+bet5+bet6+bet7+bet8+bet9+betRed+betGreen+betPurple;
 
     	int price0=bet0*9+
     			(int)((double)betRed*1.5)+
     			(int)((double)betPurple*4.5);
-    	int price1=bet1*9+
-    			betGreen*2+
-    			(int)((double)betGreen*1.5);
-		int price2=bet2*9+
-				betRed*2+
-				(int)((double)betRed*1.5);
-		int price3=bet3*9+betGreen*2+
-				(int)((double)betGreen*1.5);
-		int price4=bet4*9+betRed*2+
-				(int)((double)betRed*1.5);
+    	int price1=bet1*9+betGreen*2;
+		int price2=bet2*9+betRed*2;
+		int price3=bet3*9+betGreen*2;
+		int price4=bet4*9+betRed*2;
 		int price5=bet5*9+
 				(int)((double)betGreen*1.5)+
 				(int)((double)betPurple*4.5);
-		int price6=bet6*9+betRed*2+
-				(int)((double)betRed*1.5);
-		int price7=bet7*9+betGreen*2+
-				(int)((double)betGreen*1.5);
-		int price8=bet8*9+betRed*2+
-				(int)((double)betRed*1.5);
-		int price9=bet9*9+betGreen*2+
-				(int)((double)betGreen*1.5);
+		int price6=bet6*9+betRed*2;
+		int price7=bet7*9+betGreen*2;
+		int price8=bet8*9+betRed*2;
+		int price9=bet9*9+betGreen*2;
 		
       
 		
-		JSONArray  priceArray=new JSONArray();
+		List<String> resultList=new ArrayList<String>();
 		int [] prices=new int[] {price0,price1,price2,price3,price4,price5,price6,price7,price8,price9};
 		int [] pricesort=new int[] {price0,price1,price2,price3,price4,price5,price6,price7,price8,price9};
 		Arrays.sort(pricesort);
@@ -233,24 +225,20 @@ public class SchedulingRedGreenBall {
 
 		rbBall rbBall=rbBallList.get(0);
 		Resutl=rbBall.getLotteryResult();
-		if(Resutl!=null){
-			price=prices[Integer.parseInt(Resutl)];
-		}else{
-
+		
+		if(Resutl==null){
 			for (int i = 0; i < prices.length; i++) {
-				JSONObject obj=new JSONObject();
 				int p=prices[i];
-				obj.put("bet", i+"");
-				obj.put("price",p);
 				if(p==price){
-					priceArray.add(obj); 
+					resultList.add(i+""); 
 				}
 			}
 			Random rand = new Random();
-			int index=rand.nextInt(priceArray.size());
-			Resutl = priceArray.getJSONObject(index).getString("bet");
+			int index=rand.nextInt(resultList.size());
+			Resutl = resultList.get(index);
 		}
-
+		 price=prices[Integer.parseInt(Resutl)];
+		 
     	 issueMap.put("lotteryResult", Resutl+"");
     	 issueMap.put("lotteryPool", total+"");
     	 issueMap.put("lotteryPrice", price+"");
