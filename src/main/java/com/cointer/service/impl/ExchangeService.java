@@ -37,6 +37,7 @@ import com.cointer.mapper.freezeMapper;
 import com.cointer.mapper.gameUserMapper;
 import com.cointer.mapper.tradeOrderMapper;
 import com.cointer.pojo.dto.tokenMapChargeDto;
+import com.cointer.pojo.dto.chargeCallBack1Dto;
 import com.cointer.pojo.dto.extractDto;
 import com.cointer.pojo.dto.freezeDto;
 import com.cointer.pojo.po.gameUser;
@@ -89,7 +90,7 @@ public class ExchangeService  implements IExchangeService{
 		JSONObject resData=new JSONObject();
 		int uid =reqData.getIntValue("uid");
 		int channel =reqData.getIntValue("channel");
-		String cost=reqData.getString("cost");
+		int cost=reqData.getIntValue("cost");
 		String userip=reqData.getString("userip");
 		List <gameUser> DBUsers=gameUserMapper.userById(uid);
 		if(DBUsers==null || DBUsers.size()==0) {
@@ -97,7 +98,7 @@ public class ExchangeService  implements IExchangeService{
 		}
 		gameUser gameUser=DBUsers.get(0);
 		String orderid=CommTypeUtils.getOrderNo("OrderIn");
-		JSONObject ReqParam=  new JSONObject();
+		
 		String notify_url=RedisData.getUri(jedisClient,0,"chargeCallbackUrl");
 		String return_url=RedisData.getUri(jedisClient,0,"chargeSuccUrl");
 		String charge_url=RedisData.getUri(jedisClient,0,"chargeUrl");
@@ -109,25 +110,53 @@ public class ExchangeService  implements IExchangeService{
 		format.setTimeZone(TimeZone.getTimeZone("GMT"));
 		int timestamp=(int)(d.getTime()/1000);
 
-		ReqParam.put("uid",customerId);
-		ReqParam.put("orderid", orderid);
-		ReqParam.put("channel", channel);
-		ReqParam.put("notify_url", notify_url);
-		ReqParam.put("return_url", return_url);
-		ReqParam.put("amount", cost);
-		ReqParam.put("userip", userip);
-		ReqParam.put("timestamp", timestamp);
+//		商户 ID            mchId        是         long      20001222                        分配的商户号
+//		应用 ID            appId        是       String(32)  0ae8be35ff634e2abe94f5f32f6d5c4f 该商户创建的应用对应的 ID 
+//		支付产品 ID           productId     是          int      8000                            支付产品 ID 
+//		商户订单号           mchOrderNo      是       String(30)  20160427210604000490            商户生成的订单号
+//		币种             currency      是       String(3)   INR                             三位货币代码,卢比币:INR 
+//		支付金额             amount        是          int      100                             支付金额,单位盧比
+//		客户端 IP           clientIp      否       String(32)  210.73.10.148                   客户端 IP 地址
+//		设备              device       否       String(64)  ios10.3.1                       客户端设备
+//		支付结果前端跳              returnUrl     否      String(128)  http://domain/return.htm 
+//				支付结果后台回              notifyUrl     是      String(128)  http://domain/notify.htm 
+//				商品主题                                        subject      是       String(64)  测试商品名称                          商品主题
+//				商品描述信息                               body         是      String(256)  测试商品描述                          商品描述信息
+//				扩展参数 1           param1        否       String(64)                                  必填，请填入汇款人银行代
+//				扩展参数 2           param2        否       String(64)                                  支付中心回调时会原样返回
+//				sign        是       String(32) 
+//				签名                                               3AD6                            签名值，详见签名算法 
+		
+		JSONObject ReqParam=  new JSONObject();
+		ReqParam.put("mchId",customerId);
+		ReqParam.put("appId","bigWinner");
+		ReqParam.put("productId",100);
+		ReqParam.put("mchOrderNo", orderid);
+		ReqParam.put("currency", "INR");
+		ReqParam.put("amount", cost*100);
+		ReqParam.put("notifyUrl", notify_url);
+		ReqParam.put("subject", "coin_add");
+		ReqParam.put("body", "add_coin:"+cost);
+		
+		
+
 
 		JSONObject custom=new JSONObject();
 		custom.put("uid", uid);
-		custom.put("coin", (int)Float.parseFloat(cost));
-		ReqParam.put("custom", custom.toString());
-		ReqParam.put("lang", "en");
+		custom.put("coin", cost);
+		ReqParam.put("param1", custom.toString());
+		
 		Map<String, String> jsonMap = JSONObject.toJavaObject(ReqParam, Map.class);
 
 		String sign=MD5Util.paramsSort(jsonMap)+"&key="+goldKey;
+		
 		sign= MD5Util.getMD5(sign).toUpperCase();
 		ReqParam.put("sign", sign);
+		String params=ReqParam.toString();
+		
+		ReqParam.clear();
+		ReqParam.put("params", params);
+		
 		String	JsonAuth;
 		try {
 			HttpClientUtil  client=HttpClientUtil.getInstance();
@@ -141,53 +170,82 @@ public class ExchangeService  implements IExchangeService{
 		}
 
 		JSONObject AuthData = JSONObject.parseObject(JsonAuth, Feature.OrderedField);
-		int status=AuthData.getIntValue("status");
-		String remoteSign=AuthData.getString("sign");
-		String resultData=AuthData.getString("result");
-		if(status!=SUCC_) {
+		String status=AuthData.getString("retCode");
+		if(!status.equals("SUCCESS")) {
+			String retMsg=AuthData.getString("retMsg");
+			System.out.println("!!!!!!!!!!retMsg:"+retMsg);
 			throw new ServiceException(StatusCode.FAILED,"request_failed  status:"+status, null);
 		}
-
+		
+		String remoteSign=AuthData.getString("sign");
+		String transactionid=AuthData.getString("payOrderId");
+		String payParams=AuthData.getString("payParams");
+		
 		Map<String, String> JsonAuthMap = JSONObject.parseObject(JsonAuth, Map.class);
+		
 		JsonAuthMap.remove("sign");
-		JsonAuthMap.put("result", resultData);
+		JsonAuthMap.put("payParams", payParams);
 		sign=MD5Util.paramsSort(JsonAuthMap)+"&key="+goldKey;
-		sign= sign.replaceAll("/", "\\\\/");
+//		sign= sign.replaceAll("/", "\\\\/");
 		sign= MD5Util.getMD5(sign).toUpperCase();
 
 		if(!remoteSign.equals(sign)){
 			throw new ServiceException(StatusCode.FAILED,"sign_error remoteSign:"+remoteSign+"****sign:"+sign, null);
 		}
 
-		String transactionid=AuthData.getJSONObject("result").getString("transactionid");
-		String payurl=AuthData.getJSONObject("result").getString("payurl");
-		TransExchange.tranGenOrderIn(uid,gameUser.getAgentId(),orderid,transactionid, "", "", Float.parseFloat(cost), (int)Float.parseFloat(cost), "INR");	
+		String payurl=AuthData.getJSONObject("payParams").getString("payUrl");
+		TransExchange.tranGenOrderIn(uid,gameUser.getAgentId(),orderid,transactionid, "", "", cost, cost, "INR");	
 		resData.put("transactionid", transactionid);
 		resData.put("payurl", payurl);
 
 		return resData;
 	}
 	@Override
-	public void chargeCallBack(int status,String resultData,String remoteSign)throws Exception{
-		JSONObject AuthData = JSONObject.parseObject(resultData, Feature.OrderedField);
-		Map<String, String> JsonAuthMap = new HashMap<String,String>();
+	public void chargeCallBack(chargeCallBack1Dto chargeCallBack1Dto)throws Exception{
+		
+//	      支付订单号             payOrderId      是       String(30)  P20160427210604000490         支付中心生成的订单号
+//	       商户 ID             mchId         是       String(30)  20001222                      支付中心分配的商户号
+//	       应用 ID             appId         是       String(32)  0ae8be35ff634e2abe94f5f32f6d5 该商户创建的应用对应的
+//	     支付产品 ID            productId      是          int      8001                          支付产品 ID 
+//	     商户订单号            mchOrderNo       是       String(30)  20160427210604000490          商户生成的订单号
+//	      支付金额              amount         是          int      100                           支付金额,单位盧比
+//	                                                                                         支付状态,0-订单生成,1-支
+//	        状态               status        是          int 
+//	                                                           1                             付中,2- 支付成功,3-业务处
+//	                                                                                         理完成(成功),5-支付失败
+//	                                                           wx2016081611532915ae15beab0
+//	     渠道订单号          channelOrderNo     否       String(64)                                三方支付渠道订单号 
+//	                                                           167 893571 
+//	                                                           {“bank_type”:”CMB_DEBIT                   
+//	     渠道数据包            channelAttach    否        String     ”,” 
+//	                                                           trade_type”:”pay.weixin.microp 支付渠道数据包 
+//	                                                           ay”} 
+//
+//	     扩展参数 1             param1         否       String(64)                                支付中心回调时会原样返
+//	     扩展参数 2             param2         否       String(64)                                支付中心回调时会原样                                                   
+//	   支付成功时间             paySuccTime      是         long                                    精确到毫秒                         
+//	      通知类型              backType       是          int                                    通知类型，1-前台通知，2-
+//	                                                           1                             后台通知
+//	                                                           C380BEC2BFD727A4B6845133
+//	        签名                sign         是       String(32)                                签名值，详见签名算法
+		
+		JSONObject AuthData = (JSONObject) JSONObject.toJSON(chargeCallBack1Dto);
+		Map<String, String> JsonAuthMap = JSONObject.toJavaObject(AuthData, Map.class);
 
 		String goldKey=RedisData.getConf(jedisClient,0,"goldKey");
-		JsonAuthMap.put("result", resultData);
-		JsonAuthMap.put("status", status+"");
 		String sign=MD5Util.paramsSort(JsonAuthMap)+"&key="+goldKey;
-		sign= sign.replaceAll("/", "\\\\/");
+//		sign= sign.replaceAll("/", "\\\\/");
 		sign= MD5Util.getMD5(sign).toUpperCase();
-		if(!remoteSign.equals(sign)){
-			throw new ServiceException(StatusCode.FAILED,"sign_error remoteSign:"+remoteSign+"****sign:"+sign, null);
+		if(!chargeCallBack1Dto.getSign().equals(sign)){
+			throw new ServiceException(StatusCode.FAILED,"sign_error remoteSign:"+chargeCallBack1Dto.getSign()+"****sign:"+sign, null);
 		}
 		try {
-			if(status==SUCC_) {
-				JSONObject	custom	=JSONObject.parseObject(AuthData.getString("custom"));
-				int PresenterId=TransExchange.tranChargeSucc(AuthData.getString("orderid"),custom.getIntValue("uid"),custom.getIntValue("coin"),AuthData.getFloatValue("real_amount"));
+			if(chargeCallBack1Dto.getStatus()==3) {
+				JSONObject	custom	=JSONObject.parseObject(chargeCallBack1Dto.getParam1());
+				int PresenterId=TransExchange.tranChargeSucc(chargeCallBack1Dto.getMchOrderNo(),custom.getIntValue("uid"),custom.getIntValue("coin"),AuthData.getFloatValue("real_amount"));
 			  
 			}else {
-				TransExchange.tranChargeFailed(AuthData.getString("orderid"));
+				TransExchange.tranChargeFailed(chargeCallBack1Dto.getMchOrderNo());
 			}
 		} 
 		catch (TransException TransException) {

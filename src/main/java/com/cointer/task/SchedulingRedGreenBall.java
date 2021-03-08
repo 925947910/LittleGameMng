@@ -163,9 +163,9 @@ public class SchedulingRedGreenBall {
          result.put("bet8", "0");
          result.put("bet9", "0");
          result.put("bet0", "0");
-         result.put("betRed", "0");
-         result.put("betGreen", "0");
-         result.put("betPurple", "0");
+         result.put("betred", "0");
+         result.put("betgreen", "0");
+         result.put("betpurple", "0");
          result.put("issue", issue+"");
          result.put("betStart", nowSec+"");
          result.put("betEnd", (nowSec+150)+"");
@@ -193,9 +193,9 @@ public class SchedulingRedGreenBall {
     	int bet8=	Integer.parseInt(issueMap.get("bet8"));
     	int bet9=	Integer.parseInt(issueMap.get("bet9"));
     	
-    	int betRed=	Integer.parseInt(issueMap.get("betRed"));
-    	int betGreen=	Integer.parseInt(issueMap.get("betGreen"));
-    	int betPurple=	Integer.parseInt(issueMap.get("betPurple"));
+    	int betRed=	Integer.parseInt(issueMap.get("betred"));
+    	int betGreen=	Integer.parseInt(issueMap.get("betgreen"));
+    	int betPurple=	Integer.parseInt(issueMap.get("betpurple"));
     	int total=bet0+bet1+bet2+bet3+bet4+bet5+bet6+bet7+bet8+bet9+betRed+betGreen+betPurple;
 
     	int price0=bet0*9+

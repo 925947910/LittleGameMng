@@ -4,6 +4,8 @@ package com.cointer.service;
 
 import org.springframework.stereotype.Service;
 
+import com.cointer.pojo.dto.chargeCallBack1Dto;
+
 
 
 @Service
@@ -16,7 +18,7 @@ public interface IExchangeService   {
 
 	Object extractOrder(String RequestJsonData) throws Exception;
 
-	void chargeCallBack(int status,String result,String sign)throws Exception;
+	void chargeCallBack(chargeCallBack1Dto chargeCallBack1Dto)throws Exception;
 	void extractCallBack(int status, String resultData, String remoteSign) throws Exception;
 
 	Object verifyExtract(String RequestJsonData) throws Exception;

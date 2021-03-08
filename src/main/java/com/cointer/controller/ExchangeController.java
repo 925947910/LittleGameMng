@@ -18,6 +18,7 @@ import com.cointer.constant.StatusCode;
 import com.cointer.controller.base.BaseController;
 import com.cointer.exception.ServiceException;
 import com.cointer.exception.TransException;
+import com.cointer.pojo.dto.chargeCallBack1Dto;
 import com.cointer.redis.IJedisClient;
 import com.cointer.service.IExchangeService;
 
@@ -55,10 +56,10 @@ public class ExchangeController extends  BaseController{
 	
 	@RequestMapping("/chargeCallBack")
 	@ResponseBody
-	public String chargeCallBack(@RequestParam int status,String result,String sign) {
+	public String chargeCallBack(@RequestParam chargeCallBack1Dto chargeCallBack1Dto ) {
 		String res="success";
 		  try {
-			  ExchangeService.chargeCallBack(status,result,sign);
+			  ExchangeService.chargeCallBack(chargeCallBack1Dto);
 		} catch (Exception e) {
 			// TODO: handle exception
 			  res="failed";
