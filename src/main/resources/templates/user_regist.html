@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<!-- Required meta tags-->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+
+<!-- Title Page-->
+<title>user registration</title>
+
+<!-- Icons font CSS-->
+<link
+	th:href="@{/static/js/vendor/mdi-font/css/material-design-iconic-font.min.css}"
+	rel="stylesheet" media="all">
+<link
+	th:href="@{/static/js/vendor/font-awesome-4.7/css/font-awesome.min.css}"
+	rel="stylesheet" media="all">
+<!-- Font special for pages-->
+<link
+	href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i"
+	rel="stylesheet">
+
+<!-- Vendor CSS-->
+<link th:href="@{/static/js/vendor/select2/select2.min.css}"
+	rel="stylesheet" media="all">
+<link th:href="@{/static/js/vendor/datepicker/daterangepicker.css}"
+	rel="stylesheet" media="all">
+
+<!-- Main CSS-->
+<link th:href="@{/static/css/main1.css}" rel="stylesheet" media="all">
+</head>
+
+<body>
+	<div class="page-wrapper bg-gra-02 p-t-130 p-b-100 font-poppins">
+		<div class="wrapper wrapper--w680">
+			<div class="card card-4">
+				<div class="card-body">
+					<h2 class="title">user registration</h2>
+					<form method="POST" onsubmit="return checkForm()"
+						th:action="@{/user/regist}">
+						 <input type="hidden" name="agentId" th:value="${agentId}"/>
+						  <input type="hidden" name="presenterId" th:value="${presenterId}"/>
+						
+						
+						<div class="row row-space">
+							<div class="col-2">
+								<div class="input-group">
+									<label class="label">PhoneNumber</label> <input id="phone"
+										class="input--style-4" type="text" name="phone"
+										onfocus="shoeTips('phone_hint','Please enter your mobile phone number')"
+										onblur="phoneHide()" onkeyup="phoneCheck()"> <span
+										id="phone_hint"></span>
+								</div>
+							</div>
+							<div class="col-2">
+								<div class="input-group">
+									<label class="label">NickName</label> <input id="realNamed"
+										class="input--style-4" type="text" name="nick"
+										onfocus="shoeTips('realNames','Please enter your nickname')"
+										onblur="realName_hide()" onkeyup="realName()"> <span
+										id="realNames"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="row row-space">
+							<div class="col-2">
+								<div class="input-group">
+									<label class="label">PassWord</label> <input id="pass_value"
+										onfocus="shoeTips('pass_hint','Password length cannot be less than six characters')"
+										onblur="pass_hide()" onkeyup="checkPass()"
+										class="input--style-4" type="password" name="pwd"> <span
+										id="pass_hint"></span>
+								</div>
+							</div>
+							<div class="col-2">
+								<div class="input-group">
+									<label class="label">RetypePassword</label> <input id="pass_value2"
+										onfocus="shoeTips('pass_hint2','Password length cannot be less than six characters')"
+										onblur="pass_hide2()" onkeyup="checkRepeatPass()"
+										class="input--style-4" type="password" name="pwd2"> <span
+										id="pass_hint2"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="row row-space">
+							
+							<div class="col-2">
+								<div class="input-group">
+									<label class="label">Gender</label>
+									<div class="p-t-10">
+										<label class="radio-container m-r-45">male <input
+											type="radio" checked="checked" name="sex" value=1>
+											<span class="checkmark"></span>
+										</label> <label class="radio-container">female <input type="radio"
+											name="sex" value=0> <span class="checkmark"></span>
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="p-t-15">
+							<button class="btn btn--radius-2 btn--blue" type="submit">submit</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Jquery JS-->
+	<script th:src="@{/static/js/vendor/jquery/jquery.min.js}"></script>
+	<!-- Vendor JS-->
+	<script th:src="@{/static/js/vendor/select2/select2.min.js}"></script>
+	<script th:src="@{/static/js/vendor/datepicker/moment.min.js}"></script>
+	<script th:src="@{/static/js/vendor/datepicker/daterangepicker.js}"></script>
+
+	<script>
+		function shoeTips(spanId, tips) {
+			var span = document.getElementById(spanId);
+			span.innerHTML = tips;
+		}
+		/** * 校验用户名 */
+		function hint() {
+			var value = document.getElementById("values").value;
+			var hint = document.getElementById("hint");
+			if (value.length < 6) {
+				hint.innerHTML = "The user name is too short";
+				return false;
+			} else {
+				hint.innerHTML = "User name qualified";
+				return true;
+			}
+		}
+		function hint_hide() {
+			var hint = document.getElementById("hint");
+			hint.innerHTML = "";
+		}
+		/** * 校验密码 */
+		function checkPass() {
+			var value = document.getElementById("pass_value").value;
+			var hint = document.getElementById("pass_hint");
+			if (value.length < 6) {
+				hint.innerHTML = "Password too short";
+				return false;
+			} else {
+				hint.innerHTML = "Password is qualified";
+				return true;
+			}
+		}
+		/** * 校验密码 */
+		function checkRepeatPass() {
+			var value1 = document.getElementById("pass_value").value;
+			var value = document.getElementById("pass_value2").value;
+			var hint = document.getElementById("pass_hint2");
+			if (value != value1) {
+				hint.innerHTML = "Duplicate password error";
+				return false;
+			} else {
+				hint.innerHTML = "Password is correct";
+				return true;
+			}
+		}
+		function pass_hide() {
+			var hint = document.getElementById("pass_hint");
+			hint.innerHTML = "";
+		}
+		function pass_hide2() {
+			var hint = document.getElementById("pass_hint2");
+			hint.innerHTML = "";
+		}
+		/** * 校验真实姓名*/
+		function realName() {
+			var value = document.getElementById("realNamed").value;
+			var hint = document.getElementById("realNames");
+			if (value.length < 2) {
+				hint.innerHTML = "Nickname is too short";
+				return false;
+			} else {
+				hint.innerHTML = "Nickname right";
+				return true;
+			}
+		}
+		function realName_hide() {
+			var hint = document.getElementById("realNames");
+			hint.innerHTML = "";
+		}
+
+		/** * 校验手机号 */
+		function checkMobile(strMobile) {
+			// 13588888888
+		var phones = {
+				'ar-DZ' : /^(\+?213|0)(5|6|7)\d{8}$/,
+				'ar-SY' : /^(!?(\+?963)|0)?9\d{8}$/,
+				'ar-SA' : /^(!?(\+?966)|0)?5\d{8}$/,
+				'en-US' : /^(\+?1)?[2-9]\d{2}[2-9](?!11)\d{6}$/,
+				'cs-CZ' : /^(\+?420)? ?[1-9][0-9]{2} ?[0-9]{3} ?[0-9]{3}$/,
+				'de-DE' : /^(\+?49[ \.\-])?([\(]{1}[0-9]{1,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/,
+				'da-DK' : /^(\+?45)?(\d{8})$/,
+				'el-GR' : /^(\+?30)?(69\d{8})$/,
+				'en-AU' : /^(\+?61|0)4\d{8}$/,
+				'en-GB' : /^(\+?44|0)7\d{9}$/,
+				'en-HK' : /^(\+?852\-?)?[569]\d{3}\-?\d{4}$/,
+				'en-IN' : /^(\+?)?[789]\d{9}$/,
+				'en-NZ' : /^(\+?64|0)2\d{7,9}$/,
+				'en-ZA' : /^(\+?27|0)\d{9}$/,
+				'en-ZM' : /^(\+?26)?09[567]\d{7}$/,
+				'es-ES' : /^(\+?34)?(6\d{1}|7[1234])\d{7}$/,
+				'fi-FI' : /^(\+?358|0)\s?(4(0|1|2|4|5)?|50)\s?(\d\s?){4,8}\d$/,
+				'fr-FR' : /^(\+?33|0)[67]\d{8}$/,
+				'he-IL' : /^(\+972|0)([23489]|5[0248]|77)[1-9]\d{6}/,
+				'hu-HU' : /^(\+?36)(20|30|70)\d{7}$/,
+				'it-IT' : /^(\+?39)?\s?3\d{2} ?\d{6,7}$/,
+				'ja-JP' : /^(\+?81|0)\d{1,4}[ \-]?\d{1,4}[ \-]?\d{4}$/,
+				'ms-MY' : /^(\+?6?01){1}(([145]{1}(\-|\s)?\d{7,8})|([236789]{1}(\s|\-)?\d{7}))$/,
+				'nb-NO' : /^(\+?47)?[49]\d{7}$/,
+				'nl-BE' : /^(\+?32|0)4?\d{8}$/,
+				'nn-NO' : /^(\+?47)?[49]\d{7}$/,
+				'pl-PL' : /^(\+?48)? ?[5-8]\d ?\d{3} ?\d{2} ?\d{2}$/,
+				'pt-BR' : /^(\+?55|0)\-?[1-9]{2}\-?[2-9]{1}\d{3,4}\-?\d{4}$/,
+				'pt-PT' : /^(\+?351)?9[1236]\d{7}$/,
+				'ru-RU' : /^(\+?7|8)?9\d{9}$/,
+				'sr-RS' : /^(\+3816|06)[- \d]{5,9}$/,
+				'tr-TR' : /^(\+?90|0)?5\d{9}$/,
+				'vi-VN' : /^(\+?84|0)?((1(2([0-9])|6([2-9])|88|99))|(9((?!5)[0-9])))([0-9]{7})$/,
+				'zh-CN' : /^(\+?0?86\-?)?1[345789]\d{9}$/,
+				'zh-TW' : /^(\+?886\-?|0)?9\d{8}$/
+			};
+
+			// var regu = /^[1][345678][0-9]{9}$/;
+			var regu=phones['en-IN'];
+			var re = new RegExp(regu);
+			if (re.test(strMobile)) {
+				return true;
+			} else {
+				return false;
+			}
+		};
+		function phoneCheck() {
+			var phone = document.getElementById("phone").value;
+			var phone_hint = document.getElementById("phone_hint");
+			var flag = checkMobile(phone);
+			if (flag) {
+				phone_hint.innerHTML = "The phone number is in correct format";
+				return true;
+			} else {
+				phone_hint.innerHTML = "The format of mobile phone number is wrong";
+				return false;
+			}
+		}
+		function phoneHide() {
+			var phone_hint = document.getElementById("phone_hint");
+			phone_hint.innerHTML = "";
+		}
+
+		/** * 校验用户住址*/
+		function checkaddress() {
+			var value = document.getElementById("uaddress").value;
+			var hint = document.getElementById("address_hint");
+			if (value.length < 8) {
+				hint.innerHTML = "地址长度不能低于8位";
+				return false;
+			} else {
+				hint.innerHTML = "地址输入合格";
+				return true;
+			}
+		}
+		function address_hide() {
+			var hint = document.getElementById("address_hint");
+			hint.innerHTML = "";
+		}
+
+		function checkForm() {
+			var flag = hint() && checkPass() &&checkRepeatPass() && realName() && phoneCheck()
+					&& checkaddress();
+			return flag;
+		}
+	</script>
+
+	<!-- Main JS-->
+	<script th:src="@{/static/js/global.js}"></script>
+
+</body>
+<!-- This templates was made by Colorlib (https://colorlib.com) -->
+
+</html>
+<!-- end document-->
