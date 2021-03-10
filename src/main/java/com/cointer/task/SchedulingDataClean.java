@@ -50,9 +50,9 @@ public class SchedulingDataClean {
     	try {
          long time =System.currentTimeMillis()/1000;
          
-    	 billsMapper.cleanBills(time+(3*24*3600), EventProcesser.EVENT_CHARGE,EventProcesser.EVENT_FREEZE);
-    	 rbBallMapper.cleanRbballBets(time+(3*24*3600));	
-    	 crowdFundMapper.cleanCrowdfundBet(time+(3*24*3600));	
+    	 billsMapper.cleanBills(time-(3*24*3600), EventProcesser.EVENT_CHARGE,EventProcesser.EVENT_FREEZE);
+    	 rbBallMapper.cleanRbballBets(time-(3*24*3600));	
+    	 crowdFundMapper.cleanCrowdfundBet(time-(3*24*3600));	
     		
     		
 		} catch (Exception e) {

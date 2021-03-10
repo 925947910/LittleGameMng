@@ -70,7 +70,10 @@ public class SchedulingRedGreenBall {
 			rbBall.setLotteryResult(lotteryResult);
 			rbBall.setLotteryPrice(lotteryPrice);
 			rbBall.setLotteryPool(lotteryPool);
+			issueMap.clear();
+			issueMap.put("lotteryResult", lotteryResult);
 			rbBallMapper.updateRbBall(rbBall);
+			RedisData.setCurrRbBall(jedisClient, issueMap);
 			String rec=JSONObject.toJSONString(rbBall);
 			RedisData.addRbBallRec(jedisClient, rec);
 			
@@ -88,10 +91,10 @@ public class SchedulingRedGreenBall {
     	}
     }    
 //  封盘开奖
-    @Scheduled(cron = "59 2/3 * * * ? ")
+    @Scheduled(cron = "58 2/3 * * * ? ")
     public void DrawRedGreenBall() {
     	try {
-    		Map<String,String> issueMap=lotteryResult();
+    		Map<String,String> issueMap=RedisData.getCurrRbBall(jedisClient);
     		String result=issueMap.get("lotteryResult");
     		Long issue=Long.parseLong(issueMap.get("issue"));
     		Set<String> uids =RedisData.getRbBallBeter(jedisClient, issue, issueMap.get("lotteryResult"));
@@ -112,7 +115,7 @@ public class SchedulingRedGreenBall {
 				}
 				break;
 			}
-    		uids.retainAll(uidAdd);
+    		uids.addAll(uidAdd);
     		Iterator<String>  i= uids.iterator();
     		while (i.hasNext()) {
 				int uid =  Integer.parseInt(i.next());
@@ -123,6 +126,11 @@ public class SchedulingRedGreenBall {
 				jsonEvent.put("issue", issue);
 				RedisData.addEvent(jedisClient, uid, jsonEvent.toString());
 			}
+    		
+    		
+    		
+    	
+    		
     		
     	} 
     	catch (ServiceException ServiceException) {
@@ -150,7 +158,7 @@ public class SchedulingRedGreenBall {
           
           long zeroSec=calendar.getTimeInMillis()/1000;
          
-         long issueToday=(nowSec-zeroSec+1)/180;
+         long issueToday=1+(nowSec-zeroSec+1)/180;
          long issue= year*10000000+month*100000+day*1000+issueToday;
          
          Map<String,String> result= new HashMap<String,String>();
