@@ -1,6 +1,7 @@
 package com.cointer.task;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -69,7 +70,10 @@ public class SchedulingRedGreenBall {
 			rbBall.setLotteryResult(lotteryResult);
 			rbBall.setLotteryPrice(lotteryPrice);
 			rbBall.setLotteryPool(lotteryPool);
+			issueMap.clear();
+			issueMap.put("lotteryResult", lotteryResult);
 			rbBallMapper.updateRbBall(rbBall);
+			RedisData.setCurrRbBall(jedisClient, issueMap);
 			String rec=JSONObject.toJSONString(rbBall);
 			RedisData.addRbBallRec(jedisClient, rec);
 			
@@ -87,10 +91,10 @@ public class SchedulingRedGreenBall {
     	}
     }    
 //  封盘开奖
-    @Scheduled(cron = "59 2/3 * * * ? ")
+    @Scheduled(cron = "58 2/3 * * * ? ")
     public void DrawRedGreenBall() {
     	try {
-    		Map<String,String> issueMap=lotteryResult();
+    		Map<String,String> issueMap=RedisData.getCurrRbBall(jedisClient);
     		String result=issueMap.get("lotteryResult");
     		Long issue=Long.parseLong(issueMap.get("issue"));
     		Set<String> uids =RedisData.getRbBallBeter(jedisClient, issue, issueMap.get("lotteryResult"));
@@ -111,7 +115,7 @@ public class SchedulingRedGreenBall {
 				}
 				break;
 			}
-    		uids.retainAll(uidAdd);
+    		uids.addAll(uidAdd);
     		Iterator<String>  i= uids.iterator();
     		while (i.hasNext()) {
 				int uid =  Integer.parseInt(i.next());
@@ -119,8 +123,14 @@ public class SchedulingRedGreenBall {
 				jsonEvent.put("E", EventProcesser.EVENT_REDGREENBALL_DRAW);
 				jsonEvent.put("uid", uid);
 				jsonEvent.put("result", result);
+				jsonEvent.put("issue", issue);
 				RedisData.addEvent(jedisClient, uid, jsonEvent.toString());
 			}
+    		
+    		
+    		
+    	
+    		
     		
     	} 
     	catch (ServiceException ServiceException) {
@@ -148,7 +158,7 @@ public class SchedulingRedGreenBall {
           
           long zeroSec=calendar.getTimeInMillis()/1000;
          
-         long issueToday=(nowSec-zeroSec+1)/180;
+         long issueToday=1+(nowSec-zeroSec+1)/180;
          long issue= year*10000000+month*100000+day*1000+issueToday;
          
          Map<String,String> result= new HashMap<String,String>();
@@ -201,31 +211,21 @@ public class SchedulingRedGreenBall {
     	int price0=bet0*9+
     			(int)((double)betRed*1.5)+
     			(int)((double)betPurple*4.5);
-    	int price1=bet1*9+
-    			betGreen*2+
-    			(int)((double)betGreen*1.5);
-		int price2=bet2*9+
-				betRed*2+
-				(int)((double)betRed*1.5);
-		int price3=bet3*9+betGreen*2+
-				(int)((double)betGreen*1.5);
-		int price4=bet4*9+betRed*2+
-				(int)((double)betRed*1.5);
+    	int price1=bet1*9+betGreen*2;
+		int price2=bet2*9+betRed*2;
+		int price3=bet3*9+betGreen*2;
+		int price4=bet4*9+betRed*2;
 		int price5=bet5*9+
 				(int)((double)betGreen*1.5)+
 				(int)((double)betPurple*4.5);
-		int price6=bet6*9+betRed*2+
-				(int)((double)betRed*1.5);
-		int price7=bet7*9+betGreen*2+
-				(int)((double)betGreen*1.5);
-		int price8=bet8*9+betRed*2+
-				(int)((double)betRed*1.5);
-		int price9=bet9*9+betGreen*2+
-				(int)((double)betGreen*1.5);
+		int price6=bet6*9+betRed*2;
+		int price7=bet7*9+betGreen*2;
+		int price8=bet8*9+betRed*2;
+		int price9=bet9*9+betGreen*2;
 		
       
 		
-		JSONArray  priceArray=new JSONArray();
+		List<String> resultList=new ArrayList<String>();
 		int [] prices=new int[] {price0,price1,price2,price3,price4,price5,price6,price7,price8,price9};
 		int [] pricesort=new int[] {price0,price1,price2,price3,price4,price5,price6,price7,price8,price9};
 		Arrays.sort(pricesort);
@@ -233,24 +233,20 @@ public class SchedulingRedGreenBall {
 
 		rbBall rbBall=rbBallList.get(0);
 		Resutl=rbBall.getLotteryResult();
-		if(Resutl!=null){
-			price=prices[Integer.parseInt(Resutl)];
-		}else{
-
+		
+		if(Resutl==null){
 			for (int i = 0; i < prices.length; i++) {
-				JSONObject obj=new JSONObject();
 				int p=prices[i];
-				obj.put("bet", i+"");
-				obj.put("price",p);
 				if(p==price){
-					priceArray.add(obj); 
+					resultList.add(i+""); 
 				}
 			}
 			Random rand = new Random();
-			int index=rand.nextInt(priceArray.size());
-			Resutl = priceArray.getJSONObject(index).getString("bet");
+			int index=rand.nextInt(resultList.size());
+			Resutl = resultList.get(index);
 		}
-
+		 price=prices[Integer.parseInt(Resutl)];
+		 
     	 issueMap.put("lotteryResult", Resutl+"");
     	 issueMap.put("lotteryPool", total+"");
     	 issueMap.put("lotteryPrice", price+"");

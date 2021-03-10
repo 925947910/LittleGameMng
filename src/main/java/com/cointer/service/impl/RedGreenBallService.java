@@ -89,6 +89,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 		resData.put("redGreenRec", redGreenRec);
 		resData.put("issue",  Long.parseLong(issueMap.get("issue")));
 		resData.put("myBets",  Rec);
+		resData.put("coin", Integer.parseInt(RedisData.userField(jedisClient, uid, "coin")));	
 		return resData;
 	
 	}
@@ -134,23 +135,29 @@ public class RedGreenBallService implements IRedGreenBallService {
 	}
 	
     public Integer getPrice(int uid, Long issue, String Bet){
-
-    	int cost = rbBallMapper.coinByBet(uid, issue, Bet)*9;
+    	Integer c1=rbBallMapper.coinByBet(uid, issue, Bet);
+    	int cost = c1==null?0:c1*9;
     	switch (Bet) {
     	case "0":
-    		cost+=(int)((double)rbBallMapper.coinByBet(uid, issue, "red")*1.5);
-    		cost+=(int)((double)rbBallMapper.coinByBet(uid, issue, "purple")*4.5);
+    		Integer c2=rbBallMapper.coinByBet(uid, issue, "red");
+    		Integer c3=rbBallMapper.coinByBet(uid, issue, "purple");
+    		cost+=  c2==null?0:(int)((double)c2*1.5);
+    		cost+=  c3==null?0:(int)((double)c3*4.5);
     		break;
     	case "5":
-    		cost+=(int)((double)rbBallMapper.coinByBet(uid, issue, "green")*1.5);
-    		cost+=(int)((double)rbBallMapper.coinByBet(uid, issue, "purple")*4.5);
+    		Integer c4=rbBallMapper.coinByBet(uid, issue, "green");
+    		Integer c5=rbBallMapper.coinByBet(uid, issue, "purple");
+    		cost+=  c4==null?0:(int)((double)c4*1.5);
+    		cost+=  c5==null?0:(int)((double)c5*4.5);
     		break;
     	default:
     		int num=Integer.parseInt(Bet);
     		if((num % 2)==0){
-    			cost+=rbBallMapper.coinByBet(uid, issue, "red")*2;
+    			Integer c6=rbBallMapper.coinByBet(uid, issue, "red");
+    			cost+=  c6==null?0:c6*2;
     		}else{
-    			cost+=rbBallMapper.coinByBet(uid, issue, "green")*2;
+    			Integer c7=rbBallMapper.coinByBet(uid, issue, "green");
+    			cost+=  c7==null?0:c7*2;
     		}
     		break;
     	}

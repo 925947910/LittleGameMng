@@ -274,7 +274,7 @@ public  class RedisData {
 		return client.smembers(DB1_2, "rbBall:"+issue+"bet:"+bet);
 	}
 	public static final void   currRbBallBet(IJedisClient client,String bet,Long value){
-		client.hincrBy(DB1_2, "currRbBall", "bet:"+bet, value);
+		client.hincrBy(DB1_2, "currRbBall", "bet"+bet, value);
 	}
 	public static final void  setCurrRbBall(IJedisClient client,Map<String,String> issue){
 		client.hmset(DB1_2, "currRbBall",issue);
