@@ -372,7 +372,7 @@ public class ExchangeService  implements IExchangeService{
 		try {
 			JSONObject	custom	=JSONObject.parseObject(AuthData.getString("custom"));
 			if(status==SUCC_) {
-				TransExchange.tranExtractSucc( AuthData.getString("orderid"), custom.getIntValue("freezeId"), custom.getIntValue("uid"), custom.getIntValue("coin"),AuthData.getFloatValue("real_amount"));
+				TransExchange.tranExtractSucc( AuthData.getString("orderid"), custom.getIntValue("freezeId"), custom.getIntValue("uid"), custom.getIntValue("coin"),AuthData.getFloatValue("amount"));
 			}else {                            
 				TransExchange.tranExtractFailed( AuthData.getString("orderid"), custom.getIntValue("freezeId"), custom.getIntValue("uid"), custom.getIntValue("coin"));
 			}
