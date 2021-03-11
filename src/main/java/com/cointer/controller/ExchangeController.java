@@ -4,6 +4,9 @@ package com.cointer.controller;
 
 
 
+import java.net.URLDecoder;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +24,7 @@ import com.cointer.exception.TransException;
 import com.cointer.pojo.dto.chargeCallBack1Dto;
 import com.cointer.redis.IJedisClient;
 import com.cointer.service.IExchangeService;
+import com.cointer.util.HttpClientUtil;
 
 
 
@@ -56,24 +60,32 @@ public class ExchangeController extends  BaseController{
 	
 	@RequestMapping("/chargeCallBack")
 	@ResponseBody
-	public String chargeCallBack(@RequestParam chargeCallBack1Dto chargeCallBack1Dto ) {
+	public String chargeCallBack(@RequestBody String str ) {
 		String res="success";
 		  try {
-			  ExchangeService.chargeCallBack(chargeCallBack1Dto);
+				String params =URLDecoder.decode(str,"UTF-8");
+				Map<String,String>paramsMap=HttpClientUtil.URLRequest(params);
+				JSONObject  obj=JSONObject.parseObject(JSONObject.toJSONString(paramsMap));
+			  ExchangeService.chargeCallBack(obj);
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 			  res="failed";
 		}
 		return res;
 	}
 	@RequestMapping("/extractCallBack")
 	@ResponseBody
-	public String extractCallBack(@RequestParam int status,String result,String sign) {
+	public String extractCallBack(@RequestBody String str) {
 		String res="success";
 		  try {
-			  ExchangeService.extractCallBack(status,result,sign);
+			  String params =URLDecoder.decode(str,"UTF-8");
+				Map<String,String>paramsMap=HttpClientUtil.URLRequest(params);
+				JSONObject  obj=JSONObject.parseObject(JSONObject.toJSONString(paramsMap));
+			  ExchangeService.extractCallBack(obj);
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 			  res="failed";
 		}
 		return res;
