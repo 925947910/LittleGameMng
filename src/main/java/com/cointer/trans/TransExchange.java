@@ -83,9 +83,9 @@ public class TransExchange {
 	
 	
 	@Transactional
-	public   tradeOrder tranGenOrderIn(int uid,int agentId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
+	public   tradeOrder tranGenOrderIn(long now,int uid,int agentId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
 		
-		long now=	new Date().getTime()/1000;
+	
 		int orderId = RedisData.genOrderId(jedisClient);
 		
 		tradeOrder  orderBean= new tradeOrder();

@@ -18,7 +18,7 @@ public interface tradeOrderMapper {
 	@Select("SELECT * FROM tradeorder WHERE id = #{orderId}")
 	public List<tradeOrder> tradeOrderById(int orderId);
 	
-	@Select("SELECT id,uid,freezeId,coin FROM tradeorder WHERE orderLocal = #{orderLocal}")
+	@Select("SELECT * FROM tradeorder WHERE orderLocal = #{orderLocal}")
 	public List<tradeOrder> tradeOrderByOrderLocal(String orderLocal);  
 	
 	@Select("SELECT id,status  FROM tradeorder WHERE orderRemote = #{orderRemote}")
