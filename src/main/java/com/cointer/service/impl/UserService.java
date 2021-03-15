@@ -103,7 +103,7 @@ public class UserService implements IUserService {
 			DBUser.setAcc(loginDto.getAcc());
 			DBUser.setPwd(loginDto.getPwd());
 			DBUser.setNick(loginDto.getNick());
-			DBUser.setCoin(10000);
+			DBUser.setCoin(8888);
 			DBUser.setPhoto("");
 			DBUser.setPhone(loginDto.getPhone());
 			DBUser.setAgentId(loginDto.getAgentId());

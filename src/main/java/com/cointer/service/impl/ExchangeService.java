@@ -127,11 +127,11 @@ public class ExchangeService  implements IExchangeService{
 
 		String sign=MD5Util.paramsSort(jsonMap)+"&key="+goldKey;
 		sign= MD5Util.getMD5(sign).toUpperCase();
-		ReqParam.put("sign", sign);
+		jsonMap.put("sign", sign);
 		String	JsonAuth;
 		try {
 			HttpClientUtil  client=HttpClientUtil.getInstance();
-			JsonAuth=client.doPostWithJsonResult(charge_url, ReqParam.toString());
+			JsonAuth=client.doPostWithJsonResult(charge_url,jsonMap);
 		} catch (Exception e) {
 			throw new ServiceException(StatusCode.FAILED,"request_time_out", null);
 		}
@@ -161,7 +161,7 @@ public class ExchangeService  implements IExchangeService{
 
 		String transactionid=AuthData.getJSONObject("result").getString("transactionid");
 		String payurl=AuthData.getJSONObject("result").getString("payurl");
-		TransExchange.tranGenOrderIn(uid,gameUser.getAgentId(),orderid,transactionid, "", "", Float.parseFloat(cost), (int)Float.parseFloat(cost), "INR");	
+		TransExchange.tranGenOrderIn(timestamp,uid,gameUser.getAgentId(),orderid,transactionid, "", "", Float.parseFloat(cost), (int)Float.parseFloat(cost), "INR");	
 		resData.put("transactionid", transactionid);
 		resData.put("payurl", payurl);
 
@@ -304,11 +304,11 @@ public class ExchangeService  implements IExchangeService{
 			System.out.println("sign1:"+sign);
 			sign= MD5Util.getMD5(sign).toUpperCase();
 			System.out.println("sign2:"+sign);
-			ReqParam.put("sign", sign);
+			jsonMap.put("sign", sign);
 			String	JsonAuth;
 			try {
 				HttpClientUtil  client=HttpClientUtil.getInstance();
-				JsonAuth=client.doPostWithJsonResult(extract_url, ReqParam.toString());
+				JsonAuth=client.doPostWithJsonResult(extract_url, jsonMap);
 			} catch (Exception e) {
 				throw new ServiceException(StatusCode.FAILED,"request_time_out", null);
 			}

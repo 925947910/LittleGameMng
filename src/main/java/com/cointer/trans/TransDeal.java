@@ -57,7 +57,7 @@ public class TransDeal {
 		if(gameUserMapper.coinChange(rbBallBet.getUid(), newCoin, version)!=1) {
 			throw new TransException("coin_modify_failed");
 		}
-		
+		rbBallBet.setCoin(rbBallBet.getCoin()*98/100);
 		if(rbBallBMapper.laid(rbBallBet)!=1) {
 			throw new TransException("bet_failed");
 		}	

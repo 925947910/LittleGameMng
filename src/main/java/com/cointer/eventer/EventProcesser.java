@@ -233,14 +233,14 @@ public class EventProcesser {
 				if (cost != 0) {
 					for (int i = 0; i < 10; i++) {
 						try {
-							remain = gameCoinChange(uid, cost, EVENT_REDGREENBALL_DRAW, 0, "Red and Green Ball issue:"+issue);
+							remain = gameCoinChange(uid, cost, EVENT_REDGREENBALL_DRAW, 0, "Lottery Ball issue:"+issue);
 							break;
 						} catch (Exception e) {
 							log.error("EVENT_REDGREENBALL_DRAW",e);
 						}
 					}
 					if (remain == null) {
-						writeCoinFailed(uid, cost, EVENT_REDGREENBALL_DRAW, 0, "Red and Green Ball issue:"+issue);
+						writeCoinFailed(uid, cost, EVENT_REDGREENBALL_DRAW, 0, "Lottery Ball issue:"+issue);
 						log.warn("EVENT_REDGREENBALL_DRAW_FAILED uid:" + uid + "===cost:" + cost);
 					}
 				}
@@ -255,14 +255,14 @@ public class EventProcesser {
 				if (cost != 0 &&uid<10000000) {
 					for (int i = 0; i < 10; i++) {
 						try {                                                       
-							remain = gameCoinChange(uid, cost, EVENT_BENZBMW_DRAW, 0, "Benz BMW Issue"+issue);
+							remain = gameCoinChange(uid, cost, EVENT_BENZBMW_DRAW, 0, "Lottery Car Issue:"+issue);
 							break;
 						} catch (Exception e) {
 							log.error("EVENT_BENZBMW_DRAW",e);
 						}
 					}
 					if (remain == null) {
-						writeCoinFailed(uid, cost, EVENT_BENZBMW_DRAW, 0, "Benz BMW Issue"+issue);
+						writeCoinFailed(uid, cost, EVENT_BENZBMW_DRAW, 0, "Lottery Car Issue:"+issue);
 						log.warn("EVENT_BENZBMW_DRAW_FAILED uid:" + uid + "===cost:" + cost);
 					}
 					

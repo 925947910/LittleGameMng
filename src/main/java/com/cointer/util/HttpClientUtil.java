@@ -14,9 +14,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -42,9 +44,10 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONObject;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-
 
 public class HttpClientUtil {
 	private static final Logger log = LoggerFactory.getLogger(HttpClientUtil.class);
@@ -171,7 +174,7 @@ public class HttpClientUtil {
 	}*/
 
     public String doPostWithJsonResult(String uri, Map<String, String> paramMap) {
-        String json = null;
+    	String json = null;
         log.debug("========= Call [{}] Start ==========", uri);
         HttpResponse response = null;
         try {
@@ -188,15 +191,24 @@ public class HttpClientUtil {
                 request.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
             }
             response = client.execute(request);
-            log.debug("Response status code: {}", response.getStatusLine().getStatusCode());
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                log.debug("Payload : {}", json);
+            int StatusCode= response.getStatusLine().getStatusCode();
+            log.debug("Response status code: {}",StatusCode);
+            if(StatusCode==HttpStatus.SC_OK){
+            	json=EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            	
+            }else if(StatusCode==HttpStatus.SC_MOVED_TEMPORARILY){
+            	Header header = response.getFirstHeader("location");
+            	if (header == null||header.getValue()==null) {
+            		json ="";
+            	} 
+            	json=header.getValue();
             }
+
+        	log.debug("Payload : {}", json);
             request.releaseConnection();
         } catch (Exception e) {
             log.error("HttpClient has exception! message: {}", e.getMessage(), e);
-            return null;
+            return json;
         } finally {
             try {
                 if (response != null) {
@@ -210,6 +222,10 @@ public class HttpClientUtil {
         return json;
     }
 
+    	
+    	
+    
+    
 	/*public <T> T doPostWithJsonResult(String uri, Map<String, String> paramMap, Class<T> javaType) {
 		T result = null;
 		log.debug("========= Call [{}] Start ==========", uri);
@@ -267,29 +283,6 @@ public class HttpClientUtil {
 
 	}*/
 
-    public String doPostWithJsonResult(String uri, String jsonParameters) {
-        log.debug("========= Call [{}] Start ==========", uri);
-        log.debug("========= Call [{}] Start ==========", jsonParameters);
-        HttpPost request = new HttpPost(uri);
-        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                .setConnectTimeout(timeout).setSocketTimeout(timeout).build();
-        request.setConfig(config);
-        request.setHeader("Content-type", "application/json;charset=UTF-8");
-        request.setEntity(new StringEntity(jsonParameters, ContentType.APPLICATION_JSON));
-        HttpResponse response = null;
-        String responseStr = null;
-        try {
-            response = client.execute(request);
-            log.debug("Response status code: {}", response.getStatusLine().getStatusCode());
-            responseStr = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-            log.debug("Payload : {}", responseStr);
-        } catch (Exception e) {
-            log.error(e.getMessage(), new IllegalStateException(e));
-        }
-        log.debug("========= Call [{}] End ==========", uri);
-        return responseStr;
-
-    }
 
     public String doPost(String url, String jsonStr) {
         log.debug("========= Call [{}] Start ==========", url);
@@ -444,5 +437,70 @@ public class HttpClientUtil {
         return HttpClients.createDefault();
 
     }
+    
+    /**
+     * 解析出url参数中的键值对
+     * 如 "index.jsp?Action=del&id=123"，解析出Action:del,id:123存入map中
+     *
+     * @param URL url地址
+     * @return url请求参数部分
+     */
+    public static Map<String, String> URLRequest(String URL) {
+        Map<String, String> mapRequest = new HashMap<String, String>();
+ 
+        String[] arrSplit = null;
+ 
+//        String strUrlParam = TruncateUrlPage(URL);
+//        if (strUrlParam == null) {
+//            return mapRequest;
+//        }
+        //每个键值为一组 www.2cto.com
+        arrSplit = URL.split("[&]");
+        for (String strSplit : arrSplit) {
+            String[] arrSplitEqual = null;
+            arrSplitEqual = strSplit.split("[=]");
+ 
+            //解析出键值
+            if (arrSplitEqual.length > 1) {
+                //正确解析
+                mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
+ 
+            } else {
+                if (arrSplitEqual[0] != "") {
+                    //只有参数没有值，不加入
+                    mapRequest.put(arrSplitEqual[0], "");
+                }
+            }
+        }
+        return mapRequest;
+    }
+
+
+    /**
+     * 去掉url中的路径，留下请求参数部分
+     *
+     * @param strURL url地址
+     * @return url请求参数部分
+     */
+    public static String TruncateUrlPage(String strURL) {
+        String strAllParam = null;
+        String[] arrSplit = null;
+ 
+        strURL = strURL.trim();
+ 
+        arrSplit = strURL.split("[?]");
+        if (strURL.length() > 1) {
+            if (arrSplit.length > 1) {
+                if (arrSplit[1] != null) {
+                    strAllParam = arrSplit[1];
+                }
+            }
+        }
+ 
+        return strAllParam;
+    }
+
+
+    
 
 }

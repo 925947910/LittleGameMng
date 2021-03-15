@@ -83,9 +83,9 @@ public class TransExchange {
 	
 	
 	@Transactional
-	public   tradeOrder tranGenOrderIn(int uid,int agentId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
+	public   tradeOrder tranGenOrderIn(long now,int uid,int agentId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
 		
-		long now=	new Date().getTime()/1000;
+	
 		int orderId = RedisData.genOrderId(jedisClient);
 		
 		tradeOrder  orderBean= new tradeOrder();
@@ -117,7 +117,11 @@ public class TransExchange {
 		gameUser DBUser=DBUsers.get(0);
 		int version = DBUser.getVersion();
 		int oldCoin = DBUser.getCoin();
+		int isTourist=DBUser.getIsTourist();
 		int newCoin = oldCoin-coin;
+		if(isTourist==1) {
+			throw new TransException("isTourist_can_not_tran");
+		}
 		if(newCoin<0) {
 			throw new TransException("coin_not_enough");
 		}
