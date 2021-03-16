@@ -55,6 +55,11 @@ public  class RedisData {
 	}
 	public static final  Map<String,String>  authSession(IJedisClient client,String session){
 		Map<String,String> map= client.hgetAll(DB1_5,session);
+		if(map!=null){
+		  String uid=map.get("uid");
+		  client.zadd(DB1_5, "Onlines",System.currentTimeMillis()/1000, uid);
+		}
+		
 		return map;
 	}
 	public static final  Map<String,String>  authToken(IJedisClient client,int plat, String token){

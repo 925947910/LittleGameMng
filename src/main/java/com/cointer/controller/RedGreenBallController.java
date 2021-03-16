@@ -36,7 +36,12 @@ public class RedGreenBallController extends  BaseController{
  
 	}
 	
-	
+	@RequestMapping("/winningRec")
+	@ResponseBody
+	public String winningRec(@RequestParam String param) {
+	return 	serviceRun(RedGreenBallService, "winningRec", param);
+ 
+	}
 	@RequestMapping("/laidList")
 	@ResponseBody
 	public String laidList(@RequestParam String param) {

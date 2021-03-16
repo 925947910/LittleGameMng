@@ -23,11 +23,13 @@ import com.cointer.constant.Constant;
 import com.cointer.constant.StatusCode;
 import com.cointer.eventer.EventProcesser;
 import com.cointer.exception.ServiceException;
+import com.cointer.mapper.billsMapper;
 import com.cointer.mapper.gameUserMapper;
 import com.cointer.mapper.rbBallMapper;
 import com.cointer.pojo.dto.loginUserDto;
 import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.rbBallBet;
+import com.cointer.pojo.vo.billsInfo;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 import com.cointer.service.IRedGreenBallService;
@@ -55,6 +57,9 @@ import net.sf.jsqlparser.expression.operators.relational.Between;
 public class RedGreenBallService implements IRedGreenBallService {
 	private static final Logger log = LoggerFactory.getLogger(RedGreenBallService.class);
 
+	
+	@Autowired
+	private   billsMapper billsMapper;
 	@Autowired
 	private   rbBallMapper rbBallMapper;
 	// 注入Jedis接口用来操作缓存
@@ -63,6 +68,20 @@ public class RedGreenBallService implements IRedGreenBallService {
 	
 	@Autowired
 	private   TransDeal TransDeal;
+	
+	
+	
+	
+	@Override
+	public  Object   winningRec(String  RequestJsonData) throws Exception  {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);
+		JSONObject resData= new JSONObject();
+		int uid =reqData.getIntValue("uid");
+		List<billsInfo> winningRec=billsMapper.winningRec(uid, EventProcesser.EVENT_REDGREENBALL_DRAW);
+		resData.put("winningRec",  winningRec);
+		return resData;
+	
+	}
 	
 	@Override
 	public  Object   notice(String  RequestJsonData) throws Exception  {

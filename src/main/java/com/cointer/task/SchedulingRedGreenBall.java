@@ -64,11 +64,16 @@ public class SchedulingRedGreenBall {
     		Long issue=Long.parseLong(issueMap.get("issue"));
 			String lotteryResult=issueMap.get("lotteryResult");
 			int lotteryPool= Integer.parseInt(issueMap.get("lotteryPool"));
-			int lotteryPrice=Integer.parseInt(issueMap.get("lotteryPrice"));
+//			int lotteryPrice=Integer.parseInt(issueMap.get("lotteryPrice"));
 			rbBall rbBall=new rbBall();
+			
+			  Random rand = new Random();
+			  int basePrice=rand.nextInt(30)*10;
+			  basePrice=26100+basePrice+Integer.parseInt(lotteryResult);
+			
 			rbBall.setIssue(issue);
 			rbBall.setLotteryResult(lotteryResult);
-			rbBall.setLotteryPrice(lotteryPrice);
+			rbBall.setLotteryPrice(basePrice);
 			rbBall.setLotteryPool(lotteryPool);
 			issueMap.clear();
 			issueMap.put("lotteryResult", lotteryResult);
@@ -80,7 +85,6 @@ public class SchedulingRedGreenBall {
 			String botStr=RedisData.getBots(jedisClient);
 	        JSONObject botObj=JSONObject.parseObject(botStr);
 	        String botName=botObj.getString("name");
-	         Random rand = new Random();
 		     int num=100000*rand.nextInt(10)+10000*rand.nextInt(10);
 	        
 	        RedisData.addRbBallNotice(jedisClient, "Congratulations to player "+botName+" for winning "+num+" rupees in the "+issue+"nd issue of the red and green ball game!");

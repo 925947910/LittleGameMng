@@ -13,6 +13,8 @@ import com.cointer.pojo.vo.billsInfo;
 @Mapper
 public interface billsMapper {
 
+	@Select("select * from bills where  uid=#{uid} and type=#{type} ")    
+	List<billsInfo> winningRec(int uid,int type);
 	
 	@Select("select * from bills where  uid=#{uid} and (type=#{type1} or type=#{type2})")    
 	List<billsInfo> billsListByTypes(int uid,int type1,int type2);
