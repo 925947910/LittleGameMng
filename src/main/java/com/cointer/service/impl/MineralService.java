@@ -19,9 +19,13 @@ import com.cointer.pojo.po.mineralBills;
 import com.cointer.pojo.po.userMineral;
 import com.cointer.service.IMineralService;
 import com.cointer.trans.TransMineral;
+import com.cointer.util.SpringContextUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.cointer.eventer.EventProcesser;
+import com.cointer.eventer.Executor;
+import com.cointer.eventer.ExecutorHandle;
+import com.cointer.eventer.ExecutorPool;
 
 
 
@@ -47,7 +51,7 @@ public class MineralService implements IMineralService {
 	
 	@Autowired
 	private   EventProcesser EventProcesser;
-	
+
 
 	@Override
 	public   Object  getMineral(String  RequestJsonData) throws Exception {
@@ -110,4 +114,25 @@ public class MineralService implements IMineralService {
 		resultMap.put("members3", Num3+"");
 		return resultMap;
 	}
+	 
+	@Override
+	public Object test(String  RequestJsonData) throws Exception {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);
+		JSONObject resData=new JSONObject();
+		long begin=reqData.getLongValue("begin");
+		long end=reqData.getLongValue("end");
+		int uid=reqData.getIntValue("uid");
+		int start=reqData.getIntValue("start");
+		int num=reqData.getIntValue("num");
+		long s=reqData.getLongValue("s");
+		ExecutorHandle EventDistributor=SpringContextUtil.getBean("EventDistributor", ExecutorHandle.class);
+		EventDistributor.setS(s);
+		resData.put("s",EventDistributor.getS());
+		PageHelper.startPage(start,num);
+		List<mineralBills> mineralBills=mineralMapper.mineralBillsList(uid, begin, end);
+		resData.put("page",new PageInfo<>(mineralBills));
+		return resData;
+	}
+	
+	
 }

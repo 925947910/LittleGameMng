@@ -163,11 +163,12 @@ public class ExchangeService  implements IExchangeService{
 		if(JsonAuth==null) {
 			throw new ServiceException(StatusCode.FAILED,"request_data_null", null);
 		}
+		 System.out.println("!!!!!!!!!!JsonAuth:"+JsonAuth);
 		 resData.put("payurl", JsonAuth);
-		 JsonAuth =URLDecoder.decode(JsonAuth,"UTF-8");
+//		 JsonAuth =URLDecoder.decode(JsonAuth,"UTF-8");
 		 JsonAuth =HttpClientUtil.TruncateUrlPage(JsonAuth);
 		 paramsMap=HttpClientUtil.URLRequest(JsonAuth);
-		TransExchange.tranGenOrderIn(now,uid,gameUser.getAgentId(),mch_order_no,paramsMap.get("order_no"), "", "", cost, cost, "INR");	
+		TransExchange.tranGenOrderIn(now,uid,gameUser.getAgentId(),mch_order_no,paramsMap.get("orderId"), "", "", cost, cost, "INR");	
 		return resData;
 	}
 	@Override

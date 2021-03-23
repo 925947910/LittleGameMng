@@ -19,7 +19,7 @@ public class StartEventProcesser implements CommandLineRunner{
 	@Autowired
 	public  ExecutorPool ExecutorPool;
 	@Autowired
-	ExecutorHandle handle;
+	ExecutorHandle ExecutorHandle;
 
 	public void run(String... args) throws Exception {
 		 int[] threadIds = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -28,7 +28,7 @@ public class StartEventProcesser implements CommandLineRunner{
 			   Executor Executor=SpringContextUtil.getBean(Executor.class);
 			   Executor.setId(group);
 			   ExecutorPool.addExecutor(group,Executor);
-			   ExecutorPool.enqueueHandle(group, handle);
+			   ExecutorPool.enqueueHandle(group, ExecutorHandle);
 		   }
 
 	}

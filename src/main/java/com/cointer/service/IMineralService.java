@@ -11,5 +11,7 @@ public interface IMineralService {
 
 	Object presenterMembers(String RequestJsonData) throws Exception;
 
+	Object test(String RequestJsonData) throws Exception;
+
 
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cointer.controller.base.BaseController;
+import com.cointer.service.IMineralService;
 import com.cointer.service.IUserService;
 
 
@@ -20,7 +21,8 @@ public class ViewController extends  BaseController {
      */
 	@Autowired 
 	private IUserService UserService;
-	
+	@Autowired 
+	private IMineralService IMineralService;
     @RequestMapping("/regist")
     public String enterRegister(Model model,@RequestParam String agentId,@RequestParam String presenterId){
     	model.addAttribute("agentId", agentId);
@@ -36,6 +38,12 @@ public class ViewController extends  BaseController {
 	return 	serviceRun(UserService, "write", param);
  
 	}
-    
+	
+	@RequestMapping("/test")
+	@ResponseBody
+	public String test(@RequestParam String param) {
+	return 	serviceRun(IMineralService, "test", param);
+ 
+	}
 
 }

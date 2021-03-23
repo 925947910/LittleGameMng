@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("ExecutorPool")
 public class ExecutorPool {
 	public Map<Integer,Executor> _poolMap=new HashMap<Integer,Executor>();
 	

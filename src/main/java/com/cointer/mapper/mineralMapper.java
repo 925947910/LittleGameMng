@@ -37,10 +37,10 @@ public interface mineralMapper {
 	public int  updateMineralNum(int uid, int mineral,int version);
 	
 	
-	@Select("select * from mineralBills where  uid=#{uid} and time BETWEEN #{begin} and #{end}")    
+	@Select("select * from mineralbills where  uid=#{uid} and time BETWEEN #{begin} and #{end}")    
 	List<mineralBills> mineralBillsList(int uid,long begin, long end);
     
-    @Insert("insert into mineralBills(id,nick,uid,mineral,cost,freeze,type,tagId,reason,time) values (#{id},#{nick},#{uid},#{mineral},#{cost},#{freeze},#{type},#{tagId},#{reason},#{time})")
+    @Insert("insert into mineralbills(id,nick,uid,mineral,cost,freeze,type,tagId,reason,time) values (#{id},#{nick},#{uid},#{mineral},#{cost},#{freeze},#{type},#{tagId},#{reason},#{time})")
 	public int  writeMineralBills(mineralBills mineralBills);
     
 	@Select("select  uid  from gamePresenter  where presenterId= #{presenterId}")    
