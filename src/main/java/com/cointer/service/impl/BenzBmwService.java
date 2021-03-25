@@ -153,6 +153,7 @@ public class BenzBmwService implements IBenzBmwService {
 				jsonEvent.put("chargerId", uid);
 				RedisData.addEvent(jedisClient, PresenterId, jsonEvent.toString());
 		   }
+		 RedisData.UpdateUserSign(jedisClient, uid, 1);
 		 resData.put("coin", Integer.parseInt(RedisData.userField(jedisClient, uid, "coin")));	
 		
 		return resData;

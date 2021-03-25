@@ -176,6 +176,7 @@ public class CrowdFundService implements       ICrowdFundService        {
 		RedisData.updateCurrCrowdFundField(jedisClient, "schedule", newCurrBuy+"");
 		String rec=JSONObject.toJSONString(crowdFundBet);
 		RedisData.addCrowdFundRec(jedisClient, issueMap.get("issue"), rec);
+		RedisData.UpdateUserSign(jedisClient, uid, 1);
 		if(newCurrBuy==price){
 		
 			String uticket=(crowdFundBet.getIssue()+"")+(newCurrBuy+"");

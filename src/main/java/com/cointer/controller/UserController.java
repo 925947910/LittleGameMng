@@ -38,11 +38,15 @@ public class UserController extends  BaseController{
 		 String resultStr= serviceRun(UserService, "regist", obj.toString());
 		 obj=JSONObject.parseObject(resultStr);
 		 if ((boolean)obj.get("succ")==true){
-			 model.addAttribute("message", obj.getJSONObject("param").getString("message"));
-		     model.addAttribute("gameUrl", obj.getJSONObject("param").getString("gameUrl"));
+			 model.addAttribute("messageAndroid", obj.getJSONObject("param").getString("messageAndroid"));
+		     model.addAttribute("gameUrlAndroid", obj.getJSONObject("param").getString("gameUrlAndroid"));
+		     model.addAttribute("messageIos", obj.getJSONObject("param").getString("messageIos"));
+		     model.addAttribute("gameUrlIos", obj.getJSONObject("param").getString("gameUrlIos"));
 		 }else{
-			 model.addAttribute("message", obj.getString("message"));
-		     model.addAttribute("gameUrl", "");
+			 model.addAttribute("messageAndroid", obj.getString("messageAndroid"));
+		     model.addAttribute("gameUrlAndroid", "");
+		     model.addAttribute("messageIos", obj.getString("messageIos"));
+		     model.addAttribute("gameUrlIos", "");
 		 }
 		 
 		 return "user_regist_succ";
@@ -83,9 +87,17 @@ public class UserController extends  BaseController{
 	public String userInfo(@RequestParam String param) {
 	return 	serviceRun(UserService, "userInfo", param);
 	}
+	@RequestMapping("/getMembers")
+	@ResponseBody
+	public String getMembers(@RequestParam String param) {
+	return 	serviceRun(UserService, "getMembers", param);
+	}
 	@RequestMapping("/rank")
 	@ResponseBody
 	public String rank(@RequestParam String param) {
 	return 	serviceRun(UserService, "rank", param);
 	}
+	
+	
+	
 }

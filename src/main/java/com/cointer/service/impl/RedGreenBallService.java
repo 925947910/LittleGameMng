@@ -103,7 +103,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 		JSONObject resData= new JSONObject();
 		JSONArray redGreenRec=RedisData.rbBallRec(jedisClient);
 		Map<String,String> issueMap=RedisData.getCurrRbBall(jedisClient);
-		List<rbBallBet> Rec=rbBallMapper.currBets(uid, Long.parseLong(issueMap.get("issue")));
+		List<rbBallBet> Rec=rbBallMapper.myBets(uid);
 		resData.put("betEnd",  Integer.parseInt(issueMap.get("betEnd")));
 		resData.put("redGreenRec", redGreenRec);
 		resData.put("issue",  Long.parseLong(issueMap.get("issue")));
@@ -141,6 +141,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 		int PresenterId=TransDeal.laidRbBall(rbBallBet);
 		RedisData.currRbBallBet(jedisClient, bet, (long)coin);
 		RedisData.setRbBallBeter(jedisClient, Long.parseLong(issueMap.get("issue")), bet, uid);
+		RedisData.UpdateUserSign(jedisClient, uid, 1);
 		 if(PresenterId!=0){
 			    JSONObject jsonEvent= new JSONObject();
 				jsonEvent.put("E", EventProcesser.EVENT_PRESENTER_ADD);

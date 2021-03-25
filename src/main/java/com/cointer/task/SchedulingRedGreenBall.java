@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -102,24 +103,19 @@ public class SchedulingRedGreenBall {
     		String result=issueMap.get("lotteryResult");
     		Long issue=Long.parseLong(issueMap.get("issue"));
     		Set<String> uids =RedisData.getRbBallBeter(jedisClient, issue, issueMap.get("lotteryResult"));
-    		Set<String> uidAdd;
     		switch (result) {
 			case "0":
-				 uidAdd =RedisData.getRbBallBeter(jedisClient, issue, "purple");
-				break;
+				 uids.addAll(RedisData.getRbBallBeter(jedisClient, issue, "purple"));
             case "5":
-            	uidAdd =RedisData.getRbBallBeter(jedisClient, issue, "purple");
-				break;
+            	 uids.addAll(RedisData.getRbBallBeter(jedisClient, issue, "purple"));
 			default:
 				int num=Integer.parseInt(result);
 				if((num % 2)==0){
-					uidAdd =RedisData.getRbBallBeter(jedisClient, issue, "red");
+					uids.addAll(RedisData.getRbBallBeter(jedisClient, issue, "red"));
 				}else{
-					uidAdd =RedisData.getRbBallBeter(jedisClient, issue, "green");
+					uids.addAll(RedisData.getRbBallBeter(jedisClient, issue, "green"));
 				}
-				break;
 			}
-    		uids.addAll(uidAdd);
     		Iterator<String>  i= uids.iterator();
     		while (i.hasNext()) {
 				int uid =  Integer.parseInt(i.next());

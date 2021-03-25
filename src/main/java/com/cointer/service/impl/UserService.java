@@ -3,6 +3,7 @@ package com.cointer.service.impl;
 
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +20,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.cointer.constant.Constant;
 import com.cointer.constant.StatusCode;
+import com.cointer.eventer.EventProcesser;
 import com.cointer.exception.ServiceException;
+import com.cointer.mapper.billsMapper;
 import com.cointer.mapper.gameUserMapper;
 import com.cointer.pojo.dto.loginUserDto;
 import com.cointer.pojo.po.bots;
@@ -47,12 +50,14 @@ public class UserService implements IUserService {
 	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 	@Autowired
 	private   gameUserMapper gameUserMapper;
+	@Autowired
+	private   billsMapper billsMapper;
 
 	// 注入Jedis接口用来操作缓存
 	@Autowired
 	private   IJedisClient jedisClient;
-
-
+	@Autowired
+	EventProcesser EventProcesser;
 	@Override
 	public  Object   regist(String  RequestJsonData) throws Exception  {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
@@ -68,8 +73,10 @@ public class UserService implements IUserService {
 		loginDto.setPhone(reqData.getString("phone"));
 		loginDto.setSex(reqData.getIntValue("sex"));
 		 regist(loginDto);
-		 resData.put("message", "Congratulations on your registration. Please click the following link to download the game");
-		 resData.put("gameUrl", RedisData.getUri(jedisClient, platFrom,"gameUrl"));
+		 resData.put("messageAndroid", "Congratulations on your registration.For Android users,Please click the following link to download the game");
+		 resData.put("gameUrlAndroid", RedisData.getUri(jedisClient, platFrom,"gameUrlAndroid"));
+		 resData.put("messageIos", "Congratulations on your registration.For iOS users,Please click the following link to download the game");
+		 resData.put("gameUrlIos", RedisData.getUri(jedisClient, platFrom,"gameUrlIos"));
 		 return resData;
 	}
 	
@@ -170,6 +177,48 @@ public class UserService implements IUserService {
 		List<Map<String,String>> plats= new ArrayList<Map<String,String>>();
 		plats= RedisData.AllPlats(jedisClient);
 		return plats;
+	}
+	
+
+	@Override
+	public  Object   	getMembers(String  RequestJsonData) throws Exception  {
+		
+		JSONObject reqData=JSON.parseObject(RequestJsonData);
+		JSONObject resData=new JSONObject();
+		Integer uid=reqData.getInteger("uid");
+		List<gameUser> DBUsers=gameUserMapper.userById(uid);
+		gameUser DBUser=DBUsers.get(0);
+		int members=gameUserMapper.getMembers(uid);
+		int profit=billsMapper.getLeaderProfit(uid);
+		resData.put("isLeader",DBUser.getIsLeader());
+		resData.put("members",members);
+		resData.put("profit",profit);
+		 return resData;
+	}
+	
+	@Override
+	public  Object   	getSign(String  RequestJsonData) throws Exception  {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);
+		JSONObject resData=new JSONObject();
+		Integer uid=reqData.getInteger("uid");
+
+		String schedul=RedisData.userSign(jedisClient, uid);
+		resData.put("schedul", schedul);
+		return resData;
+	}
+	@Override
+	public  Object  getSignPrice(String  RequestJsonData) throws Exception  {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);
+		JSONObject resData=new JSONObject();
+		Integer uid=reqData.getInteger("uid");
+	
+		boolean result=RedisData.UpdateUserSign(jedisClient, uid, 2);
+		resData.put("result", result);
+		if(result){
+			int newCoin=EventProcesser.gameCoinChange(uid,5,EventProcesser.EVENT_USERSIGN_ADD,0,"user sign add");
+			resData.put("newCoin",newCoin);
+		}
+		return resData;
 	}
 	
 	public   Object  userInfo(String  RequestJsonData) throws Exception {

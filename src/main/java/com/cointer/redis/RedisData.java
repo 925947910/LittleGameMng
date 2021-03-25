@@ -1,13 +1,16 @@
 package com.cointer.redis;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.bag.SynchronizedBag;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.connection.ReactiveHashCommands.HGetCommand;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -489,7 +492,45 @@ public  class RedisData {
 		client.expire(DB1_2, "crowdFundRec:"+issue, 3600);
 	}
 	
-	
-	
+	public static final String  userSign(IJedisClient client,int uid){
+		
+		Calendar calendar = Calendar.getInstance();
+    	calendar.set(Calendar.HOUR_OF_DAY, 0);
+    	calendar.set(Calendar.MINUTE, 0);
+    	calendar.set(Calendar.SECOND, 0);
+    	long zeroSec=calendar.getTimeInMillis()/1000;
+		
+		String key= "sign:"+uid+"time:"+zeroSec;
+		if(!client.exists(DB1_0,key)){
+			Map<String, String> map= new HashMap<String,String>();
+			map.put("schedul", "0");
+			client.hmset(DB1_0, key, map);
+			client.expire(DB1_0, key, 24*3600);
+			return "0";
+		}
+		    return client.hget(DB1_0, key, "schedul");
+		
+	}
+	public synchronized static final boolean  UpdateUserSign(IJedisClient client,int uid,int status){
+		Calendar calendar = Calendar.getInstance();
+    	calendar.set(Calendar.HOUR_OF_DAY, 0);
+    	calendar.set(Calendar.MINUTE, 0);
+    	calendar.set(Calendar.SECOND, 0);
+    	long zeroSec=calendar.getTimeInMillis()/1000;
+		String key= "sign:"+uid+"time:"+zeroSec;
+		if(!client.exists(DB1_0,key)){
+			Map<String, String> map= new HashMap<String,String>();
+			map.put("schedul", status+"");
+			client.hmset(DB1_0, key, map);
+			client.expire(DB1_0, key, 24*3600);
+			return true;
+		}
+		if(((status-1)+"").equals(client.hget(DB1_0, key, "schedul"))){
+			client.hset(DB1_0, key, "schedul", status+"");
+			return true;
+		}
+		   return false;
+		
+	}
 	
 }

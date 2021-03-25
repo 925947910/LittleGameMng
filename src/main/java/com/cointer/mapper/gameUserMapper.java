@@ -18,6 +18,9 @@ public interface gameUserMapper {
 	@Select("select * from gameuser where id= #{id}")
 	public List<gameUser> userById(int id);
 
+	@Select("select count(id) from gameuser where presenterId= #{uid}")
+	public Integer getMembers(int uid);
+	
 	@Update("update gameuser set isTourist= #{isTourist} where id= #{id} ")
 	public int  updateTourist(int id,int isTourist);
 

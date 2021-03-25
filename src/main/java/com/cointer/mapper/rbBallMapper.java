@@ -24,14 +24,15 @@ public interface rbBallMapper {
 	@Update("update rbball set lotteryResult=#{lotteryResult},lotteryPool=#{lotteryPool},lotteryPrice=#{lotteryPrice} where issue=#{issue}")
 	public int  updateRbBall(rbBall rbBall);
 	
-	
-	
 	@Insert("insert into rbballbet(uid,coin,issue,bet,time) values (#{uid},#{coin},#{issue},#{bet},#{time})")
 	public int  laid(rbBallBet rbBallBet);
 	
 	@Select("select id,uid,coin,issue,bet,time from rbballbet where uid=#{uid} and issue=#{issue}")
 	public List<rbBallBet> currBets(int uid,long issue);
 
+	@Select("select id,uid,coin,issue,bet,time from rbballbet where uid=#{uid}")
+	public List<rbBallBet> myBets(int uid);
+	
 	@Select("select sum(coin) as total from rbballbet where uid=#{uid} and issue=#{issue} and bet=#{bet}")
 	public Integer coinByBet(int uid,long issue,String bet);
 	
