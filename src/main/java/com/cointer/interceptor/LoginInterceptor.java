@@ -51,11 +51,13 @@ public class LoginInterceptor extends BaseInterceptor implements HandlerIntercep
 			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆:"+uri, null));
 			return false;
 		}
-		Map<String,String> sessionData=RedisData.authSession(jedisClient, session);
+		Map<String,String> sessionData=RedisData.getSessionInfo(jedisClient, session);
 		if(sessionData==null||sessionData.size()==0) {
 			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆:"+uri, null));
 			return false;
 		}
+		  String uid=sessionData.get("uid");
+		  jedisClient.zadd(RedisData.DB1_5, "Onlines",System.currentTimeMillis()/1000, uid);
 		return true;
 	}
 	@Override

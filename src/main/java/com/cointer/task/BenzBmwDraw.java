@@ -3,19 +3,29 @@ package com.cointer.task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+
+import com.cointer.service.impl.BenzBmwService;
 @Service
 @Scope("prototype")
 public class BenzBmwDraw extends Thread{  
-	
-	String jsonData;
 	@Autowired
-	SchedulingBenzBmw SchedulingBenzBmw;
+	BenzBmwService BenzBmwService;
+	private int uid=0;
 	
-    public void setJsonData(String jsonData) {
-		this.jsonData = jsonData;
+
+	public int getUid() {
+		return uid;
 	}
+
+	public void setUid(int uid) {
+		this.uid = uid;
+	}
+
+
+
+
 	public void run() {  
-		SchedulingBenzBmw.draw();
+		BenzBmwService.draw(this.uid);
 		
     }  
 }  

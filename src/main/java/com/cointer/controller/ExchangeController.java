@@ -21,7 +21,6 @@ import com.cointer.constant.StatusCode;
 import com.cointer.controller.base.BaseController;
 import com.cointer.exception.ServiceException;
 import com.cointer.exception.TransException;
-import com.cointer.pojo.dto.chargeCallBack1Dto;
 import com.cointer.redis.IJedisClient;
 import com.cointer.service.IExchangeService;
 import com.cointer.util.HttpClientUtil;
@@ -127,7 +126,23 @@ public class ExchangeController extends  BaseController{
 //			return failed(StatusCode.FAILED, "系统异常", null);
 //		} 
 	}
-
+	@RequestMapping("/test")
+	@ResponseBody
+	public String test(@RequestParam String param) {
+		
+		return 	serviceRun(ExchangeService, "test", param);
+//		try {
+//			Object resultParam = ExchangeService.checkFreeze(param);
+//			return succ(StatusCode.SUCC, "", resultParam);
+//		} catch (ServiceException e) {
+//			return failed(e.getCode(), e.getMsg(), e.getParaMap());
+//		} catch (TransException e) {
+//			return failed(StatusCode.TRANS_ERROR, e.getMsg(), null);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return failed(StatusCode.FAILED, "系统异常", null);
+//		} 
+	}
 
 
 

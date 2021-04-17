@@ -39,13 +39,13 @@ public class BenzBmwController extends  BaseController{
 	return 	serviceRun(IBenzBmwService, "bet", param);
  
 	}
-	
-	@RequestMapping("/betList")
+	@RequestMapping("/draw")
 	@ResponseBody
-	public String betList(@RequestParam String param) {
-	return 	serviceRun(IBenzBmwService, "betList", param);
+	public String draw(@RequestParam String param) {
+	return 	serviceRun(IBenzBmwService, "draw", param);
  
 	}
+
 	@RequestMapping("/beBanker")
 	@ResponseBody
 	public String beBanker(@RequestParam String param) {
@@ -59,11 +59,6 @@ public class BenzBmwController extends  BaseController{
  
 	}
 	
-	@RequestMapping("/draw")
-	@ResponseBody
-	public String draw(@RequestParam String param) {
-	return 	serviceRun(IBenzBmwService, "draw", param);
- 
-	}
+
 
 }

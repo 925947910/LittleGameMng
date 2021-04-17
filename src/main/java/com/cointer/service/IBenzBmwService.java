@@ -14,10 +14,12 @@ public interface IBenzBmwService {
 
 	Object bet(String paramJson) throws Exception;
 
-	Object betList(String paramJson) throws Exception;
 	Object draw(String paramJson) throws Exception;
+
+	Object beBanker(String paramJson) throws Exception;
 
 	Object fallBanker(String paramJson) throws Exception;
 
-	Object beBanker(String paramJson) throws Exception;
+
+
 }

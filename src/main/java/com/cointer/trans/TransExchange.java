@@ -16,7 +16,9 @@ import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.tradeOrder;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
+import com.cointer.service.impl.GameTaskService;
 import com.cointer.util.CommTypeUtils;
+import com.alibaba.fastjson.JSONObject;
 import com.cointer.eventer.EventProcesser;
 import com.cointer.exception.TransException;
 
@@ -42,15 +44,15 @@ public class TransExchange {
 	private   IJedisClient jedisClient;
 	@Autowired
 	private EventProcesser EventProcesser;
-	
-
-
-	
+	@Autowired
+	private GameTaskService GameTaskService;
 	
 		
 	
 	@Transactional
-	public   int  tranChargeSucc(String orderLocal,int uid,int coin,float cost) throws Exception {
+	public   JSONObject  tranChargeSucc(String orderLocal,int uid,int coin,float cost) throws Exception {
+		JSONObject res=new JSONObject();
+		res.put("firstCharge", false);
 		if(tradeOrderMapper.updateStatusCostByOrder(orderLocal,cost, ORDER_PROCESSING, ORDER_SUCC)!=1) {
 			throw new TransException("status_update_failed");
 		}
@@ -65,13 +67,15 @@ public class TransExchange {
 			if(gameUserMapper.updateTourist(uid, 0)!=1) {
 				throw new TransException("tourist_status_update_failed");
 			}
+			res.put("firstCharge", true);
 			RedisData.updateUserField(jedisClient, uid, "isTourist", "0");
 		}
 		if(gameUserMapper.coinChange(uid, newCoin, version)!=1) {
 			throw new TransException("coin_modify_failed");
 		}
 		EventProcesser.writeBill(uid,DBUser.getNick(),DBUser.getAgentId(), coin, newCoin, EventProcesser.EVENT_CHARGE, 0,"充值成功orderLocal:"+orderLocal,"","");
-		return  DBUser.getPresenterId();
+		res.put("presenterId", DBUser.getPresenterId());
+		return res;
 	}
 	@Transactional
 	public   void  tranChargeFailed(String orderLocal) throws Exception {

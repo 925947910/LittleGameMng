@@ -87,11 +87,18 @@ public class UserController extends  BaseController{
 	public String userInfo(@RequestParam String param) {
 	return 	serviceRun(UserService, "userInfo", param);
 	}
-	@RequestMapping("/getMembers")
+	@RequestMapping("/leaderInfo")
 	@ResponseBody
-	public String getMembers(@RequestParam String param) {
-	return 	serviceRun(UserService, "getMembers", param);
+	public String leaderInfo(@RequestParam String param) {
+	return 	serviceRun(UserService, "leaderInfo", param);
 	}
+	@RequestMapping("/extractRebates")
+	@ResponseBody
+	public String extractRebates(@RequestParam String param) {
+	return 	serviceRun(UserService, "extractRebates", param);
+	}
+	
+	
 	@RequestMapping("/rank")
 	@ResponseBody
 	public String rank(@RequestParam String param) {

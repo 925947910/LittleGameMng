@@ -41,8 +41,6 @@ import com.cointer.exception.TransException;
 import com.cointer.mapper.freezeMapper;
 import com.cointer.mapper.gameUserMapper;
 import com.cointer.mapper.tradeOrderMapper;
-import com.cointer.pojo.dto.tokenMapChargeDto;
-import com.cointer.pojo.dto.chargeCallBack1Dto;
 import com.cointer.pojo.dto.extractDto;
 import com.cointer.pojo.dto.freezeDto;
 import com.cointer.pojo.po.gameUser;
@@ -87,7 +85,8 @@ public class ExchangeService  implements IExchangeService{
 	private   tradeOrderMapper tradeOrderMapper;
 	@Autowired
 	private   freezeMapper freezeMapper;
-
+	@Autowired
+	private   GameTaskService GameTaskService;
 	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 23, "channel": 121,"bank_code":IDPT0001,"cost": 100}
 	@Override
 	public   Object  chargeOrder(String  RequestJsonData) throws Exception {
@@ -200,8 +199,14 @@ public class ExchangeService  implements IExchangeService{
 		try {
 			if("1".equals(reqData.getString("tradeResult"))) {
 				JSONObject	custom	=JSONObject.parseObject(reqData.getString("merRetMsg"));
-				int PresenterId=TransExchange.tranChargeSucc(reqData.getString("mchOrderNo"),custom.getIntValue("uid"),custom.getIntValue("coin"),Float.parseFloat(reqData.getString("amount"))*87/100);
-			  
+				JSONObject res=TransExchange.tranChargeSucc(reqData.getString("mchOrderNo"),custom.getIntValue("uid"),custom.getIntValue("coin"),Float.parseFloat(reqData.getString("amount"))*87/100);
+                  
+				    chargeRebates(res.getInteger("presenterId"), custom.getIntValue("coin"));
+				    if(res.getBoolean("firstCharge")){
+				    	GameTaskService.updateSchedul(res.getInteger("presenterId"), GameTaskService.TASK2, 1);	
+				    }
+				    
+                    
 			}else {
 				TransExchange.tranChargeFailed(reqData.getString("mchOrderNo"));
 			}
@@ -438,8 +443,25 @@ public class ExchangeService  implements IExchangeService{
 			return data;
 		
 	}
-
-
+//	http://119.28.250.58:8085/GameUser/exchange/test?param={"uid":29,"order":"","coin":1000,"amount":1000}
+//	public   Object  test(String  RequestJsonData) throws Exception {
+//		JSONObject reqData=JSON.parseObject(RequestJsonData);
+//	JSONObject res=TransExchange.tranChargeSucc(reqData.getString("order"),reqData.getIntValue("uid"),reqData.getIntValue("coin"),Float.parseFloat(reqData.getString("amount"))*87/100);
+//    
+//    chargeRebates(res.getInteger("presenterId"), reqData.getIntValue("coin"));
+//    if(res.getBoolean("firstCharge")){
+//    	GameTaskService.updateSchedul(res.getInteger("presenterId"), GameTaskService.TASK2, 1);	
+//    }
+//	return res;
+//	}
+	public   void  chargeRebates(int uid,int coin) throws Exception {
+		if(uid==0){
+			return;
+		}
+		int per= Integer.parseInt(RedisData.userField(jedisClient, uid, "isLeader"));
+		int rebatesCoin=coin*per/100;
+        RedisData.addChargeRebates(jedisClient, uid, rebatesCoin);
+	}
 	
 
 

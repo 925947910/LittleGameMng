@@ -9,8 +9,9 @@ public interface ICrowdFundService {
 
 	Object historyIssue(String RequestJsonData) throws Exception;
 
-	Object laid(String RequestJsonData) throws Exception;
 
 	Object currBuy(String RequestJsonData) throws Exception;
+
+	Object bet(String RequestJsonData) throws Exception;
 
 }

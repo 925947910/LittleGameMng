@@ -45,10 +45,10 @@ public class CrowdFundController extends  BaseController{
 	return 	serviceRun(CrowdFundService, "currBuy", param);
  
 	}
-	@RequestMapping("/laid")
+	@RequestMapping("/bet")
 	@ResponseBody
-	public String laid(@RequestParam String param) {
-	return 	serviceRun(CrowdFundService, "laid", param);
+	public String bet(@RequestParam String param) {
+	return 	serviceRun(CrowdFundService, "bet", param);
  
 	}
 

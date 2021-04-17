@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.collections.bag.SynchronizedBag;
@@ -56,40 +57,17 @@ public  class RedisData {
 		String key=client.hget(DB1_4,INTERFACE_URI+plat,"publicKey");
 		return key;
 	}
-	public static final  Map<String,String>  authSession(IJedisClient client,String session){
-		Map<String,String> map= client.hgetAll(DB1_5,session);
-		if(map!=null){
-		  String uid=map.get("uid");
-		  client.zadd(DB1_5, "Onlines",System.currentTimeMillis()/1000, uid);
-		}
-		
+	public static final  Map<String,String>  getSessionInfo(IJedisClient client,String session){
+		Map<String,String> map= client.hgetAll(DB1_5,"token:"+session);
 		return map;
 	}
-	public static final  Map<String,String>  authToken(IJedisClient client,int plat, String token){
-		Map<String,String> map=new HashMap<String, String>();
-		if(!StringUtils.isBlank(token)) {
-			String key="token:"+plat+"_"+token;
-			map= client.hgetAll(DB1_5,key);
-		}
-		return map;
-	}
-	public static final  String genTokenInfo(IJedisClient client,int plat, String token,Map<String,String> mapData){
-		String key="token:"+plat+"_"+token;
-		client.hmset(DB1_5,key, mapData);
-		client.expire(DB1_5,key, 3600*24*7);
+
+	public static final  String setSessionInfo(IJedisClient client,String token,Map<String,String> mapData){
+		client.hmset(DB1_5,"token:"+token, mapData);
+		client.expire(DB1_5,"token:"+token, 3600*24*7);
 		client.expire(DB1_0,User+mapData.get("uid"), 3600*24*8);
-		return key;
-	}
-	
-	
-	
-	
-	public static final String  myBenzBmwPrice(IJedisClient client,Integer uid){
-		String BenzBmwPrice=client.hget(DB1_0, User+uid,"BenzBmwPrice");
-		client.hdel(DB1_0, User+uid,"BenzBmwPrice");
-		return BenzBmwPrice;
-	}
-	
+		return token;
+	}	
 	
 	public static final String  userField(IJedisClient client,Integer id,String field){
 		String fieldValue=client.hget(DB1_0, User+id, field);
@@ -125,7 +103,11 @@ public  class RedisData {
 	public static final void  updateUser(IJedisClient client,int id,Map<String, String> map){
 		client.hmset(DB1_0, User+id, map);
 	}
-
+	public static final void  addChargeRebates(IJedisClient client,Integer id,int coin){
+		client.hincrBy(DB1_0, User+id,"chargeRebates",coin);
+	}
+	
+	
 	public static final int  genAccId(IJedisClient client){
 		int id=client.incr(DB1_4, GameUserId).intValue();
 		return id;
@@ -237,6 +219,13 @@ public  class RedisData {
 		client.rpush(DB1_1, Queue, jsonEvents);
 		client.rpush(DB1_1, Distributor, id+"");
 	}
+	
+	public static final String  getBots(IJedisClient client){
+		String bot=client.lpop(DB1_1, "InfoBots");
+		client.rpush(DB1_1, "InfoBots",bot);
+		return bot;
+	}
+	
 //	public static final ArrayList<JSONObject>  rank(IJedisClient client,int uid,int rankSize){
 //		int count=rankSize;
 //		ArrayList<JSONObject> resultData= new ArrayList<JSONObject>();
@@ -274,263 +263,48 @@ public  class RedisData {
 //		Double myRank=client.zincrby(DB1_2, "rank", Double.valueOf(coin), uid+"");
 //	}
 
-	public static final void  setRbBallBeter(IJedisClient client,Long issue,String bet,int uid){
-		client.sadd(DB1_2,"rbBall:"+issue+"bet:"+bet, uid+"");
-		client.expire(DB1_2, "rbBall:"+issue+"bet:"+bet, 200);
-	}
-	public static final Set<String>  getRbBallBeter(IJedisClient client,Long issue,String bet){
-		return client.smembers(DB1_2, "rbBall:"+issue+"bet:"+bet);
-	}
-	public static final void   currRbBallBet(IJedisClient client,String bet,Long value){
-		client.hincrBy(DB1_2, "currRbBall", "bet"+bet, value);
-	}
-	public static final void  setCurrRbBall(IJedisClient client,Map<String,String> issue){
-		client.hmset(DB1_2, "currRbBall",issue);
-		client.expire(DB1_2, "currRbBall", 200);
-	}
-	public static final Map<String,String>  getCurrRbBall(IJedisClient client){
-		Map<String,String> mapData=client.hgetAll(DB1_2, "currRbBall");
-		return mapData;
-	}
-	public static final JSONArray  rbBallRec(IJedisClient client){
-		JSONArray  resultData=new JSONArray();
-		List<String> records=client.lrange(DB1_2, "rbBallRec", 0, 9);
-		Iterator<String> i=records.iterator();
-		while (i.hasNext()) {
-			String jsonStr=i.next();
-			JSONObject obj= JSONObject.parseObject(jsonStr);
-			resultData.add(obj);
-		}
-		return resultData;
-	}
-	public static final void  addRbBallRec(IJedisClient client,String rec){
-		client.lpush(DB1_2, "rbBallRec", rec);
-		client.ltrim(DB1_2, "rbBallRec", 0, 9);
-	}
 	
-	public static final JSONArray rbBallNotice(IJedisClient client){
-		List<String> records=client.lrange(DB1_2, "rbBallNotice", 0, 19);
-		JSONArray datas=JSONArray.parseArray(JSON.toJSONString(records));
-		return datas;
-	}
-	public static final void  addRbBallNotice(IJedisClient client,String rec){
-		client.lpush(DB1_2, "rbBallNotice", rec);
-		client.ltrim(DB1_2, "rbBallNotice", 0, 19);
-	}
-	
-	
-	
-	
-	public static final Map<String, String>  initBenzBmw(IJedisClient client,String issue,String start,String end,String bankerStatus){
-		Map<String, String> mapUpdate=client.hgetAll(DB1_3, "BenzBmw");
-		
-		if(mapUpdate.isEmpty()){
-			mapUpdate = new HashMap<String, String>();
-			mapUpdate.put("pricePool", "1000000");
-		}
-		mapUpdate.put("issue", issue);
-		mapUpdate.put("betStart", start);
-		mapUpdate.put("betEnd", end);
-		mapUpdate.put("bankerStatus", bankerStatus);
-		mapUpdate.put("Ferrari", 0+"");
-		mapUpdate.put("Lambo", 0+"");
-		mapUpdate.put("BMW", 0+"");
-		mapUpdate.put("Benz", 0+"");
-		mapUpdate.put("Audi", 0+"");
-		mapUpdate.put("Honda", 0+"");
-		mapUpdate.put("Toyota", 0+"");
-		mapUpdate.put("Volkswagen", 0+"");
-		
-		mapUpdate.put("real_Ferrari", 0+"");
-		mapUpdate.put("real_Lambo", 0+"");
-		mapUpdate.put("real_BMW", 0+"");
-		mapUpdate.put("real_Benz", 0+"");
-		mapUpdate.put("real_Audi", 0+"");
-		mapUpdate.put("real_Honda", 0+"");
-		mapUpdate.put("real_Toyota", 0+"");
-		mapUpdate.put("real_Volkswagen", 0+"");
-		
-		client.hmset(DB1_3, "BenzBmw", mapUpdate);
-		client.hdel(DB1_3, "BenzBmw", "result");
-		client.hdel(DB1_3, "BenzBmw", "price");
-		client.hdel(DB1_3, "BenzBmw", "totalBet");
-		return mapUpdate;
-	}
 
-	public static final Map<String, String>  getBenzBmw(IJedisClient client){
-		Map<String, String> mapUpdate=client.hgetAll(DB1_3, "BenzBmw");
-		return mapUpdate;
-	}
-	public static final String  getBenzBmwField(IJedisClient client,String field){
-		 String result=client.hget(DB1_3, "BenzBmw",field);
-		return result;
-	}                                      
-	public static final void  drawBenzBmw(IJedisClient client,int totalBet,int totalBetWithBot,int price,int priceWithBot,String result){
-		client.hincrBy(DB1_3, "BenzBmw", "pricePool", totalBetWithBot-priceWithBot);
-		Map<String,String> map= new HashMap<String,String>();  
-		map.put("totalBet", totalBetWithBot+"");
-		map.put("price", priceWithBot+"");  
-		map.put("result", result);
-		client.hmset(DB1_3, "BenzBmw", map);
-	}
-	
-	public static final void  cleanBenzBmwBets(IJedisClient client,List<String> bets){
-		for (int i = 0; i < bets.size(); i++) {
-			client.del(DB1_3, "BenzBmwBet:"+bets.get(i),"BenzBmwBetList:"+bets.get(i));
-			
-		}
-	}
-	public static final void  BenzBmwBet(IJedisClient client,int uid,String bet,int num ,boolean isBot){
-		client.hincrBy(DB1_3,"BenzBmw",bet,num);
-		if(!isBot){
-			client.hincrBy(DB1_3,"BenzBmw","real_"+bet,num);
-		}
-		client.hincrBy(DB1_3,"BenzBmwBet:"+bet, uid+"",num);
-		client.rpush(DB1_3, "BenzBmwBetList:"+bet, num+"");
-		
-	}
-	
-	public static final boolean  BenzBmwBeBanker(IJedisClient client,int uid,String name,int coin ){
-		if (client.exists(DB1_3, "BenzBmwBanker")){
-			return false;
-		}
-		Map <String,String> map= new HashMap<String,String>();
-		map.put("uid", uid+"");
-		map.put("name",name);
-		map.put("pool",coin+"");
-		map.put("bankerStatus","1");
-		client.hmset(DB1_3, "BenzBmwBanker", map);
-		return true;
-	}
-	
-	public static final Map <String,String>  BenzBmwGetBanker(IJedisClient client,int uid){
-		Map<String,String> map=client.hgetAll(DB1_3, "BenzBmwBanker");
-		if (uid!=0&&(map==null||!(uid+"").equals(map.get("uid")))){
-			return null;
-		}
-		return map;
-	}
-	public static final void  SetBenzBmwBankerField(IJedisClient client,String field,String value){
-		client.hset(DB1_3, "BenzBmwBanker", field, value);
-	}
-	public static final void  BenzBmwFallBanker(IJedisClient client){
-	    client.del(DB1_3, "BenzBmwBanker");
-	}
-	
-	public static final Map<String,String>  getBenzBmwBetNums(IJedisClient client,String bet){
-		Map<String,String> beters=client.hgetAll(DB1_3,"BenzBmwBet:"+bet);
-		return beters;
-		
-	}
-	public static final JSONArray  getBenzBmwBetList(IJedisClient client,String bet,int begin){
-		List<String> BenzBmwBetList =client.lrange(DB1_3, "BenzBmwBetList:"+bet, begin, -1);
-		JSONArray array= JSONArray.parseArray(JSON.toJSONString(BenzBmwBetList));
-		return array;
-	}
-	
-	public static final JSONArray  getBenzBmwRec(IJedisClient client){
-		
-		List<String> records=client.lrange(DB1_3, "BenzBmwRec", 0, 9);
-		JSONArray array= JSONArray.parseArray(JSON.toJSONString(records));
-		return array;
-	}
-	public static final void  addBenzBmwRec(IJedisClient client,String rec){
-		client.lpush(DB1_3, "BenzBmwRec", rec);
-		client.ltrim(DB1_3, "BenzBmwRec", 0, 9);
-	}
-	public static final Map<String, String>  getCrowdFundItem(IJedisClient client){
-		Map<String, String> mapUpdate=client.hgetAll(DB1_1, "crowdFundItem");
-		return mapUpdate;
-	}
-	public static final void  setCurrCrowdFund(IJedisClient client,Map<String,String> issue){
-		client.hmset(DB1_2, "currCrowdFund",issue);
-		client.expire(DB1_2, "currCrowdFund", 2000);
-	}
-	public static final Map<String,String>  getCurrCrowdFund(IJedisClient client){
-		Map<String,String> mapData=client.hgetAll(DB1_2, "currCrowdFund");
-		return mapData;
-	}
-	
-	public static final void   updateCurrCrowdFundField(IJedisClient client,String field,String value){
-		client.hset(DB1_2, "currCrowdFund", field, value);
-	}
-	public static final String  getBots(IJedisClient client){
-		String bot=client.lpop(DB1_1, "InfoBots");
-		client.rpush(DB1_1, "InfoBots",bot);
-		return bot;
-	}
 
-	public static final JSONArray  crowdFundIssueList(IJedisClient client){
-		JSONArray  resultData=new JSONArray();
-		List<String> records=client.lrange(DB1_2, "crowdFundRecs", 0, 6);
-		Iterator<String> i=records.iterator();
-		while (i.hasNext()) {
-			String jsonStr=i.next();
-			resultData.add(jsonStr);
-		}
-		return resultData;
-	}
-	public static final void  addCrowdFundIssueList(IJedisClient client,String Issue){
-		client.lpush(DB1_2, "crowdFundRecs", Issue);
-		client.ltrim(DB1_2, "crowdFundRecs", 0, 5);
-	}
-	
-	public static final JSONArray crowdFundRec(IJedisClient client,String issue){
-		JSONArray  resultData=new JSONArray();
-		List<String> records=client.lrange(DB1_2, "crowdFundRec:"+issue, 0, 16);
-		Iterator<String> i=records.iterator();
-		while (i.hasNext()) {
-			String jsonStr=i.next();
-			JSONObject obj= JSONObject.parseObject(jsonStr);
-			resultData.add(obj);
-		}
-		return resultData;
-	}
-	public static final void  addCrowdFundRec(IJedisClient client,String issue,String rec){
-		client.lpush(DB1_2, "crowdFundRec:"+issue, rec);
-		client.ltrim(DB1_2, "crowdFundRec:"+issue, 0, 15);
-		client.expire(DB1_2, "crowdFundRec:"+issue, 3600);
-	}
-	
-	public static final String  userSign(IJedisClient client,int uid){
-		
-		Calendar calendar = Calendar.getInstance();
-    	calendar.set(Calendar.HOUR_OF_DAY, 0);
-    	calendar.set(Calendar.MINUTE, 0);
-    	calendar.set(Calendar.SECOND, 0);
-    	long zeroSec=calendar.getTimeInMillis()/1000;
-		
-		String key= "sign:"+uid+"time:"+zeroSec;
-		if(!client.exists(DB1_0,key)){
-			Map<String, String> map= new HashMap<String,String>();
-			map.put("schedul", "0");
-			client.hmset(DB1_0, key, map);
-			client.expire(DB1_0, key, 24*3600);
-			return "0";
-		}
-		    return client.hget(DB1_0, key, "schedul");
-		
-	}
-	public synchronized static final boolean  UpdateUserSign(IJedisClient client,int uid,int status){
-		Calendar calendar = Calendar.getInstance();
-    	calendar.set(Calendar.HOUR_OF_DAY, 0);
-    	calendar.set(Calendar.MINUTE, 0);
-    	calendar.set(Calendar.SECOND, 0);
-    	long zeroSec=calendar.getTimeInMillis()/1000;
-		String key= "sign:"+uid+"time:"+zeroSec;
-		if(!client.exists(DB1_0,key)){
-			Map<String, String> map= new HashMap<String,String>();
-			map.put("schedul", status+"");
-			client.hmset(DB1_0, key, map);
-			client.expire(DB1_0, key, 24*3600);
-			return true;
-		}
-		if(((status-1)+"").equals(client.hget(DB1_0, key, "schedul"))){
-			client.hset(DB1_0, key, "schedul", status+"");
-			return true;
-		}
-		   return false;
-		
-	}
+//	public static final String  userSign(IJedisClient client,int uid){
+//		
+//		Calendar calendar = Calendar.getInstance();
+//    	calendar.set(Calendar.HOUR_OF_DAY, 0);
+//    	calendar.set(Calendar.MINUTE, 0);
+//    	calendar.set(Calendar.SECOND, 0);
+//    	long zeroSec=calendar.getTimeInMillis()/1000;
+//		
+//		String key= "sign:"+uid+"time:"+zeroSec;
+//		if(!client.exists(DB1_0,key)){
+//			Map<String, String> map= new HashMap<String,String>();
+//			map.put("schedul", "0");
+//			client.hmset(DB1_0, key, map);
+//			client.expire(DB1_0, key, 24*3600);
+//			return "0";
+//		}
+//		    return client.hget(DB1_0, key, "schedul");
+//		
+//	}
+//	public synchronized static final boolean  UpdateUserSign(IJedisClient client,int uid,int status){
+//		Calendar calendar = Calendar.getInstance();
+//    	calendar.set(Calendar.HOUR_OF_DAY, 0);
+//    	calendar.set(Calendar.MINUTE, 0);
+//    	calendar.set(Calendar.SECOND, 0);
+//    	long zeroSec=calendar.getTimeInMillis()/1000;
+//		String key= "sign:"+uid+"time:"+zeroSec;
+//		if(!client.exists(DB1_0,key)){
+//			Map<String, String> map= new HashMap<String,String>();
+//			map.put("schedul", status+"");
+//			client.hmset(DB1_0, key, map);
+//			client.expire(DB1_0, key, 24*3600);
+//			return true;
+//		}
+//		if(((status-1)+"").equals(client.hget(DB1_0, key, "schedul"))){
+//			client.hset(DB1_0, key, "schedul", status+"");
+//			return true;
+//		}
+//		   return false;
+//		
+//	}
 	
 }

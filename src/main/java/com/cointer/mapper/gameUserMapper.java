@@ -23,7 +23,10 @@ public interface gameUserMapper {
 	
 	@Update("update gameuser set isTourist= #{isTourist} where id= #{id} ")
 	public int  updateTourist(int id,int isTourist);
-
+	
+	@Update("update gameuser set isLeader= #{isLeader} where id= #{id} ")
+	public int  updateLeader(int id,int isLeader);
+	
 	@Update("update gameuser set photo= #{photo} where id= #{id} ")
 	public int  updatePhoto(int id,String photo);
 	

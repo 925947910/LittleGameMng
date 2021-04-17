@@ -21,8 +21,6 @@ public class ViewController extends  BaseController {
      */
 	@Autowired 
 	private IUserService UserService;
-	@Autowired 
-	private IMineralService IMineralService;
     @RequestMapping("/regist")
     public String enterRegister(Model model,@RequestParam String agentId,@RequestParam String presenterId){
     	model.addAttribute("agentId", agentId);
@@ -39,11 +37,6 @@ public class ViewController extends  BaseController {
  
 	}
 	
-	@RequestMapping("/test")
-	@ResponseBody
-	public String test(@RequestParam String param) {
-	return 	serviceRun(IMineralService, "test", param);
- 
-	}
+
 
 }

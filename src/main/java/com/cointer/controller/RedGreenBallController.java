@@ -26,8 +26,7 @@ public class RedGreenBallController extends  BaseController{
 	@Autowired 
 	private IRedGreenBallService RedGreenBallService;
 
-	
-	
+
 	
 	@RequestMapping("/notice")
 	@ResponseBody
@@ -36,24 +35,34 @@ public class RedGreenBallController extends  BaseController{
  
 	}
 	
-	@RequestMapping("/winningRec")
+	@RequestMapping("/winRec")
 	@ResponseBody
-	public String winningRec(@RequestParam String param) {
-	return 	serviceRun(RedGreenBallService, "winningRec", param);
+	public String winRec(@RequestParam String param) {
+	return 	serviceRun(RedGreenBallService, "winRec", param);
  
 	}
-	@RequestMapping("/laidList")
+	@RequestMapping("/historyIssue")
 	@ResponseBody
-	public String laidList(@RequestParam String param) {
-	return 	serviceRun(RedGreenBallService, "laidList", param);
+	public String historyIssue(@RequestParam String param) {
+	return 	serviceRun(RedGreenBallService, "historyIssue", param);
  
 	}
-
-	@RequestMapping("/laid")
+	@RequestMapping("/currIssue")
 	@ResponseBody
-	public String laid(@RequestParam String param) {
-	return 	serviceRun(RedGreenBallService, "laid", param);
+	public String currIssue(@RequestParam String param) {
+	return 	serviceRun(RedGreenBallService, "currIssue", param);
  
 	}
-
+	@RequestMapping("/bet")
+	@ResponseBody
+	public String bet(@RequestParam String param) {
+	return 	serviceRun(RedGreenBallService, "bet", param);
+ 
+	}
+	@RequestMapping("/betRec")
+	@ResponseBody
+	public String betRec(@RequestParam String param) {
+	return 	serviceRun(RedGreenBallService, "betRec", param);
+ 
+	}
 }

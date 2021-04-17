@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +58,13 @@ import net.sf.jsqlparser.expression.operators.relational.Between;
 @Service
 public class CrowdFundService implements       ICrowdFundService        {
 	private static final Logger log = LoggerFactory.getLogger(CrowdFundService.class);
-
+	public static final String CrowdFundItem="crowdFundItem";
+	public static final String CurrCrowdFund="currCrowdFund";
+	public static final String CrowdFundRecs="crowdFundRecs";
+	public static final String CrowdFundRec="crowdFundRec:";
+	
+	
+	
 	@Autowired
 	private   crowdFundMapper crowdFundMapper;
 	// 注入Jedis接口用来操作缓存
@@ -74,10 +81,10 @@ public class CrowdFundService implements       ICrowdFundService        {
 		int uid =reqData.getIntValue("uid");
 		JSONObject resData= new JSONObject();
 
-		Map<String,String> crowdFundMap=RedisData.getCurrCrowdFund(jedisClient);
+		Map<String,String> crowdFundMap=getCurrCrowdFund(jedisClient);
 		long issue =Long.parseLong(crowdFundMap.get("issue"));
-		JSONArray crowdFundIssues= RedisData.crowdFundIssueList(jedisClient);
-		JSONArray crowdFundRec= RedisData.crowdFundRec(jedisClient, issue+"");
+		JSONArray crowdFundIssues= crowdFundRecs(jedisClient);
+		JSONArray crowdFundRec= crowdFundRec(jedisClient, issue+"");
 
 		List<crowdFundBet> DbMybetRec=crowdFundMapper.MybetRec(issue,uid);
 		JSONArray mybetRec= JSONArray.parseArray(JSON.toJSONString(DbMybetRec));
@@ -106,7 +113,7 @@ public class CrowdFundService implements       ICrowdFundService        {
 		JSONObject resData= new JSONObject();
 
 
-		JSONArray crowdFundRec= RedisData.crowdFundRec(jedisClient, issue+"");
+		JSONArray crowdFundRec= crowdFundRec(jedisClient, issue+"");
 
 		List<crowdFundBet> DbMybetRec=crowdFundMapper.MybetRec(issue,uid);
 		JSONArray mybetRec= JSONArray.parseArray(JSON.toJSONString(DbMybetRec));
@@ -137,7 +144,7 @@ public class CrowdFundService implements       ICrowdFundService        {
 		
 		JSONObject resData= new JSONObject();
 
-		Map<String,String> crowdFundMap=RedisData.getCurrCrowdFund(jedisClient);
+		Map<String,String> crowdFundMap=getCurrCrowdFund(jedisClient);
 		
 		resData.put("issue", crowdFundMap.get("issue"));
 
@@ -149,14 +156,14 @@ public class CrowdFundService implements       ICrowdFundService        {
 
 
 	@Override
-	public  Object   laid(String  RequestJsonData) throws Exception  {
+	public  Object   bet(String  RequestJsonData) throws Exception  {
 
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
 		JSONObject resData= new JSONObject();
 		int uid =reqData.getIntValue("uid");
 		int coin =reqData.getIntValue("coin");
 
-		Map<String,String> issueMap=RedisData.getCurrCrowdFund(jedisClient);
+		Map<String,String> issueMap=getCurrCrowdFund(jedisClient);
 		long issue=Long.parseLong(issueMap.get("issue"));
 		Calendar calendar = Calendar.getInstance();
 
@@ -173,10 +180,9 @@ public class CrowdFundService implements       ICrowdFundService        {
 		crowdFundBet.setTime((long)nowSec);
 		
 		int newCurrBuy=TransDeal.laidCrowdFund(crowdFundBet,false);
-		RedisData.updateCurrCrowdFundField(jedisClient, "schedule", newCurrBuy+"");
+		updateCurrCrowdFundField(jedisClient, "schedule", newCurrBuy+"");
 		String rec=JSONObject.toJSONString(crowdFundBet);
-		RedisData.addCrowdFundRec(jedisClient, issueMap.get("issue"), rec);
-		RedisData.UpdateUserSign(jedisClient, uid, 1);
+		addCrowdFundRec(jedisClient, issueMap.get("issue"), rec);
 		if(newCurrBuy==price){
 		
 			String uticket=(crowdFundBet.getIssue()+"")+(newCurrBuy+"");
@@ -189,7 +195,57 @@ public class CrowdFundService implements       ICrowdFundService        {
 
 
 
+	public static final Map<String, String>  getCrowdFundItem(IJedisClient client){
+		Map<String, String> mapUpdate=client.hgetAll(RedisData.DB1_1, CrowdFundItem);
+		return mapUpdate;
+	}
+	public static final void  setCurrCrowdFund(IJedisClient client,Map<String,String> issue){
+		client.hmset(RedisData.DB1_2, CurrCrowdFund,issue);
+		client.expire(RedisData.DB1_2, CurrCrowdFund, 2000);
+	}
+	public static final Map<String,String>  getCurrCrowdFund(IJedisClient client){
+		Map<String,String> mapData=client.hgetAll(RedisData.DB1_2, CurrCrowdFund);
+		return mapData;
+	}
+	
+	public static final void   updateCurrCrowdFundField(IJedisClient client,String field,String value){
+		client.hset(RedisData.DB1_2, CurrCrowdFund, field, value);
+	}
 
+	public static final JSONArray  crowdFundRecs(IJedisClient client){
+		JSONArray  resultData=new JSONArray();
+		List<String> records=client.lrange(RedisData.DB1_2, CrowdFundRecs, 0, 6);
+		Iterator<String> i=records.iterator();
+		while (i.hasNext()) {
+			String jsonStr=i.next();
+			resultData.add(jsonStr);
+		}
+		return resultData;
+	}
+	public static final void  addCrowdFundRecs(IJedisClient client,String Issue){
+		client.lpush(RedisData.DB1_2, CrowdFundRecs, Issue);
+		client.ltrim(RedisData.DB1_2, CrowdFundRecs, 0, 5);
+	}
+	
+	public static final JSONArray crowdFundRec(IJedisClient client,String issue){
+		JSONArray  resultData=new JSONArray();
+		List<String> records=client.lrange(RedisData.DB1_2, CrowdFundRec+issue, 0, 16);
+		Iterator<String> i=records.iterator();
+		while (i.hasNext()) {
+			String jsonStr=i.next();
+			JSONObject obj= JSONObject.parseObject(jsonStr);
+			resultData.add(obj);
+		}
+		return resultData;
+	}
+	public static final void  addCrowdFundRec(IJedisClient client,String issue,String rec){
+		client.lpush(RedisData.DB1_2, CrowdFundRec+issue, rec);
+		client.ltrim(RedisData.DB1_2, CrowdFundRec+issue, 0, 15);
+		client.expire(RedisData.DB1_2,CrowdFundRec+issue, 3600);
+	}
+	
+	
+	
 
 
 }

@@ -35,9 +35,9 @@ public class EventDistributor implements ExecutorHandle{
 			while (true) {
 				jedis.select(RedisData.DB1_1);
 				List<String> idStrList=jedis.blpop(10,Distributor+Group);
-				if(now>s){
-					break;
-				}
+//				if(now>s){
+//					break;
+//				}
 				if(idStrList==null){
 					break;
 				}

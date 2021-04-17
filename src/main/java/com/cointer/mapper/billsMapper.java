@@ -14,11 +14,10 @@ import com.cointer.pojo.vo.billsInfo;
 public interface billsMapper {
 
 	
-	@Select("select sum(cost) from bills where  uid=#{uid} and type=25")    
-	public Integer getLeaderProfit(int uid);
+
 	
 	@Select("select * from bills where  uid=#{uid} and type=#{type} ")    
-	List<billsInfo> winningRec(int uid,int type);
+	List<billsInfo> billsByType(int uid,int type);
 	
 	@Select("select * from bills where  uid=#{uid} and (type=#{type1} or type=#{type2})")    
 	List<billsInfo> billsListByTypes(int uid,int type1,int type2);

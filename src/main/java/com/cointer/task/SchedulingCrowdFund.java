@@ -23,6 +23,7 @@ import com.cointer.pojo.po.crowdFundBet;
 import com.cointer.pojo.po.gameUser;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
+import com.cointer.service.impl.CrowdFundService;
 import com.cointer.trans.TransDeal;
 
 
@@ -36,7 +37,7 @@ public class SchedulingCrowdFund {
 	@Autowired
 	private   TransDeal TransDeal;
 //    生成一元购产品
-	@Scheduled(initialDelay = 10*1000,fixedRate = 1800*1000)
+//	@Scheduled(initialDelay = 10*1000,fixedRate = 1800*1000)
     public void GenCrowdFund() {
     	try {
     		  Calendar calendar = Calendar.getInstance();
@@ -45,7 +46,7 @@ public class SchedulingCrowdFund {
     		if(issueMap.isEmpty()){
         		throw new ServiceException(StatusCode.FAILED,"GenCrowdFund_not_init", null);
         	}
-            RedisData.setCurrCrowdFund(jedisClient, issueMap);
+            CrowdFundService.setCurrCrowdFund(jedisClient, issueMap);
             crowdFund  crowdFund=new crowdFund();
             crowdFund.setIssue(Long.parseLong(issueMap.get("issue")));
             crowdFund.setName(issueMap.get("name"));
@@ -55,20 +56,20 @@ public class SchedulingCrowdFund {
             crowdFund.setTime(time);
             crowdFund.setVersion(0);
             crowdFundMapper.initCrowdFund(crowdFund);
-            RedisData.addCrowdFundIssueList(jedisClient, issueMap.get("issue"));
+            CrowdFundService.addCrowdFundRecs(jedisClient, issueMap.get("issue"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
     }
     
 //  添加购买记录
-	@Scheduled(initialDelay = 10*1000,fixedRate = 60*1000)
+//	@Scheduled(initialDelay = 10*1000,fixedRate = 60*1000)
     public void BotCrowdFund() {
 //       
     	try {
     		 Calendar calendar = Calendar.getInstance();
     		   int now=(int)(calendar.getTimeInMillis()/1000);
-    			  Map <String,String> crowdFund=RedisData.getCurrCrowdFund(jedisClient);
+    			  Map <String,String> crowdFund=CrowdFundService.getCurrCrowdFund(jedisClient);
     			  Long issue=Long.parseLong(crowdFund.get("issue"));
     			   int price=Integer.parseInt(crowdFund.get("price"));
     		       int beginTime=Integer.parseInt(crowdFund.get("beginTime"));
@@ -94,9 +95,9 @@ public class SchedulingCrowdFund {
 		   		crowdFundBet.setTime((long)now);
 		   		
 		   		int newCurrBuy=TransDeal.laidCrowdFund(crowdFundBet,true);
-		   		RedisData.updateCurrCrowdFundField(jedisClient, "schedule", newCurrBuy+"");
+		   		CrowdFundService.updateCurrCrowdFundField(jedisClient, "schedule", newCurrBuy+"");
 				String rec=JSONObject.toJSONString(crowdFundBet);
-				RedisData.addCrowdFundRec(jedisClient, issue+"", rec);
+				CrowdFundService.addCrowdFundRec(jedisClient, issue+"", rec);
 				if(newCurrBuy==price){
 					String uticket=(crowdFundBet.getIssue()+"")+(newCurrBuy+"");
 					crowdFundMapper.addWinner(issue,0,botObj.getString("name"),botObj.getString("photo"),uticket);
@@ -129,7 +130,7 @@ public class SchedulingCrowdFund {
          
          Map<String,String> result= new HashMap<String,String>();
          
-         Map<String,String> CrowdFundItem=RedisData.getCrowdFundItem(jedisClient);
+         Map<String,String> CrowdFundItem=CrowdFundService.getCrowdFundItem(jedisClient);
          
          
          result.put("issue", issue+"");

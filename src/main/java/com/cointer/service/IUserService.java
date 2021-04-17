@@ -12,7 +12,7 @@ public interface IUserService {
 	Object  regist(String RequestJsonData) throws Exception;
 	Object  login(String RequestJsonData) throws Exception;
 	Object write(String RequestJsonData) throws Exception;
-	Object getMembers(String RequestJsonData) throws Exception;
-	Object getSign(String RequestJsonData) throws Exception;
-	Object getSignPrice(String RequestJsonData) throws Exception;
+	Object leaderInfo(String RequestJsonData) throws Exception;
+	Object extractRebates(String RequestJsonData) throws Exception;
+
 }
