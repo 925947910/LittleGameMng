@@ -17,9 +17,6 @@ import com.cointer.mapper.gameTaskMapper;
 import com.cointer.mapper.gameUserMapper;
 import com.cointer.mapper.rbBallMapper;
 import com.cointer.mapper.tradeOrderMapper;
-import com.cointer.mapper.crowdFundMapper;
-import com.cointer.pojo.po.crowdFund;
-import com.cointer.pojo.po.crowdFundBet;
 import com.cointer.pojo.po.freeze;
 import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.rbBallBet;
@@ -44,8 +41,6 @@ public class TransDeal {
 	@Autowired
 	private   rbBallMapper rbBallBMapper;
 	
-	@Autowired
-	private   crowdFundMapper crowdFundMapper;
 	@Autowired
 	private   gameTaskMapper  gameTaskMapper;
 	@Transactional
@@ -99,14 +94,17 @@ public class TransDeal {
     		gameUser DBUser=DBUsers.get(0);
     		int version = DBUser.getVersion();
     		int oldCoin = DBUser.getCoin();
-    		int newCoin = oldCoin+ EventProcesser.platExtract(bank);
+    		
+    		int extractedBank=EventProcesser.platExtract(bank);
+    		int newCoin = oldCoin+extractedBank;
+    		System.out.println("!!!!!!!!!!!fallBanker oldCoin:"+oldCoin+"!!!bank:"+bank+"!!!extractedBank:"+extractedBank+"!!!newCoin:"+newCoin);
     		if(newCoin<0) {
     			throw new TransException("coin_not_enough");
     		}
     		if(gameUserMapper.coinChange(uid, newCoin, version)!=1) {
     			throw new TransException("coin_modify_failed");
     		}
-    		EventProcesser.writeBill(uid,DBUser.getNick(),DBUser.getAgentId(),bank,newCoin,EventProcesser.EVENT_BENZBMW_BET, uid,"BenzBmw下庄","","");
+    		EventProcesser.writeBill(uid,DBUser.getNick(),DBUser.getAgentId(),extractedBank,newCoin,EventProcesser.EVENT_BENZBMW_DRAW, uid,"Lottery Car fallBanker ","","");
 		
 	}
 	@Transactional
@@ -147,45 +145,7 @@ public class TransDeal {
 		    EventProcesser.writeBill(uid,DBUser.getNick(),DBUser.getAgentId(),-totalCoin, newCoin, EventProcesser.EVENT_ROULETTE_DRAW, uid,"Roulette下注","","");
 		return  PresenterId;
 	}
-	@Transactional
-	public   int  laidCrowdFund( crowdFundBet crowdFundBet,boolean isBot) throws Exception {
-		
-		if(!isBot){
-			List<gameUser> DBUsers=gameUserMapper.checkCoin(crowdFundBet.getUid());
-			gameUser DBUser=DBUsers.get(0);
-			int version = DBUser.getVersion();
-			int oldCoin = DBUser.getCoin();
-			int newCoin = oldCoin-crowdFundBet.getCoin();
-			if(newCoin<0) {
-				throw new TransException("coin_not_enough");
-			}
-			if(gameUserMapper.coinChange(crowdFundBet.getUid(), newCoin, version)!=1) {
-				throw new TransException("coin_modify_failed");
-			}
-			
-			EventProcesser.writeBill(crowdFundBet.getUid(),DBUser.getNick(),DBUser.getAgentId(),-crowdFundBet.getCoin(), newCoin, EventProcesser.EVENT_CROWDFUND_BET, crowdFundBet.getUid(),"一元购下注","","");
-			
-		}
-		List<crowdFund> crowdFunds=crowdFundMapper.checkCurrBuy(crowdFundBet.getIssue());
-		crowdFund crowdFund=crowdFunds.get(0);
-		int cVersion = crowdFund.getVersion();
-		int oldCurrBuy = crowdFund.getCurrBuy();
-		int price   =  crowdFund.getPrice();
-		
-		int newCurrBuy = oldCurrBuy+crowdFundBet.getCoin();
-		if(newCurrBuy>price) {
-			throw new TransException("stock_not_enough");
-		}
-		if(crowdFundMapper.addCurrBuy(crowdFundBet.getIssue(), newCurrBuy, cVersion)<1){
-			throw new TransException("buy_failed");
-		}
-		crowdFundBet.setTicket((crowdFundBet.getIssue()+"")+(newCurrBuy+""));
-		if(crowdFundMapper.addCrowdFundBet(crowdFundBet)!=1){
-			throw new TransException("buy_failed");
-		}
-		
-		return  newCurrBuy;
-	}
+
 	
 	@Transactional
 	public   void  taskAddCoin(int id,int taskType,int step,int uid,int coin) throws Exception {

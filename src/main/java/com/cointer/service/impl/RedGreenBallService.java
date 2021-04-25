@@ -59,7 +59,8 @@ public class RedGreenBallService implements IRedGreenBallService {
 	public static final String LotteryResult="lotteryResult";
 	public static final String LotteryPool="lotteryPool";
 	public static final String LotteryPrice="lotteryPrice";
-
+	public static final String TotalWin="totalWin";
+	public static final String IsDraw="isDraw";
 	
 	@Autowired
 	private   billsMapper billsMapper;
@@ -109,9 +110,12 @@ public class RedGreenBallService implements IRedGreenBallService {
 		JSONObject resData= new JSONObject();
 		int uid =reqData.getIntValue("uid");
 		Map<String,String> issueMap=getCurrRbBall(jedisClient);
+		List<String> rbBallPrice=jedisClient.lrange(RedisData.DB1_2,"rbBallPrice:"+uid, 0, -1);
+		jedisClient.del(RedisData.DB1_2,"rbBallPrice:"+uid);
 		resData.put("betEnd",  Integer.parseInt(issueMap.get(BetEnd)));
 		resData.put("issue",  Long.parseLong(issueMap.get(Issue)));
 		resData.put("coin", Integer.parseInt(RedisData.userField(jedisClient, uid, "coin")));	
+		resData.put("rbBallPrice",rbBallPrice);	
 		return resData;
 	
 	}
@@ -158,7 +162,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 		TransDeal.laidRbBall(rbBallBet);
 	    currRbBallBet(jedisClient, bet, (long)coin);
 		setRbBallBeter(jedisClient, Long.parseLong(issueMap.get(Issue)), bet, uid);
-		 resData.put("coin", Integer.parseInt(RedisData.userField(jedisClient, uid, "coin")));	
+		resData.put("coin", Integer.parseInt(RedisData.userField(jedisClient, uid, "coin")));	
 		return resData;
 	}
 	
@@ -202,12 +206,15 @@ public class RedGreenBallService implements IRedGreenBallService {
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     	try {
     		Map<String,String> issueMap=getIssue();
+    		issueMap.put(IsDraw,"0");
             setCurrRbBall(jedisClient, issueMap);
             rbBall rbBall=new rbBall();
             rbBall.setIssue( Long.parseLong(issueMap.get(Issue)));
             rbBall.setTime(Long.parseLong(issueMap.get(BetStart)));
             rbBall.setLotteryPool(0);
             rbBall.setLotteryPrice(0);
+            rbBall.setTotalWin(0);
+            rbBall.setIsDraw(0);
            if(rbBallMapper.currRbBall(Long.parseLong(issueMap.get(Issue))).isEmpty()){
         	  rbBallMapper.initRbBall(rbBall); 
            } 
@@ -223,7 +230,7 @@ public class RedGreenBallService implements IRedGreenBallService {
     		Long issue=Long.parseLong(issueMap.get(Issue));
 			String lotteryResult=issueMap.get(LotteryResult);
 			int lotteryPool= Integer.parseInt(issueMap.get(LotteryPool));
-//			int lotteryPrice=Integer.parseInt(issueMap.get("lotteryPrice"));
+			int totalWin=Integer.parseInt(issueMap.get(TotalWin));
 			rbBall rbBall=new rbBall();
 			
 			  Random rand = new Random();
@@ -234,7 +241,10 @@ public class RedGreenBallService implements IRedGreenBallService {
 			rbBall.setLotteryResult(lotteryResult);
 			rbBall.setLotteryPrice(basePrice);
 			rbBall.setLotteryPool(lotteryPool);
+			rbBall.setTotalWin(totalWin);
+			rbBall.setIsDraw(1);
 			issueMap.clear();
+			issueMap.put(IsDraw,"1");
 			issueMap.put(LotteryResult, lotteryResult);
 			rbBallMapper.updateRbBall(rbBall);
 			setCurrRbBall(jedisClient, issueMap);
@@ -276,12 +286,17 @@ public class RedGreenBallService implements IRedGreenBallService {
     		Iterator<String>  i= uids.iterator();
     		while (i.hasNext()) {
 				int uid =  Integer.parseInt(i.next());
-				JSONObject jsonEvent= new JSONObject();
-				jsonEvent.put("E", EventProcesser.EVENT_REDGREENBALL_DRAW);
-				jsonEvent.put("uid", uid);
-				jsonEvent.put("result", result);
-				jsonEvent.put("issue", issue);
-				RedisData.addEvent(jedisClient, uid, jsonEvent.toString());
+				int cost=EventProcesser.platExtract(getPrice(uid, issue, result));
+				if(cost>0){
+					JSONObject jsonEvent= new JSONObject();
+					jsonEvent.put("E", EventProcesser.EVENT_REDGREENBALL_DRAW);
+					jsonEvent.put("uid", uid);
+					jsonEvent.put("result", result);
+					jsonEvent.put("issue", issue);
+					jsonEvent.put("cost", cost);
+					RedisData.addEvent(jedisClient, uid, jsonEvent.toString());
+					jedisClient.rpush(RedisData.DB1_2,"rbBallPrice:"+uid,jsonEvent.toString());
+				}
 			}
     		
     	} 
@@ -401,7 +416,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 		 
     	 issueMap.put(LotteryResult, Resutl+"");
     	 issueMap.put(LotteryPool, total+"");
-    	 issueMap.put(LotteryPrice, price+"");
+    	 issueMap.put(TotalWin, price+"");
 
     	return issueMap;
     }

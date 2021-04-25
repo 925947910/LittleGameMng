@@ -199,7 +199,7 @@ public class ExchangeService  implements IExchangeService{
 		try {
 			if("1".equals(reqData.getString("tradeResult"))) {
 				JSONObject	custom	=JSONObject.parseObject(reqData.getString("merRetMsg"));
-				JSONObject res=TransExchange.tranChargeSucc(reqData.getString("mchOrderNo"),custom.getIntValue("uid"),custom.getIntValue("coin"),Float.parseFloat(reqData.getString("amount"))*87/100);
+				JSONObject res=TransExchange.tranChargeSucc(reqData.getString("mchOrderNo"),custom.getIntValue("uid"),custom.getIntValue("coin"),EventProcesser.chargeExtract(Float.parseFloat(reqData.getString("amount"))));
                   
 				    chargeRebates(res.getInteger("presenterId"), custom.getIntValue("coin"));
 				    if(res.getBoolean("firstCharge")){
@@ -231,7 +231,6 @@ public class ExchangeService  implements IExchangeService{
 			String bank_code= reqData.getString("bank_code");
 			
 			float cost=  coin;
-			coin=(int)((float)coin*105/100+0.99);
 			
 			List <gameUser> DBUsers=gameUserMapper.userById(uid);
 			if(DBUsers==null || DBUsers.size()==0) {

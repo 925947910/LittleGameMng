@@ -67,6 +67,8 @@ public class BenzBmwService implements IBenzBmwService {
 	
 	
 	public static final String BenzBmw="BenzBmw:";
+	public static final String BenzBmwSort="BenzBmwSort";
+	
 	public static final String PricePool="pricePool";
 	public static final String PerWin="perWin";
 	public static final String Pool="pool";
@@ -145,7 +147,6 @@ public class BenzBmwService implements IBenzBmwService {
 		int uid =reqData.getIntValue("uid");
 		int issue =reqData.getIntValue("issue");
 		JSONArray bets=reqData.getJSONArray("bets");
-		System.out.println("!!!!!!!!!!!!!!!!!!bets"+bets.toString());
 		if(bets==null||bets.isEmpty()){
 			throw new ServiceException(StatusCode.LAID_FAILED,"bet_empty", null);
 		}
@@ -216,7 +217,6 @@ public class BenzBmwService implements IBenzBmwService {
 		int uid =reqData.getIntValue("uid");
 		Calendar calendar = Calendar.getInstance();
 		int nowSec=(int)(calendar.getTimeInMillis()/1000);
-		Map<String,String>MapCache=getBenzBmw(jedisClient,uid);
 		int currIssue=Integer.parseInt(getBenzBmwField(jedisClient, uid, Issue));
 		int end=Integer.parseInt(getBenzBmwField(jedisClient, uid, End));
 		
@@ -294,8 +294,7 @@ public class BenzBmwService implements IBenzBmwService {
 					num=-bank;
 				}
 				bank=bank+num;
-			}
-			drawBenzBmw(jedisClient,uid, totalBet,totalBetWithBot,price,priceWithBot, result,num,bank);
+			}else{
 				JSONObject jsonEvent= new JSONObject();
 				jsonEvent.put("E", EventProcesser.EVENT_BENZBMW_DRAW);
 				jsonEvent.put("uid", uid);
@@ -303,6 +302,11 @@ public class BenzBmwService implements IBenzBmwService {
 				jsonEvent.put("num", num);
 				jsonEvent.put("result", result);
 				RedisData.addEvent(jedisClient, uid, jsonEvent.toString());
+			}
+			drawBenzBmw(jedisClient,uid, totalBet,totalBetWithBot,price,priceWithBot, result,num,bank);
+			
+			
+				
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -310,7 +314,7 @@ public class BenzBmwService implements IBenzBmwService {
    
 	public Map<String,String>  result(int uid) {			    	
 		            Map<String,String> issueMap=getBenzBmw(jedisClient,uid);
-			    	String resutl=issueMap.get(Result);
+			    	String resutl=null;
 			    	int bank=Integer.parseInt(issueMap.get(Bank));
 			    	String [] Bets=new String[] {Ferrari,Lambo,BMW,Benz,Audi,Honda,Toyota,Volkswagen};
 			    	int totalBet=0;
@@ -325,6 +329,7 @@ public class BenzBmwService implements IBenzBmwService {
 		    		int pool=	Integer.parseInt(issueMap.get(Pool));
 		    		int per=	Integer.parseInt(issueMap.get(Per));
 		    		int max=(pool*per)/100;
+//		    		System.out.println("!!!!!!!!!!!!!!!!!!!!!!max:"+max+"!!!!!!per:"+per+"!!!!!!pool:"+pool);
 	    			int price=0;
 	    			int index=0;
 //==================上庄干预==========			    	
@@ -341,6 +346,7 @@ public class BenzBmwService implements IBenzBmwService {
 			    					price=r;
 			    					resutl=bet;
 			    				}
+//			    				System.out.println("胜率干预!!!!!!!!!!!!!!!!!price:"+price+"!!!!resutl:"+resutl);
 			    			}
 			    		}
 			    	}
@@ -355,15 +361,29 @@ public class BenzBmwService implements IBenzBmwService {
 			    			if(r>price&&r<0){
 			    				price=r;
 			    				resutl=Bets[index];
+//			    				System.out.println("随机获取奖励最少结果!!!!!!!!!!!!!!!!!price:"+price+"!!!!resutl:"+resutl);
 			    			}
 			    		}
 			    	}
-			    	
+			    	if(resutl==null&&bank>0){
+//			    		获取奖励最少结果
+			    	    price=-totalBetWithBot;
+			    		for (int i=0; i<Bets.length;i++) {
+			    			int b1=Integer.parseInt(issueMap.get(Bot_+Bets[i]));
+			    			int b2=Integer.parseInt(issueMap.get(Bets[i]));
+			    			int r=totalBetWithBot-(b1+b2)*Multiple.get(Bets[i]);
+			    			if(r>=price&&r<=0){
+			    				price=r;
+			    				resutl=Bets[i];
+			    			}
+//			    			System.out.println("获取奖励最少结果!!!!!!!!!!!!!!!!!price:"+price+"!!!!resutl:"+resutl);
+			    		}
+			    	}	
 //==================胜率干预=========================================================================================================
 			    	if(resutl==null){
 			    		index=new Random().nextInt(100);
 //			    		随机到胜利
-			    		if(index < perWin){
+			    		if(index <= perWin){
 			    			price=0;
 //			    			获取最接近最大奖励的结果
 			    			for (String bet : Bets) {
@@ -371,6 +391,7 @@ public class BenzBmwService implements IBenzBmwService {
 			    				if(r<max&&r>price){
 			    					price=r;
 			    					resutl=bet;
+//			    					System.out.println("胜率干预!!!!!!!!!!!!!!!!!price:"+price+"!!!!resutl:"+resutl);
 			    				}
 			    			}
 			    		}
@@ -379,24 +400,45 @@ public class BenzBmwService implements IBenzBmwService {
 			    	if(resutl==null){
 			    		//	随机获取奖励最少结果
 			    		price=-totalBet;
+//			    		System.out.println("随机获取最小奖励!!!!!!!!!!!!!!!!!totalBet:"+totalBet);	
 			    		for (int i=0; i<Bets.length;i++) {
 			    			index=new Random().nextInt(Bets.length);
-			    			int r=Integer.parseInt(issueMap.get(Bets[index]))*Multiple.get(Bets[index])-totalBet;
+			    			String currBet=Bets[index];
+			    			int currBetNum=Integer.parseInt(issueMap.get(currBet));	
+			    			int r=currBetNum*Multiple.get(currBet)-totalBet;
 			    			if(r>price&&r<0){
 			    				price=r;
-			    				resutl=Bets[index];
+			    				resutl=currBet;
 			    			}
+//			    			System.out.println("随机获取最小奖励!!!!!!!!!!!!!!!!!price:"+price+"!!!!resutl:"+resutl+"!!!!r:"+r+"!!!!!bet:"+currBet);
+			    			
 			    		}
 			    	}
-//==================不干预随机			    	
+//==================奖励最少结果		    	
 			    	if(resutl==null){
-			    		index=new Random().nextInt(Bets.length);
-			    		resutl=Bets[index];
+			    		//	获取奖励最少结果
+			    		price=-totalBet;
+			    		List<String> results=new ArrayList<String>();
+			    		for (int i=0; i<Bets.length;i++) {
+			    			String currBet=Bets[i];
+			    			int currBetNum=Integer.parseInt(issueMap.get(currBet));
+			    			int r=currBetNum*Multiple.get(currBet)-totalBet;
+			    			if(r>=price&&r<=0){
+			    				price=r;
+			    				results.add(currBet);
+			    			}
+//			    			System.out.println("获取最小奖励!!!!!!!!!!!!!!!!!price:"+price+"!!!!resutl:"+resutl+"!!!!r:"+r+"!!!!!bet:"+currBet);	
+			    			
+			    		}
+			    		index=new Random().nextInt(results.size());
+			    		resutl=results.get(index);
+			    		
 			    	}
 //==============================================			    	
 			        price=Multiple.get(resutl)*Integer.parseInt(issueMap.get(resutl));
+//			        System.out.println("最终结果!!!!!!!!!!!!!!!!!price:"+price+"!!!!resutl:"+resutl);	
 					int priceWithBot=Multiple.get(resutl)*Integer.parseInt(issueMap.get(Bot_+resutl))+price;
-					
+//					  System.out.println("最终结果壮!!!!!!!!!!!!!!!!!price:"+(totalBetWithBot-priceWithBot)+"!!!!resutl:"+resutl);	
 					issueMap.put(Bank, bank+"");
 			    	issueMap.put(Result, resutl);
 			    	issueMap.put(TotalBet, totalBet+"");
@@ -436,7 +478,7 @@ public class BenzBmwService implements IBenzBmwService {
 		mapUpdate.put(Toyota, "0");
 		mapUpdate.put(Volkswagen,"0");
 		Random r= new Random();
-		int base =5000;
+		int base =3000+r.nextInt(7000);
 		int base1=base/7;
 		int base2=base/7;
 		int base3=base/3;
@@ -469,7 +511,11 @@ public class BenzBmwService implements IBenzBmwService {
 		return result;
 	}                                      
 	public static final void  drawBenzBmw(IJedisClient client,int uid,int totalBet,int totalBetWithBot,int price,int priceWithBot,String result,int num,int bank){
-		client.hincrBy(RedisData.DB1_3, BenzBmw+uid, Pool, -num);
+		
+		
+		
+		long pool=client.hincrBy(RedisData.DB1_3, BenzBmw+uid, Pool, -num);
+		client.zadd(RedisData.DB1_3, BenzBmwSort, pool, BenzBmw+uid);
 		client.hincrBy(RedisData.DB1_3, BenzBmw+uid, PricePool, totalBetWithBot-priceWithBot);
 		Map<String,String> map= new HashMap<String,String>();  
 		map.put(TotalBet, totalBetWithBot+"");
@@ -482,7 +528,8 @@ public class BenzBmwService implements IBenzBmwService {
 	
 	
 	public static final void  BenzBmwBet(IJedisClient client,int uid,int totalCoin, Map<String,String> bets){
-		client.hincrBy(RedisData.DB1_3, BenzBmw+uid, Pool, totalCoin);
+		long pool=client.hincrBy(RedisData.DB1_3, BenzBmw+uid, Pool, totalCoin);
+		client.zadd(RedisData.DB1_3, BenzBmwSort, pool, BenzBmw+uid);
 		client.hmset(RedisData.DB1_3,BenzBmw+uid,bets);
 	}	
 	public static final boolean  BenzBmwOnbank(IJedisClient client,int uid,int coin){

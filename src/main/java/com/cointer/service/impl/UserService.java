@@ -120,7 +120,6 @@ public class UserService implements IUserService {
 			if(gameUserMapper.registGameUser(DBUser)!=1){
 				throw new ServiceException(StatusCode.REGIST_FAILED,"account_regist_failed", null);
 			}
-		    RedisData.setAccKey(jedisClient,id, loginDto.getPlat(), loginDto.getAcc());
 			GameTaskService.updateSchedul(loginDto.getPresenterId(), GameTaskService.TASK1, 1);
 		return id;
 	}
@@ -204,17 +203,18 @@ public class UserService implements IUserService {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
 		JSONObject resData=new JSONObject();
 		Integer uid=reqData.getInteger("uid");
-		Integer coin=reqData.getInteger("coin");
 		Integer rewardsPool=0;
 		String  chargeRebates=RedisData.userField(jedisClient, uid, "chargeRebates");
 		if(chargeRebates!=null){
 			rewardsPool=Integer.parseInt(chargeRebates);
 		}
-		if(coin>rewardsPool){
+		if(rewardsPool==0){
 			throw new ServiceException(StatusCode.FAILED,"rewardsPool_not_enough", null);
 		}
-		EventProcesser.gameCoinChange(uid, coin, EventProcesser.EVENT_EXTRACT_REBATES, 0, "extractRebates");
-		RedisData.addChargeRebates(jedisClient, uid, -coin);
+		EventProcesser.gameCoinChange(uid, rewardsPool, EventProcesser.EVENT_EXTRACT_REBATES, 0, "extractRebates");
+		RedisData.addChargeRebates(jedisClient, uid, -rewardsPool);
+		List<billsInfo> rewardsRec=billsMapper.billsByType(uid, EventProcesser.EVENT_EXTRACT_REBATES);
+		resData.put("rewardsRec",rewardsRec);
 		resData.put("rewardsPool", RedisData.userField(jedisClient, uid, "chargeRebates"));
 		resData.put("coin",RedisData.userField(jedisClient, uid, "coin"));
 		return resData;
@@ -250,11 +250,18 @@ public class UserService implements IUserService {
 	
 	public   Object  userInfo(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
+		JSONObject resData=new JSONObject();
 		int uid=reqData.getIntValue("uid");
 		
 		Map<String,String> MapResult=RedisData.userInfo(jedisClient, uid);
-
-		return MapResult;
+		String url=RedisData.getUri(jedisClient, 0, "shareUrl");
+		List<billsInfo> bills=billsMapper.billsListByTypes(uid, EventProcesser.EVENT_REDGREENBALL_DRAW,EventProcesser.EVENT_BENZBMW_DRAW);
+		resData.put("userInfo", MapResult);
+		resData.put("bills", bills);
+//		resData.put("isLeader", isLeader);
+		resData.put("shareUrl", url+"?agentId="+MapResult.get("agentId")+"&presenterId="+uid);
+		
+		return resData;
 	}
 	
 
@@ -264,18 +271,22 @@ public class UserService implements IUserService {
 	public  Object   write(String  RequestJsonData) throws Exception  {
 		Map<String,String> interfaceUri= new HashMap<String,String>();
 		
-		interfaceUri.put("chargeUrl", "https://api.quickpayind.support/pay");
+		
+		interfaceUri.put("mch_id", "100017003");
+		interfaceUri.put("payKey", "0Q5gl3OYT2oHA5c5");
+		interfaceUri.put("transferKey", "100017003");
+		
+		
+	    interfaceUri.put("chargeUrl", "https://api.quickpayind.support/pay");
 		interfaceUri.put("chargeCallbackUrl", "http://377u408z76.wicp.vip:47585/GameUser/exchange/chargeCallBack");
 		interfaceUri.put("chargeSuccUrl", "http://www.baidu.com/");
-		
 		interfaceUri.put("extractUrl", "https://api.quickpayind.support/applyfor");
 		interfaceUri.put("verifyOrderUrl", "http://127.0.0.1:8085/GameUser/exchange/verifyExtract");
-		interfaceUri.put("extractCallbackUrl", "http://377u408z76.wicp.vip:47585/GameUser/exchange/extractCallBack");
+		interfaceUri.put("extractCallbackUrl", "http://377u408z76.wicp.vip:47585/GameUser/exchange/extractCallBack");	
 		
-		interfaceUri.put("gameUrl", "http://www.baidu.com/");
 		interfaceUri.put("shareUrl", "http://127.0.0.1:8085/GameUser/view/regist");
-		interfaceUri.put("customerId", "big22");
-		interfaceUri.put("goldKey", "0Q5gl3OYT2oHA5c5");
+		interfaceUri.put("gameUrlAndroid", "http://www.baidu.com/");
+		interfaceUri.put("gameUrlIos", "http://www.baidu.com/");
 		
 		try {
 		
@@ -287,31 +298,23 @@ public class UserService implements IUserService {
 		
 		
 
-		Map<String,String>  crowdFundItem= new HashMap<String,String>();
-		
-		crowdFundItem.put("name", "iphone12");
-		crowdFundItem.put("price", "100000");
-		crowdFundItem.put("picture", "[www.baidu.com,www.baidu.com,www.baidu.com,www.baidu.com]");
-		try {
-			jedisClient.hmset(RedisData.DB1_1, "crowdFundItem", crowdFundItem);			
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
+
 		  
 						   
 						
 		List<String> photos= new ArrayList<String>();
-		
-		photos.add("http://129.226.35.186/head/man1.jpg");
-		photos.add("http://129.226.35.186/head/man2.jpg");
-		photos.add("http://129.226.35.186/head/man3.jpg");
-		photos.add("http://129.226.35.186/head/man4.jpg");
-		photos.add("http://129.226.35.186/head/man5.jpg");
-		photos.add("http://129.226.35.186/head/woman1.jpg");
-		photos.add("http://129.226.35.186/head/woman2.jpg");
-		photos.add("http://129.226.35.186/head/woman3.jpg");
-		photos.add("http://129.226.35.186/head/woman4.jpg");
-		photos.add("http://129.226.35.186/head/woman5.jpg");
+		String headUrl=jedisClient.hget(RedisData.DB1_1, RedisData.INTERFACE_URI+0, "headUrl");
+		photos.add(headUrl+"man1.jpg");
+		photos.add(headUrl+"man2.jpg");
+		photos.add(headUrl+"man3.jpg");
+		photos.add(headUrl+"man4.jpg");
+		photos.add(headUrl+"man5.jpg");
+		photos.add(headUrl+"woman1.jpg");
+		photos.add(headUrl+"woman2.jpg");
+		photos.add(headUrl+"woman3.jpg");
+		photos.add(headUrl+"woman4.jpg");
+		photos.add(headUrl+"woman5.jpg");
+		jedisClient.del(RedisData.DB1_1, "InfoBots");
 		
 		List<bots>bots=gameUserMapper.getBots();
 		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!begin:"+System.currentTimeMillis()/1000);

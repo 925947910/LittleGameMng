@@ -114,7 +114,7 @@ public class EventProcesser {
 			 uid = data.getIntValue("uid");
 			 result = data.getString("result");
 			 issue = data.getLongValue("issue");
-				cost=EventProcesser.platExtract(RedGreenBallService.getPrice(uid, issue, result));
+			 cost =	data.getIntValue("cost");
 				if (cost != 0) {
 					for (int i = 0; i < 10; i++) {
 						try {
@@ -229,7 +229,9 @@ public class EventProcesser {
 	}
 
 	public static  int platExtract(int num){
-		return num*97/100;
+		return num*95/100;
 	}
-
+	public static  float chargeExtract(float num){
+		return num*92/100;
+	}
 }
