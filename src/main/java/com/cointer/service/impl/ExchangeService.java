@@ -55,6 +55,8 @@ import com.cointer.util.MD5Util;
 import com.cointer.util.RSAUtils;
 import com.cointer.util.SpringContextUtil;
 
+import io.lettuce.core.RedisClient;
+
 
 
 
@@ -87,7 +89,7 @@ public class ExchangeService  implements IExchangeService{
 	private   freezeMapper freezeMapper;
 	@Autowired
 	private   GameTaskService GameTaskService;
-	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 23, "channel": 121,"bank_code":IDPT0001,"cost": 100}
+	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 30, "channel": 102,"bank_code":"IDPT0001","cost": 100}
 	@Override
 	public   Object  chargeOrder(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
@@ -167,7 +169,7 @@ public class ExchangeService  implements IExchangeService{
 //		 JsonAuth =URLDecoder.decode(JsonAuth,"UTF-8");
 		 JsonAuth =HttpClientUtil.TruncateUrlPage(JsonAuth);
 		 paramsMap=HttpClientUtil.URLRequest(JsonAuth);
-		TransExchange.tranGenOrderIn(now,uid,gameUser.getAgentId(),mch_order_no,paramsMap.get("orderId"), "", "", cost, cost, "INR");	
+		TransExchange.tranGenOrderIn(now,uid,gameUser.getAgentId(),gameUser.getPresenterId(),mch_order_no,paramsMap.get("orderId"), "", "", cost, cost, "INR");	
 		return resData;
 	}
 	@Override
@@ -218,7 +220,7 @@ public class ExchangeService  implements IExchangeService{
 	}	
 	
 	
-	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 23, "coin": 1000, "receive_name": "yeah", "receive_account": "6262662666662666", "remark": "HDFC0000027", "bank_code": "IDPT0001"}
+	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "receive_name": "yeah", "receive_account": "6262662666662666", "remark": "HDFC0000027", "bank_code": "IDPT0001"}
 		@Override
 		public   Object  extractOrder(String  RequestJsonData) throws Exception {
 			JSONObject reqData=JSON.parseObject(RequestJsonData);
@@ -231,7 +233,12 @@ public class ExchangeService  implements IExchangeService{
 			String bank_code= reqData.getString("bank_code");
 			
 			float cost=  coin;
-			
+			Date Date =new Date(); 
+			long now=	Date.getTime()/1000;
+			String extractLimitStr= RedisData.userField(jedisClient, uid, "extractLimit");
+			if(extractLimitStr!=null&&Integer.parseInt(extractLimitStr)>now){
+				throw new ServiceException(StatusCode.GEN_ORDER_FAILED,"withdrawal system is busy", null);
+			}
 			List <gameUser> DBUsers=gameUserMapper.userById(uid);
 			if(DBUsers==null || DBUsers.size()==0) {
 				throw new ServiceException(StatusCode.GEN_ORDER_FAILED,"user_not_exist", null);
@@ -248,7 +255,7 @@ public class ExchangeService  implements IExchangeService{
 			
 			String AccountOut=outInfo.toString();
 			
-			TransExchange.tranGenOrderOut(uid,gameUser.getAgentId(),fId,orderid,orderid, receive_account, AccountOut,cost, coin, "INR");	
+			TransExchange.tranGenOrderOut(uid,gameUser.getAgentId(),gameUser.getPresenterId(),fId,orderid,orderid, receive_account, AccountOut,cost, coin, "INR");	
 
 			return resData;
 		}

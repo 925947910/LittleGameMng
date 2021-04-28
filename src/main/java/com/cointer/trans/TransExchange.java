@@ -87,7 +87,7 @@ public class TransExchange {
 	
 	
 	@Transactional
-	public   tradeOrder tranGenOrderIn(long now,int uid,int agentId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
+	public   tradeOrder tranGenOrderIn(long now,int uid,int agentId,int presenterId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
 		
 	
 		int orderId = RedisData.genOrderId(jedisClient);
@@ -101,6 +101,7 @@ public class TransExchange {
 		orderBean.setPlat(0);
 		orderBean.setUid(uid);
 		orderBean.setAgentId(agentId);
+		orderBean.setPresenterId(presenterId);
 		orderBean.setCost(cost);
 		orderBean.setFreezeId(0);
 		orderBean.setCoin(coin);
@@ -116,7 +117,7 @@ public class TransExchange {
 	
 	
 	@Transactional                        
-	public   tradeOrder  tranGenOrderOut(int uid,int agentId,int fId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
+	public   tradeOrder  tranGenOrderOut(int uid,int agentId,int presenterId,int fId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
 		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
 		gameUser DBUser=DBUsers.get(0);
 		int version = DBUser.getVersion();
@@ -152,6 +153,7 @@ public class TransExchange {
 		orderBean.setPlat(0);
 		orderBean.setUid(uid);
 		orderBean.setAgentId(agentId);
+		orderBean.setPresenterId(presenterId);
 		orderBean.setCost(cost);
 		orderBean.setCoin(coin);
 		orderBean.setAccountOut(accOut);

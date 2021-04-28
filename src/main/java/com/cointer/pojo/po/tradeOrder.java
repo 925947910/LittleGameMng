@@ -11,6 +11,7 @@ public class tradeOrder {
 	private Integer plat;
 	private Integer uid;
 	private Integer agentId;
+	private Integer presenterId;
 	private float cost;
 	private String  currency="";
 	private Integer  coin;
@@ -55,6 +56,12 @@ public class tradeOrder {
 	}
 	public void setAgentId(Integer agentId) {
 		this.agentId = agentId;
+	}
+	public Integer getPresenterId() {
+		return presenterId;
+	}
+	public void setPresenterId(Integer presenterId) {
+		this.presenterId = presenterId;
 	}
 	public float getCost() {
 		return cost;

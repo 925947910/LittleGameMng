@@ -36,10 +36,10 @@ public interface rbBallMapper {
 	public Integer coinByBet(int uid,long issue,String bet);
 	
 	
-	@Delete("delete from rbball where 'time' < #{time}")
+	@Delete("delete from rbball where time < #{time}")
 	public int cleanRbball(long time);
 	
-	@Delete("delete from rbballbet where 'time' < #{time}")
+	@Delete("delete from rbballbet where time < #{time}")
 	public int cleanRbballBets(long time);
 	
 

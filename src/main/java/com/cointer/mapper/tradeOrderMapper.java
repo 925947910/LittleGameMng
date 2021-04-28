@@ -42,13 +42,13 @@ public interface tradeOrderMapper {
 	@Update("update tradeorder set orderRemote=#{orderRemote}  where id=#{id}")
 	public int  updateOrderRemote(int id,String orderRemote);
 
-	@Insert("insert into tradeorder(id,uid,agentId,freezeId,coin,cost,accountOut,accountIn,orderLocal,orderRemote,currency,orderType,time,status) values (#{id},#{uid},#{agentId},#{freezeId},#{coin},#{cost},#{accountOut},#{accountIn},#{orderLocal},#{orderRemote},#{currency},#{orderType},#{time},#{status})")
+	@Insert("insert into tradeorder(id,uid,agentId,presenterId,freezeId,coin,cost,accountOut,accountIn,orderLocal,orderRemote,currency,orderType,time,status) values (#{id},#{uid},#{agentId},#{presenterId},#{freezeId},#{coin},#{cost},#{accountOut},#{accountIn},#{orderLocal},#{orderRemote},#{currency},#{orderType},#{time},#{status})")
 	public int  insertTradeOrder(tradeOrder tradeOrder);
 
-	@Delete("delete from tradeorder where 'time' < #{time} and orderType=1 and status !=3")
+	@Delete("delete from tradeorder where time < #{time} and orderType=1 and status !=3")
 	public int cleanTradeorderIn(long time);
-	@Delete("delete from tradeorder where 'time' < #{time} and orderType=2 and status ==4")
+	@Delete("delete from tradeorder where time < #{time} and orderType=2 and status =4")
 	public int cleanTradeorderOut(long time);
-	@Delete("delete from tradeorder where 'time' < #{time} ")
+	@Delete("delete from tradeorder where time < #{time} ")
 	public int cleanTradeorder(long time);
 }

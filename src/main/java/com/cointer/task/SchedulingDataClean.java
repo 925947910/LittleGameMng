@@ -30,7 +30,9 @@ public class SchedulingDataClean {
 	@Autowired
 	private   tradeOrderMapper tradeOrderMapper;
 	
-    @Scheduled(cron = "0 0 00 * * ?")
+   
+//    @Scheduled(cron = "0 0/1 * * * ?")
+	 @Scheduled(cron = "0 0 00 * * ?")
     public void CleanBills() {
     	try {
          long time =System.currentTimeMillis()/1000;
@@ -42,6 +44,7 @@ public class SchedulingDataClean {
     	 tradeOrderMapper.cleanTradeorder(time-(30*24*3600));
     	 tradeOrderMapper.cleanTradeorderOut(time-(3*24*3600));
     	 tradeOrderMapper.cleanTradeorderIn(time-(3*24*3600));
+    	 log.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CleanDatas");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

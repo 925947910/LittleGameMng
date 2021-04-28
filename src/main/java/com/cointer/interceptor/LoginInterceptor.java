@@ -48,12 +48,12 @@ public class LoginInterceptor extends BaseInterceptor implements HandlerIntercep
 		}
 		String  session=request.getParameter(Constant._SESSION);
 		if(session == null) {
-			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆:"+uri, null));
+			send(response, BaseController.failed(StatusCode.NO_LOGIN, "User login failed please login again", null));
 			return false;
 		}
 		Map<String,String> sessionData=RedisData.getSessionInfo(jedisClient, session);
 		if(sessionData==null||sessionData.size()==0) {
-			send(response, BaseController.failed(StatusCode.NO_LOGIN, "用户未登陆:"+uri, null));
+			send(response, BaseController.failed(StatusCode.NO_LOGIN, "User login failed please login again", null));
 			return false;
 		}
 		  String uid=sessionData.get("uid");
