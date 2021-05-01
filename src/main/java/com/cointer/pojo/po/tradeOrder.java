@@ -27,6 +27,7 @@ public class tradeOrder {
 	public void setId(Integer id) {
 		this.id = id;
 	}
+
 	public String getOrderLocal() {
 		return orderLocal;
 	}

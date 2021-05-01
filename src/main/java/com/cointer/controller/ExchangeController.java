@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,14 +17,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.Feature;
-import com.cointer.constant.StatusCode;
 import com.cointer.controller.base.BaseController;
-import com.cointer.exception.ServiceException;
-import com.cointer.exception.TransException;
+import com.cointer.pojo.tikPay.*;
 import com.cointer.redis.IJedisClient;
 import com.cointer.service.IExchangeService;
 import com.cointer.util.HttpClientUtil;
+import com.cointer.util.tikPay.AESOperator;
 
 
 
@@ -143,7 +142,48 @@ public class ExchangeController extends  BaseController{
 //			return failed(StatusCode.FAILED, "系统异常", null);
 //		} 
 	}
+	 @PostMapping("/tikSucess")
+	    public CommonResult sucess(@RequestBody OtcCallPo callPo) {
+	        try {
+	            String data =  AESOperator.getInstance().decrypt(callPo.getEncryptedData(),"2qnt0DQoHrBLDQYkW45hYOMwfYIHdFsOuqrJ4pkzAVA=".substring(0,16));
 
+	            CallVo callVo = JSON.parseObject(data, CallVo.class);
+
+	            System.out.println("------------------------"+callVo.getThirdOrderNumber()+";"+callVo.getStatus());
+
+	         /*   String decryptedData = AESOperator.getInstance().decrypt(encryptedReq.getEncryptedData());
+	            AdInfoPo adInfoPo = JSON.parseObject(decryptedData, AdInfoPo.class);*/
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+
+	        return new CommonResult(1,"SCUESS",null);
+	    }
+
+
+
+
+	    @PostMapping("/tikFail")
+	    public CommonResult fail(@RequestBody OtcCallPo callPo) {
+	        try {
+	            String data =AESOperator.getInstance().decrypt(callPo.getEncryptedData(),"2qnt0DQoHrBLDQYkW45hYOMwfYIHdFsOuqrJ4pkzAVA=".substring(0,16));
+	            CallVo callVo = JSON.parseObject(data, CallVo.class);
+
+	            System.out.println("------------------------"+callVo.getThirdOrderNumber()+";"+callVo.getStatus());
+
+
+	         /*   String decryptedData = AESOperator.getInstance().decrypt(encryptedReq.getEncryptedData());
+	            AdInfoPo adInfoPo = JSON.parseObject(decryptedData, AdInfoPo.class);*/
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	        return new CommonResult(2,"FAIL",null);
+
+
+	    }
 
 
 }

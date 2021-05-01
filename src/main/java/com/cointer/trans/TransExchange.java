@@ -87,7 +87,7 @@ public class TransExchange {
 	
 	
 	@Transactional
-	public   tradeOrder tranGenOrderIn(long now,int uid,int agentId,int presenterId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
+	public   tradeOrder tranGenOrderIn(int plat,long now,int uid,int agentId,int presenterId,String orderLocal,String orderRemote,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
 		
 	
 		int orderId = RedisData.genOrderId(jedisClient);
@@ -96,9 +96,9 @@ public class TransExchange {
 		orderBean.setId(orderId);
 		orderBean.setAccountIn(accIn);
 		orderBean.setAccountOut(accOut);
-		orderBean.setOrderLocal(orderid);
-		orderBean.setOrderRemote(transactionid);
-		orderBean.setPlat(0);
+		orderBean.setOrderLocal(orderLocal);
+		orderBean.setOrderRemote(orderRemote);
+		orderBean.setPlat(plat);
 		orderBean.setUid(uid);
 		orderBean.setAgentId(agentId);
 		orderBean.setPresenterId(presenterId);
@@ -110,7 +110,7 @@ public class TransExchange {
 		orderBean.setStatus(ORDER_PROCESSING);  // 0 初始  1 订单对接成功    2转账中  3成功   4失败
 		orderBean.setTime(now);
 		if(tradeOrderMapper.insertTradeOrder(orderBean)!=1) {
-			throw new TransException("gen_order_failed:"+transactionid);
+			throw new TransException("gen_order_failed:"+orderRemote);
 		}
        return orderBean;
 	}

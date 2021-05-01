@@ -8,30 +8,18 @@ package com.cointer.service.impl;
 
 
 
-import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.util.EntityUtils;
-import org.omg.CORBA.INTERNAL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.cointer.constant.StatusCode;
@@ -41,10 +29,9 @@ import com.cointer.exception.TransException;
 import com.cointer.mapper.freezeMapper;
 import com.cointer.mapper.gameUserMapper;
 import com.cointer.mapper.tradeOrderMapper;
-import com.cointer.pojo.dto.extractDto;
-import com.cointer.pojo.dto.freezeDto;
 import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.tradeOrder;
+import com.cointer.pojo.tikPay.ReqOrderPo;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 import com.cointer.service.IExchangeService;
@@ -52,10 +39,7 @@ import com.cointer.trans.TransExchange;
 import com.cointer.util.CommTypeUtils;
 import com.cointer.util.HttpClientUtil;
 import com.cointer.util.MD5Util;
-import com.cointer.util.RSAUtils;
-import com.cointer.util.SpringContextUtil;
-
-import io.lettuce.core.RedisClient;
+import com.cointer.service.tikPay.TikPayService;
 
 
 
@@ -89,87 +73,49 @@ public class ExchangeService  implements IExchangeService{
 	private   freezeMapper freezeMapper;
 	@Autowired
 	private   GameTaskService GameTaskService;
+	@Autowired
+	private   TikPayService TikPayService;
+	
 	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 30, "channel": 102,"bank_code":"IDPT0001","cost": 100}
 	@Override
 	public   Object  chargeOrder(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
 		JSONObject resData=new JSONObject();
 		int uid =reqData.getIntValue("uid");
-		String channel =reqData.getString("channel");
-		String bank_code =reqData.getString("bank_code");
-		
 		int cost=reqData.getIntValue("cost");
 		List <gameUser> DBUsers=gameUserMapper.userById(uid);
 		if(DBUsers==null || DBUsers.size()==0) {
 			throw new ServiceException(StatusCode.GEN_ORDER_FAILED,"user_not_exist", null);
 		}
 		gameUser gameUser=DBUsers.get(0);
-		String mch_order_no=CommTypeUtils.getOrderNo("OrderIn");
+		String orderLocal=CommTypeUtils.getOrderNo("OrderIn");
 		
-		String notify_url=RedisData.getUri(jedisClient,0,"chargeCallbackUrl");
-		String charge_url=RedisData.getUri(jedisClient,0,"chargeUrl");
-		String payKey=RedisData.getConf(jedisClient,0,"payKey");
-		String mch_id=RedisData.getConf(jedisClient,0,"mch_id");
-		
-//		sign_type	签名方式	String	Y	固定值 MD5，不参与签名
-//		sign	签名	String	Y	不参与签名
-//		mch_id	商户号	String	Y	平台分配唯一
-//		notify_url	后台通知地址	String	Y	不超过 200 字节
-//		page_url	前台通知地址	String	N	不超过 200 字节
-//		mch_order_no	商家订单号	String	Y	保证每笔订单唯一
-//		pay_type	支付类型	String	Y	请查阅商户后台通道编码
-//		trade_amount	交易金额	String	Y	整数，以元为单位
-//		order_date	订单时间	String	Y	时间格式： yyyy-MM-dd
-//		HH:mm:ss
-//		bank_code	银行代码	String	Y	网银B2C必填
-//		goods_name	商品名称	String	Y	不超过 50 字节
-//		mch_return_msg	透传参数	String	N	 不超过200字节
-		 Date Date =new Date(); 
-		 long now=	Date.getTime()/1000;
-		 
-		 DateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //HH表示24小时制；  
-         String dateStr = DateFormat.format(Date);  
-
-		JSONObject ReqParam=  new JSONObject();
-		
-		ReqParam.put("mch_id",mch_id);
-		ReqParam.put("notify_url",notify_url);
-		ReqParam.put("mch_order_no", mch_order_no);
-		ReqParam.put("pay_type", channel);
-		ReqParam.put("trade_amount", cost+"");
-		ReqParam.put("order_date", dateStr);
-		ReqParam.put("bank_code", bank_code);
-		ReqParam.put("goods_name", "coin_add");
-		
-		JSONObject custom=new JSONObject();
-		custom.put("uid", uid);
-		custom.put("coin", cost);
-		custom.put("channel",channel);
-		ReqParam.put("mch_return_msg", custom.toString());
-		
-		Map<String, String> paramsMap = JSONObject.toJavaObject(ReqParam, Map.class);
-		String sign=MD5Util.paramsSort(paramsMap)+"&key="+payKey;
-		
-		sign= MD5Util.getMD5(sign).toLowerCase();
-		paramsMap.put("sign", sign);
-		paramsMap.put("sign_type","MD5");
-		String	JsonAuth;
-		try {
-			HttpClientUtil  client=HttpClientUtil.getInstance();
-			JsonAuth=client.doPostWithJsonResult(charge_url, paramsMap);
-		
-		} catch (Exception e) {
+		String channel=RedisData.getUri(jedisClient,0,"channelIn");
+		JSONObject	AuthData=null;
+		int plat=0;
+		switch (channel) {
+		case "OtPay":
+			plat=1;
+			break;
+        case "TikPay":
+        	plat=2;
+        	ReqOrderPo ReqOrderPo= new ReqOrderPo();
+        	ReqOrderPo.setAmount(cost+"");
+        	ReqOrderPo.setThirdUserId(uid+"");
+        	ReqOrderPo.setThirdOrderNumber(orderLocal);
+        	AuthData=TikPayService.chargeOrder(ReqOrderPo);
+			break;
+		default:
+			break;
+		}
+		if(AuthData==null) {
 			throw new ServiceException(StatusCode.FAILED,"request_time_out", null);
-		}
-		if(JsonAuth==null) {
-			throw new ServiceException(StatusCode.FAILED,"request_data_null", null);
-		}
-		 System.out.println("!!!!!!!!!!JsonAuth:"+JsonAuth);
-		 resData.put("payurl", JsonAuth);
-//		 JsonAuth =URLDecoder.decode(JsonAuth,"UTF-8");
-		 JsonAuth =HttpClientUtil.TruncateUrlPage(JsonAuth);
-		 paramsMap=HttpClientUtil.URLRequest(JsonAuth);
-		TransExchange.tranGenOrderIn(now,uid,gameUser.getAgentId(),gameUser.getPresenterId(),mch_order_no,paramsMap.get("orderId"), "", "", cost, cost, "INR");	
+	    }
+		String orderRemote=AuthData.getString("orderRemote");
+		String payurl=AuthData.getString("payurl");
+		long   now=AuthData.getLongValue("now");
+		TransExchange.tranGenOrderIn(plat,now,uid,gameUser.getAgentId(),gameUser.getPresenterId(),orderLocal,orderRemote, "", "", cost, cost, "INR");	
+		resData.put("payurl", payurl);
 		return resData;
 	}
 	@Override
@@ -186,7 +132,7 @@ public class ExchangeService  implements IExchangeService{
 //		signType	签名方式	String	Y	不参与签名
 //		sign	签名	String	Y	不参与签名
 		
-	
+		System.out.println("!!!!!!!!!!JsonAuth:"+reqData.toString());
 		Map<String, String> JsonAuthMap = JSONObject.toJavaObject(reqData, Map.class);
 	    String	remoteSign=reqData.getString("sign");
 		JsonAuthMap.remove("sign");
@@ -201,7 +147,8 @@ public class ExchangeService  implements IExchangeService{
 		try {
 			if("1".equals(reqData.getString("tradeResult"))) {
 				JSONObject	custom	=JSONObject.parseObject(reqData.getString("merRetMsg"));
-				JSONObject res=TransExchange.tranChargeSucc(reqData.getString("mchOrderNo"),custom.getIntValue("uid"),custom.getIntValue("coin"),EventProcesser.chargeExtract(Float.parseFloat(reqData.getString("amount"))));
+				float realAmount=EventProcesser.chargeExtract(Float.parseFloat(reqData.getString("amount")),custom.getIntValue("chargeExtract"));
+				JSONObject res=TransExchange.tranChargeSucc(reqData.getString("mchOrderNo"),custom.getIntValue("uid"),custom.getIntValue("coin"),realAmount);
                   
 				    chargeRebates(res.getInteger("presenterId"), custom.getIntValue("coin"));
 				    if(res.getBoolean("firstCharge")){
@@ -476,7 +423,6 @@ public class ExchangeService  implements IExchangeService{
 
 
 //	{"code":0,"data":[{"type":"deposit","snapshot_id":"74e3c5d2-04b7-405d-b509-81291c048bbe","asset_id":"4d8c508b-91c5-375b-92b0-ee702ed2dac5","transaction_hash":"0x02de278dd526f57fb146844b244051a4e28ad375c274e3b4caac8225344ac6ab","output_index":0,"sender":"0x6748F50f686bfbcA6Fe8ad62b22228b87F31ff2b","amount":"3","opening_balance":"2","closing_balance":"5","created_at":"2020-03-04T12:26:56.646442Z"},{"type":"deposit","snapshot_id":"fa4c6fa4-164f-42f9-8e2f-75e8cc037b5f","asset_id":"4d8c508b-91c5-375b-92b0-ee702ed2dac5","transaction_hash":"0xe7b4eac519250351dcf5fb50fe8dd5ab277339bcd56f49db7feb9f6a93a8ace0","output_index":0,"sender":"0x46705dfff24256421A05D056c29E81Bdc09723B8","amount":"2","opening_balance":"0","closing_balance":"2","created_at":"2020-03-04T11:26:45.729179Z"}]}
-
 
 
 
