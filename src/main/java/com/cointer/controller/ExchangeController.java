@@ -7,6 +7,8 @@ package com.cointer.controller;
 import java.net.URLDecoder;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,8 +21,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.cointer.controller.base.BaseController;
 import com.cointer.pojo.tikPay.*;
-import com.cointer.redis.IJedisClient;
 import com.cointer.service.IExchangeService;
+import com.cointer.service.tikPay.TikPayService;
+import com.cointer.service.otPay.OtPayService;
 import com.cointer.util.HttpClientUtil;
 import com.cointer.util.tikPay.AESOperator;
 
@@ -34,11 +37,14 @@ import com.cointer.util.tikPay.AESOperator;
 @Controller
 @RequestMapping("/exchange")
 public class ExchangeController extends  BaseController{
+	private static final Logger log = LoggerFactory.getLogger(ExchangeController.class);
 	@Autowired 
 	private IExchangeService ExchangeService;
-	@Autowired
-	private   IJedisClient jedisClient;
-
+	
+	@Autowired 
+	private TikPayService TikPayService;
+	@Autowired 
+	private OtPayService OtPayService;
 	@RequestMapping("/chargeOrder")
 	@ResponseBody
 	public String chargeOrder(@RequestParam String param) {
@@ -56,15 +62,15 @@ public class ExchangeController extends  BaseController{
 		return 	serviceRun(ExchangeService, "verifyExtract", param);
 	} 
 	
-	@RequestMapping("/chargeCallBack")
+	@RequestMapping("/otPayChargeCallBack")
 	@ResponseBody
-	public String chargeCallBack(@RequestBody String str ) {
+	public String otPayChargeCallBack(@RequestBody String str ) {
 		String res="success";
 		  try {
 				String params =URLDecoder.decode(str,"UTF-8");
 				Map<String,String>paramsMap=HttpClientUtil.URLRequest(params);
 				JSONObject  obj=JSONObject.parseObject(JSONObject.toJSONString(paramsMap));
-			  ExchangeService.chargeCallBack(obj);
+			    OtPayService.chargeCallBack(obj);
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -72,7 +78,7 @@ public class ExchangeController extends  BaseController{
 		}
 		return res;
 	}
-	@RequestMapping("/extractCallBack")
+	@RequestMapping("/otPayExtractCallBack")
 	@ResponseBody
 	public String extractCallBack(@RequestBody String str) {
 		String res="success";
@@ -80,7 +86,7 @@ public class ExchangeController extends  BaseController{
 			  String params =URLDecoder.decode(str,"UTF-8");
 				Map<String,String>paramsMap=HttpClientUtil.URLRequest(params);
 				JSONObject  obj=JSONObject.parseObject(JSONObject.toJSONString(paramsMap));
-			  ExchangeService.extractCallBack(obj);
+				OtPayService.extractCallBack(obj);
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -142,31 +148,54 @@ public class ExchangeController extends  BaseController{
 //			return failed(StatusCode.FAILED, "系统异常", null);
 //		} 
 	}
-	 @PostMapping("/tikSucess")
-	    public CommonResult sucess(@RequestBody OtcCallPo callPo) {
-	        try {
-	            String data =  AESOperator.getInstance().decrypt(callPo.getEncryptedData(),"2qnt0DQoHrBLDQYkW45hYOMwfYIHdFsOuqrJ4pkzAVA=".substring(0,16));
-
-	            CallVo callVo = JSON.parseObject(data, CallVo.class);
-
-	            System.out.println("------------------------"+callVo.getThirdOrderNumber()+";"+callVo.getStatus());
-
-	         /*   String decryptedData = AESOperator.getInstance().decrypt(encryptedReq.getEncryptedData());
-	            AdInfoPo adInfoPo = JSON.parseObject(decryptedData, AdInfoPo.class);*/
-
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
-
-
-	        return new CommonResult(1,"SCUESS",null);
+	 @PostMapping("/tikPayChargeCallBack")
+	 @ResponseBody
+	    public String tikChargeCallBack(@RequestBody OtcCallPo callPo) {
+		 JSONObject  obj=new JSONObject();
+		 String resultJson;
+		  try {
+			  TikPayService.chargeCallBack(callPo);
+	             obj.put("code", 1);
+	             obj.put("message", "SUCCESS");
+	             resultJson = obj.toJSONString();
+	             log.debug("tikPayChargeCallBack!!!!!!!!!!!!!!!!!!!json:"+resultJson);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+            obj.put("code", 2);
+            obj.put("message", "FAIL");
+            resultJson = obj.toJSONString();
+            log.debug("tikPayChargeCallBack!!!!!!!!!!!!!!!!!!!json:"+resultJson);
+           
+		}
+		  return resultJson;
 	    }
+	 @PostMapping("/tikPayExtractCallBack")
+	 @ResponseBody
+	 public String tikExtractCallBack(@RequestBody OtcCallPo callPo) {
+		 JSONObject  obj=new JSONObject();
+		 String resultJson;
+		 try {
+			 TikPayService.extractCallBack(callPo);
+			 obj.put("code", 1);
+			 obj.put("message", "SUCCESS");
+			 resultJson = obj.toJSONString();
+			 log.debug("tikPayExtractCallBack!!!!!!!!!!!!!!!!!!!json:"+resultJson);
 
+		 } catch (Exception e) {
+			 e.printStackTrace();
+			 obj.put("code", 2);
+			 obj.put("message", "FAIL");
+			 resultJson = obj.toJSONString();
+			 log.debug("tikPayExtractCallBack!!!!!!!!!!!!!!!!!!!json:"+resultJson);
+		 }
+		 return resultJson;
+	 }
 
 
 
 	    @PostMapping("/tikFail")
-	    public CommonResult fail(@RequestBody OtcCallPo callPo) {
+	    public String fail(@RequestBody OtcCallPo callPo) {
 	        try {
 	            String data =AESOperator.getInstance().decrypt(callPo.getEncryptedData(),"2qnt0DQoHrBLDQYkW45hYOMwfYIHdFsOuqrJ4pkzAVA=".substring(0,16));
 	            CallVo callVo = JSON.parseObject(data, CallVo.class);
@@ -180,7 +209,8 @@ public class ExchangeController extends  BaseController{
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
-	        return new CommonResult(2,"FAIL",null);
+	        CommonResult CommonResult=new CommonResult(1,"FAIL",null);
+			 return JSONObject.toJSONString(CommonResult);
 
 
 	    }

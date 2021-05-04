@@ -1,6 +1,5 @@
 package com.cointer.pojo.tikPay;
 
-import java.util.List;
 
 /**
  * 通用返回对象

@@ -1,6 +1,5 @@
 package com.cointer.trans;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +16,6 @@ import com.cointer.pojo.po.tradeOrder;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 import com.cointer.service.impl.GameTaskService;
-import com.cointer.util.CommTypeUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.cointer.eventer.EventProcesser;
 import com.cointer.exception.TransException;
@@ -44,8 +42,6 @@ public class TransExchange {
 	private   IJedisClient jedisClient;
 	@Autowired
 	private EventProcesser EventProcesser;
-	@Autowired
-	private GameTaskService GameTaskService;
 	
 		
 	

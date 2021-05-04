@@ -18,9 +18,6 @@ public interface IExchangeService   {
 
 	Object extractOrder(String RequestJsonData) throws Exception;
 
-	void chargeCallBack(JSONObject reqData)throws Exception;
-	void extractCallBack(JSONObject reqData) throws Exception;
-
 	Object verifyExtract(String RequestJsonData) throws Exception;
 
 	

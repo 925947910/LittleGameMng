@@ -11,12 +11,15 @@ import javax.crypto.spec.SecretKeySpec;
 import okio.ByteString;
 
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 public class AESOperator {
     /*
      * 加密用的Key 可以用26个字母和数字组成 此处使用AES-128-CBC加密模式，key需要为16位。
      */
-    private String KEY = "!QA2Z@w1sxO*(-8L";
+//    private String KEY = "!QA2Z@w1sxO*(-8L";
     private String VECTOR = "!WFNZFU_{H%M(S|a";
     private static AESOperator instance = null;
 
@@ -135,10 +138,67 @@ public class AESOperator {
             String originalString = new String(original, "UTF-8");
             return originalString;
         } catch (Exception ex) {
+        	ex.printStackTrace();
             return null;
         }
     }
 
+    
+    /**
+     * 生成签名
+     * @param timestamp
+     * @param nonce
+     * @return
+     */
+    public static String createSignature( String timestamp, String nonce,String appid,String appsecret,String reqJson) {
+        String[] arr = new String[] { appsecret, timestamp, nonce, appid,reqJson};
+        // 将 appsecret, timestamp, nonce, appid 参数进行字典序排序
+        Arrays.sort(arr);
+        StringBuilder content = new StringBuilder();
+        for (int i = 0; i < arr.length; i++) {
+            content.append(arr[i]);
+        }
+        MessageDigest md = null;
+        String tmpStr = null;
+
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+            // 将参数字符串拼接成一个字符串进行 sha1 加密
+            byte[] digest = md.digest(content.toString().getBytes());
+
+            tmpStr = byteToStr(digest);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return tmpStr;
+    }
+
+    /**
+     * 将字节数组转换为十六进制字符串
+     * @param byteArray
+     * @return
+     */
+    private static String byteToStr(byte[] byteArray) {
+        String strDigest = "";
+        for (int i = 0; i < byteArray.length; i++) {
+            strDigest += byteToHexStr(byteArray[i]);
+        }
+        return strDigest;
+    }
+    /**
+     * 将字节转换为十六进制字符串
+     * @param mByte
+     * @return
+     */
+    private static String byteToHexStr(byte mByte) {
+        char[] Digit = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+        char[] tempArr = new char[2];
+        tempArr[0] = Digit[(mByte >>> 4) & 0X0F];
+        tempArr[1] = Digit[mByte & 0X0F];
+        String s = new String(tempArr);
+        return s;
+    }
+    
     public static void main(String[] args) throws Exception {
      /*   // 需要加密的字串
         String cSrc = "我爱你";
