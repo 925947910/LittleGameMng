@@ -72,14 +72,13 @@ public class ExchangeService  implements IExchangeService{
 	@Autowired
 	private   OtPayService OtPayService;
 
-	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 30, "channel": 102,"bank_code":"IDPT0001","cost": 100}
+	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 30,"bank_code":"IDPT0001","cost": 100}
 	@Override
 	public   Object  chargeOrder(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
 		JSONObject resData=new JSONObject();
 		int uid =reqData.getIntValue("uid");
 		int cost=reqData.getIntValue("cost");
-		String bank_code =reqData.getString("bank_code");
 		List <gameUser> DBUsers=gameUserMapper.userById(uid);
 		if(DBUsers==null || DBUsers.size()==0) {
 			throw new ServiceException(StatusCode.GEN_ORDER_FAILED,"user_not_exist", null);
@@ -93,11 +92,11 @@ public class ExchangeService  implements IExchangeService{
 		switch (channel) {
 		case "OtPay":
 			plat=1;
-			AuthData=OtPayService.chargeOrder(uid, cost, orderLocal, bank_code);
+			AuthData=OtPayService.chargeOrder(reqData,orderLocal);
 			break;
 		case "TikPay":
 			plat=2;
-			AuthData=TikPayService.chargeOrder( uid+"",cost+"", orderLocal);
+			AuthData=TikPayService.chargeOrder(reqData,orderLocal);
 			break;
 		default:
 			break;
@@ -113,22 +112,18 @@ public class ExchangeService  implements IExchangeService{
 		return resData;
 	}
 
-	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "receive_name": "yeah", "receive_account": "6262662666662666", "remark": "HDFC0000027", "bank_code": "IDPT0001"}
+	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "isfc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
 	@Override
-	public   Object  extractOrder(String  RequestJsonData) throws Exception {
+	public   JSONObject  extractOrder(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
 		JSONObject resData=new JSONObject();
 		int uid =reqData.getIntValue("uid");
+		String account= reqData.getString("account");
 		int coin=reqData.getIntValue("coin");
-		String receive_name= reqData.getString("receive_name");
-		String receive_account= reqData.getString("receive_account");
-		String remark= reqData.getString("remark");
-		String bank_code= reqData.getString("bank_code");
-
 		float cost=  coin;
-		Date Date =new Date(); 
-		long now=	Date.getTime()/1000;
+		long now=	System.currentTimeMillis()/1000;
 		String extractLimitStr= RedisData.userField(jedisClient, uid, "extractLimit");
+		String channel=RedisData.getConf(jedisClient,0,"channelOut");
 		if(extractLimitStr!=null&&Integer.parseInt(extractLimitStr)>now){
 			throw new ServiceException(StatusCode.GEN_ORDER_FAILED,"withdrawal system is busy", null);
 		}
@@ -137,17 +132,20 @@ public class ExchangeService  implements IExchangeService{
 			throw new ServiceException(StatusCode.GEN_ORDER_FAILED,"user_not_exist", null);
 		}
 		gameUser gameUser=DBUsers.get(0);
-		String orderid=CommTypeUtils.getOrderNo("OrderOut");
-		int fId = RedisData.genFreezeId(jedisClient);
-		JSONObject outInfo= new JSONObject();
-
-		outInfo.put("receive_name", receive_name);
-		outInfo.put("receive_account", receive_account);
-		outInfo.put("remark", remark);
-		outInfo.put("bank_code", bank_code);
-		String AccountOut=outInfo.toString();
-
-		TransExchange.tranGenOrderOut(uid,gameUser.getAgentId(),gameUser.getPresenterId(),fId,orderid,orderid, receive_account, AccountOut,cost, coin, "INR");	
+		String orderLocal=CommTypeUtils.getOrderNo("OrderOut");
+		int freezeId = RedisData.genFreezeId(jedisClient);
+		String	AccountOut="";
+		switch (channel) {
+		case "OtPay":
+			AccountOut=OtPayService.accountInfo(reqData);
+			break;
+		case "TikPay":
+			AccountOut=TikPayService.accountInfo(reqData);
+			break;
+		default:
+			break;
+		}
+		TransExchange.tranGenOrderOut(uid,gameUser.getAgentId(),gameUser.getPresenterId(),freezeId,orderLocal,orderLocal, account, AccountOut,cost, coin, "INR");	
 
 		return resData;
 	}

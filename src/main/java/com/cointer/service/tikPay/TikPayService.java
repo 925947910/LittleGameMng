@@ -58,6 +58,8 @@ public class TikPayService  {
 	private static final Logger log = LoggerFactory.getLogger(TikPayService.class);
 
 	private   static int channelIndex =2;
+	private   static int PAY_UPI=7;
+	private   static int PAY_BANKCARD=11;
 	@Autowired
 	private   IJedisClient jedisClient;
 	@Autowired
@@ -68,10 +70,10 @@ public class TikPayService  {
 	 * @return 
 	 * @throws Exception 
      */
-    public   JSONObject chargeOrder(String uid,String cost,String orderLocal) throws Exception {
+    public   JSONObject chargeOrder(JSONObject reqData,String orderLocal) throws Exception {
     	ReqOrderPo ReqOrderPo= new ReqOrderPo();
-    	ReqOrderPo.setAmount(cost);
-    	ReqOrderPo.setThirdUserId(uid);
+    	ReqOrderPo.setAmount(reqData.getIntValue("cost")+"");
+    	ReqOrderPo.setThirdUserId(reqData.getIntValue("uid")+"");
     	ReqOrderPo.setThirdOrderNumber(orderLocal);
     	JSONObject result=null;
 		String chargeUrl=RedisData.getUri(jedisClient,channelIndex,"chargeUrl");
@@ -101,7 +103,19 @@ public class TikPayService  {
         
         return result;
     }
-	
+	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "isfc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
+	public   String accountInfo(JSONObject reqData) throws Exception {
+		String name= reqData.getString("name");
+		String account= reqData.getString("account");
+		String isfc= reqData.getString("isfc");
+		String bank_name= reqData.getString("bank_name");
+		JSONObject accountInfo= new JSONObject();
+		accountInfo.put("name", name);
+		accountInfo.put("account", account);
+		accountInfo.put("isfc", isfc);
+		accountInfo.put("bank_name", bank_name);
+		return accountInfo.toString();
+	}
     /**
      * 下发接口接口示例
      * @throws Exception 
@@ -123,9 +137,11 @@ public class TikPayService  {
 	        issueOrderPo.setThirdUserId(tradeOrder.getUid()+"");
 
 	        IssuePayPo issuePayPo = new  IssuePayPo();
-	        issuePayPo.setPaymentId(7);
-	        issuePayPo.setName(outInfo.getString("receive_name"));
-	        issuePayPo.setAccountName(outInfo.getString("receive_account"));
+	        issuePayPo.setPaymentId(PAY_BANKCARD);
+	        issuePayPo.setName(outInfo.getString("name"));
+	        issuePayPo.setAccountName(outInfo.getString("account"));
+	        issuePayPo.setIfscCode(outInfo.getString("isfc"));
+	        issuePayPo.setBankName(outInfo.getString("bank_name"));
 	        issueOrderPo.setIssuePayPo(issuePayPo);
 	        String issueOrderPoStr=JSON.toJSONString(issueOrderPo);
 	        log.info("=====================verifyExtract:"+issueOrderPoStr);

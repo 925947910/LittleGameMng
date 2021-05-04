@@ -113,7 +113,7 @@ public class TransExchange {
 	
 	
 	@Transactional                        
-	public   tradeOrder  tranGenOrderOut(int uid,int agentId,int presenterId,int fId,String orderid,String transactionid,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
+	public   tradeOrder  tranGenOrderOut(int uid,int agentId,int presenterId,int freezeId,String orderLocal,String orderRemote,String accIn,String accOut,float cost,int coin,String currency) throws Exception {
 		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
 		gameUser DBUser=DBUsers.get(0);
 		int version = DBUser.getVersion();
@@ -133,7 +133,7 @@ public class TransExchange {
 		
 		int orderId = RedisData.genOrderId(jedisClient);
 		freeze freezeBean= new freeze();
-		freezeBean.setId(fId);
+		freezeBean.setId(freezeId);
 		freezeBean.setUid(uid);
 		freezeBean.setOrderId(orderId);
 		freezeBean.setCoin(coin);
@@ -144,8 +144,8 @@ public class TransExchange {
 		}
 		tradeOrder  orderBean= new tradeOrder();
 		orderBean.setId(orderId);
-		orderBean.setOrderLocal(orderid);
-		orderBean.setOrderRemote(transactionid);
+		orderBean.setOrderLocal(orderLocal);
+		orderBean.setOrderRemote(orderRemote);
 		orderBean.setPlat(0);
 		orderBean.setUid(uid);
 		orderBean.setAgentId(agentId);
@@ -155,7 +155,7 @@ public class TransExchange {
 		orderBean.setAccountOut(accOut);
 		orderBean.setCurrency(currency);
 		orderBean.setOrderType(ORDEROUT);
-		orderBean.setFreezeId(fId);
+		orderBean.setFreezeId(freezeId);
 		orderBean.setStatus(ORDER_PROCESSING);  // 0 初始  1 订单对接成功    2转账中  3成功   4失败
 		orderBean.setTime(now);
 		int res=tradeOrderMapper.insertTradeOrder(orderBean);
@@ -166,11 +166,11 @@ public class TransExchange {
 		return orderBean;
 	}
 	@Transactional
-	public   void  tranExtractSucc(String orderLocal,int fId,int uid,int coin,float cost) throws Exception {
+	public   void  tranExtractSucc(String orderLocal,int freezeId,int uid,int coin,float cost) throws Exception {
 		if(tradeOrderMapper.updateStatusCostByOrder(orderLocal,cost ,ORDER_PROCESSING, ORDER_SUCC)!=1) {
 			throw new TransException("status_update_failed");
 		}
-		if(freezeMapper.delFreeze(fId)!=1) {
+		if(freezeMapper.delFreeze(freezeId)!=1) {
 			throw new TransException("unfreeze_failed");
 		}
 		List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
@@ -180,7 +180,7 @@ public class TransExchange {
 	
 	}
 	@Transactional
-	public   void  tranExtractFailed(String orderLocal,int fId,int uid,int coin) throws Exception {
+	public   void  tranExtractFailed(String orderLocal,int freezeId,int uid,int coin) throws Exception {
 	
 		if(tradeOrderMapper.updateStatusByOrder(orderLocal, ORDER_PROCESSING, ORDER_FAILED)!=1) {
 			throw new TransException("status_update_failed");
@@ -194,7 +194,7 @@ public class TransExchange {
 				throw new TransException("coin_modify_failed");
 			}
 			
-			if(freezeMapper.delFreeze(fId)!=1) {
+			if(freezeMapper.delFreeze(freezeId)!=1) {
 				throw new TransException("unfreeze_failed");
 			}
 			EventProcesser.writeBill(uid,DBUser.getNick(),DBUser.getAgentId(), coin, newCoin, EventProcesser.EVENT_FREEZE_REBACK, 0,"提现失败orderLocal:"+orderLocal,"","");

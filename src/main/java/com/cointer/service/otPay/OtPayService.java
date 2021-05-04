@@ -9,6 +9,7 @@ package com.cointer.service.otPay;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -16,14 +17,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.cointer.constant.StatusCode;
 import com.cointer.exception.ServiceException;
+import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.tradeOrder;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 import com.cointer.service.impl.ExchangeService;
+import com.cointer.util.CommTypeUtils;
 import com.cointer.util.HttpClientUtil;
 import com.cointer.util.MD5Util;
 
@@ -55,7 +59,7 @@ public class OtPayService  {
 	
 	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 30, "channel": 102,"bank_code":"IDPT0001","cost": 100}
 
-	public   JSONObject  chargeOrder(int uid,int cost,String orderLocal,String bank_code) throws Exception {
+	public   JSONObject  chargeOrder(JSONObject reqData,String orderLocal) throws Exception {
 		JSONObject resData=new JSONObject();
 
 		String notify_url=RedisData.getUri(jedisClient,channelIndex,"chargeCallbackUrl");
@@ -89,9 +93,9 @@ public class OtPayService  {
 		ReqParam.put("notify_url",notify_url);
 		ReqParam.put("mch_order_no", orderLocal);
 		ReqParam.put("pay_type", channel);
-		ReqParam.put("trade_amount", cost+"");
+		ReqParam.put("trade_amount",reqData.getIntValue("cost")+"");
 		ReqParam.put("order_date", dateStr);
-		ReqParam.put("bank_code", bank_code);
+		ReqParam.put("bank_code", reqData.getString("bank_code"));
 		ReqParam.put("goods_name", "coin_add");
 
 //		JSONObject custom=new JSONObject();
@@ -172,8 +176,20 @@ public class OtPayService  {
     	}
     	ExchangeService.processCharge(AuthData);
 		
-		} 
-
+		}
+	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "isfc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
+	public   String accountInfo(JSONObject reqData) throws Exception {
+		String name= reqData.getString("name");
+		String account= reqData.getString("account");
+		String isfc= reqData.getString("isfc");
+		String bank_code= reqData.getString("bank_code");
+		JSONObject accountInfo= new JSONObject();
+		accountInfo.put("name", name);
+		accountInfo.put("account", account);
+		accountInfo.put("isfc", isfc);
+		accountInfo.put("bank_code", bank_code);
+		return accountInfo.toString();
+	}
 	public   JSONObject  verifyExtract(tradeOrder  tradeOrder) throws Exception {
 		JSONObject result=null;
 		JSONObject ReqParam=  new JSONObject();
@@ -209,10 +225,9 @@ public class OtPayService  {
 		ReqParam.put("transfer_amount", (int)tradeOrder.getCost()+"");
 		ReqParam.put("back_url", notify_url);
 
-
-		ReqParam.put("receive_name", outInfo.getString("receive_name"));
-		ReqParam.put("receive_account", outInfo.getString("receive_account"));
-		ReqParam.put("remark", outInfo.getString("remark"));
+		ReqParam.put("receive_name", outInfo.getString("name"));
+		ReqParam.put("receive_account", outInfo.getString("account"));
+		ReqParam.put("remark", outInfo.getString("isfc"));
 		ReqParam.put("bank_code", outInfo.getString("bank_code"));
 		Map<String, String> jsonMap = JSONObject.toJavaObject(ReqParam, Map.class);
 
