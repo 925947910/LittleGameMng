@@ -425,7 +425,13 @@ public class RedGreenBallService implements IRedGreenBallService {
     
     
     
-	
+    public static final void  delRbBallBeter(IJedisClient client,int uid){
+    	String issue=client.hget(RedisData.DB1_2, CurrRbBall,"issue");
+    	String [] bets= {"1","2","3","4","5","6","7","8","9","0",Red,Green,Purple};
+    	for (int i = 0; i < bets.length; i++) {
+    		client.srem(RedisData.DB1_2, "rbBall:"+issue+"bet:"+bets[i], uid+"");
+    	}
+    }	
 	public static final void  setRbBallBeter(IJedisClient client,Long issue,String bet,int uid){
 		client.sadd(RedisData.DB1_2,"rbBall:"+issue+"bet:"+bet, uid+"");
 		client.expire(RedisData.DB1_2, "rbBall:"+issue+"bet:"+bet, 200);

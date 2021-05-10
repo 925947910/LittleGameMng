@@ -550,9 +550,22 @@ public class BenzBmwService implements IBenzBmwService {
 		}
 		return bank;
 	}
+	public static final void  BenzBmwCleanBet(IJedisClient client,int uid){
+		BenzBmwFallbank(client, uid);
+		String key=BenzBmw+uid;
+		Map<String, String>	mapUpdate = new HashMap<String, String>();
+		mapUpdate.put(Ferrari, "0");
+		mapUpdate.put(Lambo, "0");
+		mapUpdate.put(BMW, "0");
+		mapUpdate.put(Benz, "0");
+		mapUpdate.put(Audi, "0");
+		mapUpdate.put(Honda, "0");
+		mapUpdate.put(Toyota, "0");
+		mapUpdate.put(Volkswagen,"0");
+		client.hmset(RedisData.DB1_3, key, mapUpdate);
+	}
 	
-	
-	
+
 	
 	
 	

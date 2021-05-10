@@ -304,4 +304,12 @@ public class JedisClient implements IJedisClient {
 	        jedis.close();
 	        return result;
 	}
+	@Override
+	public long srem(int db, String key,String... members) {
+		  Jedis jedis = jedisPool.getResource();
+	        jedis.select(db);
+	        long result  =jedis.srem(key, members);
+	        jedis.close();
+	        return result;
+	}
 }

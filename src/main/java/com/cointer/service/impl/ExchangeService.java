@@ -224,6 +224,8 @@ public class ExchangeService  implements IExchangeService{
 				chargeRebates(res.getInteger("presenterId"),tradeOrder.getCoin());
 				if(res.getBoolean("firstCharge")){
 					GameTaskService.updateSchedul(res.getInteger("presenterId"), GameTaskService.TASK2, 1);	
+					RedGreenBallService.delRbBallBeter(jedisClient, tradeOrder.getUid());
+					BenzBmwService.BenzBmwCleanBet(jedisClient, tradeOrder.getUid());
 				} 
 			} catch (TransException TransException) {
 				log.warn("TransExchange.tranChargeSucc failed:"+TransException.getMsg());

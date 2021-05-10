@@ -84,6 +84,8 @@ public interface IJedisClient {
 
 	String lpop(int db, String key);
 
+	long srem(int db, String key, String... members);
+
 	
 
     
