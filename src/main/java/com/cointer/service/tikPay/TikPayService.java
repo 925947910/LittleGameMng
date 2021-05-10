@@ -19,7 +19,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -60,6 +59,14 @@ public class TikPayService  {
 	private   static int channelIndex =2;
 	private   static int PAY_UPI=7;
 	private   static int PAY_BANKCARD=11;
+	
+	private static String CHARGEURL="chargeUrl";
+	private static String EXTRACTURL="extractUrl";
+	private static String EXTRACTPER="extractPer";
+	private static String API="api";
+	private static String APPSECRET="appsecret";
+	private static String PAYURL="payurl";
+	
 	@Autowired
 	private   IJedisClient jedisClient;
 	@Autowired
@@ -76,12 +83,11 @@ public class TikPayService  {
     	ReqOrderPo.setThirdUserId(reqData.getIntValue("uid")+"");
     	ReqOrderPo.setThirdOrderNumber(orderLocal);
     	JSONObject result=null;
-		String chargeUrl=RedisData.getUri(jedisClient,channelIndex,"chargeUrl");
-		String payurl=RedisData.getUri(jedisClient,channelIndex,"payurl");
-		String api=RedisData.getConf(jedisClient,channelIndex,"api");
-		String appsecret=RedisData.getConf(jedisClient,channelIndex,"appsecret");
-		 Date Date =new Date(); 
-		long now=	Date.getTime()/1000;
+		String chargeUrl=RedisData.getUri(jedisClient,channelIndex,CHARGEURL);
+		String payurl=RedisData.getUri(jedisClient,channelIndex,PAYURL);
+		String api=RedisData.getConf(jedisClient,channelIndex,API);
+		String appsecret=RedisData.getConf(jedisClient,channelIndex,APPSECRET);
+		long now=	System.currentTimeMillis()/1000;
 		 String str =  JSONObject.toJSONString(ReqOrderPo);
 		 log.info("=====================chargeOrder:"+str);
        
@@ -103,16 +109,16 @@ public class TikPayService  {
         
         return result;
     }
-	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "isfc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
+	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "ifsc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
 	public   String accountInfo(JSONObject reqData) throws Exception {
 		String name= reqData.getString("name");
 		String account= reqData.getString("account");
-		String isfc= reqData.getString("isfc");
+		String ifsc= reqData.getString("ifsc");
 		String bank_name= reqData.getString("bank_name");
 		JSONObject accountInfo= new JSONObject();
 		accountInfo.put("name", name);
 		accountInfo.put("account", account);
-		accountInfo.put("isfc", isfc);
+		accountInfo.put("ifsc", ifsc);
 		accountInfo.put("bank_name", bank_name);
 		return accountInfo.toString();
 	}
@@ -122,9 +128,9 @@ public class TikPayService  {
      */
     
     public   JSONObject verifyExtract(tradeOrder tradeOrder) throws Exception {
-		String extractUrl=RedisData.getUri(jedisClient,channelIndex,"extractUrl");
-		String api=RedisData.getConf(jedisClient,channelIndex,"api");
-		String appsecret=RedisData.getConf(jedisClient,channelIndex,"appsecret");
+		String extractUrl=RedisData.getUri(jedisClient,channelIndex,EXTRACTURL);
+		String api=RedisData.getConf(jedisClient,channelIndex,API);
+		String appsecret=RedisData.getConf(jedisClient,channelIndex,APPSECRET);
 		long now=	System.currentTimeMillis();
         long nonceTime=now%10000000000l;
 		String nonceStr="1111111111"+nonceTime;
@@ -140,7 +146,7 @@ public class TikPayService  {
 	        issuePayPo.setPaymentId(PAY_BANKCARD);
 	        issuePayPo.setName(outInfo.getString("name"));
 	        issuePayPo.setAccountName(outInfo.getString("account"));
-	        issuePayPo.setIfscCode(outInfo.getString("isfc"));
+	        issuePayPo.setIfscCode(outInfo.getString("ifsc"));
 	        issuePayPo.setBankName(outInfo.getString("bank_name"));
 	        issueOrderPo.setIssuePayPo(issuePayPo);
 	        String issueOrderPoStr=JSON.toJSONString(issueOrderPo);
@@ -179,8 +185,8 @@ public class TikPayService  {
     
     public void chargeCallBack(OtcCallPo callPo) throws Exception { 
     	JSONObject AuthData=null;
-    	String appsecret=RedisData.getConf(jedisClient,channelIndex,"appsecret");
-    	String extractPer=RedisData.getConf(jedisClient,channelIndex,"extractPer");
+    	String appsecret=RedisData.getConf(jedisClient,channelIndex,APPSECRET);
+    	String extractPer=RedisData.getConf(jedisClient,channelIndex,EXTRACTPER);
     	String data =  AESOperator.getInstance().decrypt(callPo.getEncryptedData(),appsecret.substring(0,16));
     	CallVo callVo = JSON.parseObject(data, CallVo.class);
     	  log.info("------------------------chargeCallBackData:"+data);
@@ -204,7 +210,7 @@ public class TikPayService  {
     
     public void extractCallBack(OtcCallPo callPo) throws Exception { 
     	    JSONObject AuthData=null; 
-    		String appsecret=RedisData.getConf(jedisClient,channelIndex,"appsecret");
+    		String appsecret=RedisData.getConf(jedisClient,channelIndex,APPSECRET);
     		String data =  AESOperator.getInstance().decrypt(callPo.getEncryptedData(),appsecret.substring(0,16));
 
     		CallVo callVo = JSON.parseObject(data, CallVo.class);

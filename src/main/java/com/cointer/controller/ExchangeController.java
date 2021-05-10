@@ -26,7 +26,7 @@ import com.cointer.service.tikPay.TikPayService;
 import com.cointer.service.otPay.OtPayService;
 import com.cointer.util.HttpClientUtil;
 import com.cointer.util.tikPay.AESOperator;
-
+import com.cointer.service.amPay.AmPayService; 
 
 
 
@@ -45,6 +45,8 @@ public class ExchangeController extends  BaseController{
 	private TikPayService TikPayService;
 	@Autowired 
 	private OtPayService OtPayService;
+	@Autowired 
+	private AmPayService AmPayService;
 	@RequestMapping("/chargeOrder")
 	@ResponseBody
 	public String chargeOrder(@RequestParam String param) {
@@ -80,7 +82,7 @@ public class ExchangeController extends  BaseController{
 	}
 	@RequestMapping("/otPayExtractCallBack")
 	@ResponseBody
-	public String extractCallBack(@RequestBody String str) {
+	public String otPayExtractCallBack(@RequestBody String str) {
 		String res="success";
 		  try {
 			  String params =URLDecoder.decode(str,"UTF-8");
@@ -94,7 +96,38 @@ public class ExchangeController extends  BaseController{
 		}
 		return res;
 	}
-	
+	@RequestMapping("/amPayChargeCallBack")
+	@ResponseBody
+	public String amPayChargeCallBack(@RequestBody String str ) {
+		String res="SUCCESS";
+		  try {
+			    String params =URLDecoder.decode(str,"UTF-8");
+				Map<String,String>paramsMap=HttpClientUtil.URLRequest(params);
+				JSONObject  obj=JSONObject.parseObject(JSONObject.toJSONString(paramsMap));
+				AmPayService.chargeCallBack(obj);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			  res="FAILED";
+		}
+		return res;
+	}
+	@RequestMapping("/amPayExtractCallBack")
+	@ResponseBody
+	public String amPayExtractCallBack(@RequestBody String str) {
+		String res="SUCCESS";
+		  try {
+			    String params =URLDecoder.decode(str,"UTF-8");
+				Map<String,String>paramsMap=HttpClientUtil.URLRequest(params);
+				JSONObject  obj=JSONObject.parseObject(JSONObject.toJSONString(paramsMap));
+				AmPayService.extractCallBack(obj);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			  res="FAILED";
+		}
+		return res;
+	}	
 
 
 
@@ -150,7 +183,7 @@ public class ExchangeController extends  BaseController{
 	}
 	 @PostMapping("/tikPayChargeCallBack")
 	 @ResponseBody
-	    public String tikChargeCallBack(@RequestBody OtcCallPo callPo) {
+	    public String tikPayChargeCallBack(@RequestBody OtcCallPo callPo) {
 		 JSONObject  obj=new JSONObject();
 		 String resultJson;
 		  try {
@@ -158,21 +191,19 @@ public class ExchangeController extends  BaseController{
 	             obj.put("code", 1);
 	             obj.put("message", "SUCCESS");
 	             resultJson = obj.toJSONString();
-	             log.debug("tikPayChargeCallBack!!!!!!!!!!!!!!!!!!!json:"+resultJson);
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
             obj.put("code", 2);
             obj.put("message", "FAIL");
             resultJson = obj.toJSONString();
-            log.debug("tikPayChargeCallBack!!!!!!!!!!!!!!!!!!!json:"+resultJson);
            
 		}
 		  return resultJson;
 	    }
 	 @PostMapping("/tikPayExtractCallBack")
 	 @ResponseBody
-	 public String tikExtractCallBack(@RequestBody OtcCallPo callPo) {
+	 public String tikPayExtractCallBack(@RequestBody OtcCallPo callPo) {
 		 JSONObject  obj=new JSONObject();
 		 String resultJson;
 		 try {
@@ -180,14 +211,12 @@ public class ExchangeController extends  BaseController{
 			 obj.put("code", 1);
 			 obj.put("message", "SUCCESS");
 			 resultJson = obj.toJSONString();
-			 log.debug("tikPayExtractCallBack!!!!!!!!!!!!!!!!!!!json:"+resultJson);
 
 		 } catch (Exception e) {
 			 e.printStackTrace();
 			 obj.put("code", 2);
 			 obj.put("message", "FAIL");
 			 resultJson = obj.toJSONString();
-			 log.debug("tikPayExtractCallBack!!!!!!!!!!!!!!!!!!!json:"+resultJson);
 		 }
 		 return resultJson;
 	 }
@@ -200,7 +229,7 @@ public class ExchangeController extends  BaseController{
 	            String data =AESOperator.getInstance().decrypt(callPo.getEncryptedData(),"2qnt0DQoHrBLDQYkW45hYOMwfYIHdFsOuqrJ4pkzAVA=".substring(0,16));
 	            CallVo callVo = JSON.parseObject(data, CallVo.class);
 
-	            System.out.println("------------------------"+callVo.getThirdOrderNumber()+";"+callVo.getStatus());
+//	            System.out.println("------------------------"+callVo.getThirdOrderNumber()+";"+callVo.getStatus());
 
 
 	         /*   String decryptedData = AESOperator.getInstance().decrypt(encryptedReq.getEncryptedData());

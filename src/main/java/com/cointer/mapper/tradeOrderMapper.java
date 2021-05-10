@@ -16,6 +16,11 @@ import com.cointer.trans.TransExchange;
 public interface tradeOrderMapper {
 
 	
+	@Select("SELECT SUM(cost) from  tradeorder  WHERE uid=#{uid} AND time BETWEEN #{begin} AND #{end}  AND orderType=#{orderType} AND `status`=3")
+	public float sumTradeOrder(int uid,long begin, long end,int orderType);
+	
+
+	
 	@Select("SELECT * FROM tradeorder WHERE id = #{orderId}")
 	public List<tradeOrder> tradeOrderById(int orderId);
 	

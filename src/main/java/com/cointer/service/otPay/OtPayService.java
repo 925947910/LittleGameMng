@@ -17,17 +17,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.cointer.constant.StatusCode;
 import com.cointer.exception.ServiceException;
-import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.tradeOrder;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 import com.cointer.service.impl.ExchangeService;
-import com.cointer.util.CommTypeUtils;
 import com.cointer.util.HttpClientUtil;
 import com.cointer.util.MD5Util;
 
@@ -41,12 +38,21 @@ import com.cointer.util.MD5Util;
 @Service
 public class OtPayService  {
 
-	public static final int			PAY_BANK       = 907;
-	public static final int			PAY_TM       = 931;
-	public static final int			PAY_UPI       = 936;
 
-	public static final int			SUCC_       = 10000;
+
+
 	private   static int channelIndex =1;
+	private static String CHARGECALLBACKURL="chargeCallbackUrl";
+	private static String CHARGEURL="chargeUrl";
+	private static String EXTRACTURL="extractUrl";
+	private static String EXTRACTCALLBACKURL="extractCallbackUrl";
+	
+	private static String EXTRACTPER="extractPer";
+	private static String MCH_ID="mch_id";
+	private static String PAYKEY="payKey";
+	private static String TRANSFERKEY="transferKey";
+	private static String CHANNEL="channel";
+	private static String ORDERKEY="orderKey";
 
 
 	private static final Logger log = LoggerFactory.getLogger(OtPayService.class);
@@ -62,12 +68,12 @@ public class OtPayService  {
 	public   JSONObject  chargeOrder(JSONObject reqData,String orderLocal) throws Exception {
 		JSONObject resData=new JSONObject();
 
-		String notify_url=RedisData.getUri(jedisClient,channelIndex,"chargeCallbackUrl");
-		String charge_url=RedisData.getUri(jedisClient,channelIndex,"chargeUrl");
-		String payKey=RedisData.getConf(jedisClient,channelIndex,"payKey");
-		String channel=RedisData.getConf(jedisClient,channelIndex,"channel");
-		String orderKey=RedisData.getConf(jedisClient,channelIndex,"orderKey");
-		String mch_id=RedisData.getConf(jedisClient,channelIndex,"mch_id");
+		String notify_url=RedisData.getUri(jedisClient,channelIndex,CHARGECALLBACKURL);
+		String charge_url=RedisData.getUri(jedisClient,channelIndex,CHARGEURL);
+		String payKey=RedisData.getConf(jedisClient,channelIndex,PAYKEY);
+		String channel=RedisData.getConf(jedisClient,channelIndex,CHANNEL);
+		String orderKey=RedisData.getConf(jedisClient,channelIndex,ORDERKEY);
+		String mch_id=RedisData.getConf(jedisClient,channelIndex,MCH_ID);
 
 		//		sign_type	签名方式	String	Y	固定值 MD5，不参与签名
 		//		sign	签名	String	Y	不参与签名
@@ -98,12 +104,6 @@ public class OtPayService  {
 		ReqParam.put("bank_code", reqData.getString("bank_code"));
 		ReqParam.put("goods_name", "coin_add");
 
-//		JSONObject custom=new JSONObject();
-//		custom.put("uid", uid);
-//		custom.put("coin", cost);
-//		custom.put("channel",channel);
-//		custom.put("chargeExtract",chargeExtract);
-//		ReqParam.put("mch_return_msg", custom.toString());
 
 		Map<String, String> paramsMap = JSONObject.toJavaObject(ReqParam, Map.class);
 		String sign=MD5Util.paramsSort(paramsMap)+"&key="+payKey;
@@ -121,7 +121,7 @@ public class OtPayService  {
 		if(JsonAuth==null) {
 			throw new ServiceException(StatusCode.FAILED,"request_data_null", null);
 		}
-		System.out.println("!!!!!!!!!!JsonAuth:"+JsonAuth);
+		log.info("!!!!!!!!!!JsonAuth:"+JsonAuth);
 
 		//		 JsonAuth =URLDecoder.decode(JsonAuth,"UTF-8");
 		String paramStr =HttpClientUtil.TruncateUrlPage(JsonAuth);
@@ -147,12 +147,12 @@ public class OtPayService  {
 		//		signType	签名方式	String	Y	不参与签名
 		//		sign	签名	String	Y	不参与签名
 
-		System.out.println("!!!!!!!!!!JsonAuth:"+reqData.toString());
+		log.info("!!!!!!!!!!JsonAuth:"+reqData.toString());
 		Map<String, String> JsonAuthMap = JSONObject.toJavaObject(reqData, Map.class);
 		String	remoteSign=reqData.getString("sign");
 		JsonAuthMap.remove("sign");
 		JsonAuthMap.remove("signType");
-		String payKey=RedisData.getConf(jedisClient,channelIndex,"payKey");
+		String payKey=RedisData.getConf(jedisClient,channelIndex,PAYKEY);
 		String sign=MD5Util.paramsSort(JsonAuthMap)+"&key="+payKey;
 		//		sign= sign.replaceAll("/", "\\\\/");
 		sign= MD5Util.getMD5(sign).toLowerCase();
@@ -161,7 +161,7 @@ public class OtPayService  {
 		}
     	AuthData=new JSONObject();
     	String orderLocal=reqData.getString("mchOrderNo");
-    	String extractPer=RedisData.getConf(jedisClient,channelIndex,"extractPer");
+    	String extractPer=RedisData.getConf(jedisClient,channelIndex,EXTRACTPER);
     	switch (reqData.getIntValue("tradeResult")) {
     	case 1:
     		AuthData.put("succ", true);
@@ -177,26 +177,26 @@ public class OtPayService  {
     	ExchangeService.processCharge(AuthData);
 		
 		}
-	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "isfc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
+	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "ifsc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
 	public   String accountInfo(JSONObject reqData) throws Exception {
 		String name= reqData.getString("name");
 		String account= reqData.getString("account");
-		String isfc= reqData.getString("isfc");
+		String ifsc= reqData.getString("ifsc");
 		String bank_code= reqData.getString("bank_code");
 		JSONObject accountInfo= new JSONObject();
 		accountInfo.put("name", name);
 		accountInfo.put("account", account);
-		accountInfo.put("isfc", isfc);
+		accountInfo.put("ifsc", ifsc);
 		accountInfo.put("bank_code", bank_code);
 		return accountInfo.toString();
 	}
 	public   JSONObject  verifyExtract(tradeOrder  tradeOrder) throws Exception {
 		JSONObject result=null;
 		JSONObject ReqParam=  new JSONObject();
-		String notify_url=RedisData.getUri(jedisClient,channelIndex,"extractCallbackUrl");
-		String extract_url=RedisData.getUri(jedisClient,channelIndex,"extractUrl");
-		String transferKey=RedisData.getConf(jedisClient,channelIndex,"transferKey");
-		String mch_id=RedisData.getConf(jedisClient,channelIndex,"mch_id");
+		String notify_url=RedisData.getUri(jedisClient,channelIndex,EXTRACTCALLBACKURL);
+		String extract_url=RedisData.getUri(jedisClient,channelIndex,EXTRACTURL);
+		String transferKey=RedisData.getConf(jedisClient,channelIndex,TRANSFERKEY);
+		String mch_id=RedisData.getConf(jedisClient,channelIndex,MCH_ID);
 
 
 
@@ -227,7 +227,7 @@ public class OtPayService  {
 
 		ReqParam.put("receive_name", outInfo.getString("name"));
 		ReqParam.put("receive_account", outInfo.getString("account"));
-		ReqParam.put("remark", outInfo.getString("isfc"));
+		ReqParam.put("remark", outInfo.getString("ifsc"));
 		ReqParam.put("bank_code", outInfo.getString("bank_code"));
 		Map<String, String> jsonMap = JSONObject.toJavaObject(ReqParam, Map.class);
 
@@ -248,7 +248,7 @@ public class OtPayService  {
 		if(JsonAuth==null) {
 			throw new ServiceException(StatusCode.FAILED,"request_data_null", null);
 		}
-		System.out.println("JsonAuth:"+JsonAuth);
+		log.info("JsonAuth:"+JsonAuth);
 		JSONObject AuthData = JSONObject.parseObject(JsonAuth, Feature.OrderedField);
 
 
@@ -278,7 +278,7 @@ public class OtPayService  {
 			result.put("orderRemote",transactionid);
 		}else {
 			String retMsg=AuthData.getString("errorMsg");
-			System.out.println("!!!!!!!!!!retMsg:"+retMsg);
+			log.info("!!!!!!!!!!retMsg:"+retMsg);
 			result.put("succ",false);
 		}
 		return result;
@@ -308,7 +308,7 @@ public class OtPayService  {
 
 		JsonAuthMap.remove("sign");
 		JsonAuthMap.remove("signType");
-		String transferKey=RedisData.getConf(jedisClient,channelIndex,"transferKey");
+		String transferKey=RedisData.getConf(jedisClient,channelIndex,TRANSFERKEY);
 		String sign=MD5Util.paramsSort(JsonAuthMap)+"&key="+transferKey;
 		//		sign= sign.replaceAll("/", "\\\\/");
 		sign= MD5Util.getMD5(sign).toLowerCase();

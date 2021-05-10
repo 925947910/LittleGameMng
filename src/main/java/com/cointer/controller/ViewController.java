@@ -24,7 +24,6 @@ public class ViewController extends  BaseController {
     public String enterRegister(Model model,@RequestParam String agentId,@RequestParam String presenterId){
     	model.addAttribute("agentId", agentId);
     	model.addAttribute("presenterId", presenterId);
-        System.out.println("进入注册界面...");
         return "user_regist";
     }
 

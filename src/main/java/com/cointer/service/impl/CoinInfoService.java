@@ -2,9 +2,10 @@ package com.cointer.service.impl;
 
 
 
+import java.util.Calendar;
 import java.util.List;
 
-
+import org.apache.commons.collections.OrderedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.cointer.eventer.EventProcesser;
+import com.cointer.exception.TransException;
 import com.cointer.mapper.billsMapper;
 import com.cointer.mapper.freezeMapper;
 import com.cointer.mapper.gameUserMapper;
@@ -23,10 +25,10 @@ import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 import com.cointer.service.ICoinInfoService;
 import com.cointer.service.IExchangeService;
+import com.cointer.trans.TransExchange;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-
-
+import com.cointer.mapper.tradeOrderMapper;
 
 
 
@@ -49,6 +51,11 @@ public class CoinInfoService implements ICoinInfoService {
 
 	@Autowired
 	private   billsMapper billsMapper;
+	@Autowired
+	private   tradeOrderMapper tradeOrderMapper;
+	@Autowired
+	private   EventProcesser EventProcesser;
+	
 	@Autowired
 	private   gameUserMapper gameUserMapper;
 
@@ -117,6 +124,54 @@ public class CoinInfoService implements ICoinInfoService {
 		resData.put("extractPwd", extractPwd);
 		return resData;
 	}
-
-
+	@Override
+	public Object dailyCheck(String  RequestJsonData) throws Exception {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);	
+		JSONObject resData=new JSONObject();
+		int uid=reqData.getIntValue("uid");
+		String rewards=getDailySign(jedisClient, uid);
+		if(rewards==null){
+			Calendar calendar = Calendar.getInstance();
+	    	long nowSec=calendar.getTimeInMillis()/1000;
+	    	calendar.set(Calendar.HOUR_OF_DAY, 0);
+	    	calendar.set(Calendar.MINUTE, 0);
+	    	calendar.set(Calendar.SECOND, 0);
+	    	long endSec=calendar.getTimeInMillis()/1000+24*3600+1;
+	    	float orderin=tradeOrderMapper.sumTradeOrder(uid, endSec-24*3600-1, endSec-1, TransExchange.ORDERIN);
+	    	float orderout=tradeOrderMapper.sumTradeOrder(uid, endSec-24*3600-1, endSec-1, TransExchange.ORDEROUT);
+	    	float earn= (orderin-orderout);
+	    	int newRewards=earn==0?1:(int)(earn/100);
+	    	EventProcesser.gameCoinChange(uid, newRewards, EventProcesser.EVENT_DAILY_ACTIVE, 0, "日常签到获取");
+		    setDailySign(jedisClient, uid, newRewards, (int)(endSec-nowSec));	
+			resData.put("succ",true );
+			resData.put("rewards", newRewards);
+		}else{
+			resData.put("succ",false );
+			resData.put("rewards", rewards);
+		}
+		return resData;
+		}
+	
+	@Override
+	public Object dailySignInfo(String  RequestJsonData) throws Exception {
+		JSONObject reqData=JSON.parseObject(RequestJsonData);	
+		JSONObject resData=new JSONObject();
+		int uid=reqData.getIntValue("uid");
+		String rewards=getDailySign(jedisClient, uid);
+		if(rewards!=null){
+			resData.put("received",true );
+			resData.put("rewards", rewards);
+		}else{
+			resData.put("received",false );
+		}
+		return resData;
+		}
+	
+	public static final void  setDailySign(IJedisClient client,int uid,int rewards,int expire){
+		client.hset(RedisData.DB1_0,"DailySign:"+uid, "rewards",rewards+"");
+		client.expire(RedisData.DB1_2, "DailySign:"+uid, expire);
+	}
+	public static final String getDailySign(IJedisClient client,int uid){
+		return client.hget(RedisData.DB1_0,"DailySign:"+uid, "rewards");
+	}
 }

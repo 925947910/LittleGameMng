@@ -250,8 +250,8 @@ public class BenzBmwService implements IBenzBmwService {
 		 if(currIssue!= issue){
 				throw new ServiceException(StatusCode.GET_DRAW_FAILED,"issue_expire", null);
 			}
-		 System.out.println("!!!!!!!!!!!!!!!!!check"+(end-40+23));
-		 System.out.println("!!!!!!!!!!!!!!!!!nowSec"+nowSec);
+//		 System.out.println("!!!!!!!!!!!!!!!!!check"+(end-40+23));
+//		 System.out.println("!!!!!!!!!!!!!!!!!nowSec"+nowSec);
 		 if(nowSec<end-40+23){
 				throw new ServiceException(StatusCode.GET_DRAW_FAILED,"not_awarded ", null);
 			}

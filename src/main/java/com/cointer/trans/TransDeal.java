@@ -5,11 +5,13 @@ package com.cointer.trans;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import com.cointer.config.EndEventProcesser;
 import com.cointer.eventer.EventProcesser;
 import com.cointer.exception.TransException;
 import com.cointer.mapper.freezeMapper;
@@ -28,7 +30,7 @@ import com.cointer.service.impl.RouletteService;
 import com.cointer.util.CommTypeUtils;
 @Component
 public class TransDeal {
-	
+	private static final Logger log = LoggerFactory.getLogger(TransDeal.class);
 	@Autowired
 	private   gameUserMapper gameUserMapper;
 	@Autowired
@@ -56,11 +58,10 @@ public class TransDeal {
 		if(gameUserMapper.coinChange(rbBallBet.getUid(), newCoin, version)!=1) {
 			throw new TransException("coin_modify_failed");
 		}
-		rbBallBet.setCoin(rbBallBet.getCoin());
 		if(rbBallBMapper.laid(rbBallBet)!=1) {
 			throw new TransException("bet_failed");
 		}	
-		EventProcesser.writeBill(rbBallBet.getUid(),DBUser.getNick(),DBUser.getAgentId(),-rbBallBet.getCoin(), newCoin, EventProcesser.EVENT_REDGREENBALL_BET, rbBallBet.getUid(),"红绿球下注issue:"+rbBallBet.getIssue(),"","");
+		EventProcesser.writeBill(rbBallBet.getUid(),DBUser.getNick(),DBUser.getAgentId(),-rbBallBet.getCoin(), newCoin, EventProcesser.EVENT_REDGREENBALL_BET, rbBallBet.getUid(),"红绿球下注issue:"+rbBallBet.getIssue()+"==bet:"+rbBallBet.getBet()+"==coin"+rbBallBet.getCoin(),"","");
 	    return DBUser.getPresenterId();
 	}
 	
@@ -97,7 +98,6 @@ public class TransDeal {
     		
     		int extractedBank=EventProcesser.platExtract(bank);
     		int newCoin = oldCoin+extractedBank;
-    		System.out.println("!!!!!!!!!!!fallBanker oldCoin:"+oldCoin+"!!!bank:"+bank+"!!!extractedBank:"+extractedBank+"!!!newCoin:"+newCoin);
     		if(newCoin<0) {
     			throw new TransException("coin_not_enough");
     		}

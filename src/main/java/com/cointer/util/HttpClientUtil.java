@@ -221,8 +221,113 @@ public class HttpClientUtil {
         log.debug("========= Call [{}] End ==========", uri);
         return json;
     }
+    public String doPostWithJsonResult(String uri, String jsonStr) {
+    	String json = null;
+        log.debug("========= Call [{}] Start ==========", uri);
+        HttpResponse response = null;
+        try {
+            HttpPost request = new HttpPost(uri);
+            RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                    .setConnectTimeout(timeout).setSocketTimeout(timeout).build();
+            request.setConfig(config);
+            request.setHeader("Content-type", "application/json;charset=UTF-8");
+            if (jsonStr != null && !"".equals(jsonStr)) {
+//            	request.setHeader("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+                 request.setEntity(new StringEntity(jsonStr, ContentType.APPLICATION_JSON));
+//            	 StringEntity StringEntity = new StringEntity(jsonStr);  
+//            	 StringEntity.setContentEncoding("UTF-8");  
+//            	 StringEntity.setContentType("application/json");  
+//            	 request.setEntity(StringEntity);  	
+            }
+            response = client.execute(request);
+            int StatusCode= response.getStatusLine().getStatusCode();
+            log.debug("Response status code: {}",StatusCode);
+            if(StatusCode==HttpStatus.SC_OK){
+            	json=EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            	
+            }else if(StatusCode==HttpStatus.SC_MOVED_TEMPORARILY){
+            	Header header = response.getFirstHeader("location");
+            	if (header == null||header.getValue()==null) {
+            		json ="";
+            	} 
+            	json=header.getValue();
+            }
 
-    	
+        	log.debug("Payload : {}", json);
+            request.releaseConnection();
+        } catch (Exception e) {
+            log.error("HttpClient has exception! message: {}", e.getMessage(), e);
+            return json;
+        } finally {
+            try {
+                if (response != null) {
+                    EntityUtils.consume(response.getEntity());
+                }
+            } catch (IOException e) {
+                log.error("HttpClient has exception! message: {}", e.getMessage(), e);
+            }
+        }
+        log.debug("========= Call [{}] End ==========", uri);
+        return json;
+    }
+    public String doPost(String url, String jsonStr) {
+        log.debug("========= Call [{}] Start ==========", url);
+        URL u = null;
+        HttpURLConnection con = null;
+
+        try {
+            u = new URL(url);
+            con = (HttpURLConnection) u.openConnection();
+            con.setRequestMethod("POST");
+            con.setDoOutput(true);
+            con.setDoInput(true);
+            con.setUseCaches(false);
+            //application/x-www-form-urlencoded
+            con.setRequestProperty("content-type", "application/json;charset=UTF-8");
+            con.setConnectTimeout(timeout);
+            con.setReadTimeout(timeout);
+            //con.setRequestProperty("content-type", "application/x-www-form-urlencoded");
+            if (jsonStr != null && !"".equals(jsonStr)) {
+                OutputStreamWriter osw = new OutputStreamWriter(
+                        con.getOutputStream(), "UTF-8");
+                log.debug("即将发送参数:{}", jsonStr);
+                osw.write(jsonStr);
+                osw.flush();
+                osw.close();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), new IllegalStateException(e));
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
+        }
+        // 读取返回内容
+        StringBuffer buffer = new StringBuffer();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(
+                    con.getInputStream(), "UTF-8"));
+            String temp = "";
+            while ((temp = br.readLine()) != null) {
+                buffer.append(temp);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), new IllegalStateException(e));
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                	log.error("", e);
+                }
+            }
+        }
+        String result = buffer.toString();
+        log.debug("Payload: {}", result);
+        log.debug("========= Call [{}] End ==========", url);
+        return result;
+    } 	
     	
     
     
@@ -284,64 +389,7 @@ public class HttpClientUtil {
 	}*/
 
 
-    public String doPost(String url, String jsonStr) {
-        log.debug("========= Call [{}] Start ==========", url);
-        URL u = null;
-        HttpURLConnection con = null;
 
-        try {
-            u = new URL(url);
-            con = (HttpURLConnection) u.openConnection();
-            con.setRequestMethod("POST");
-            con.setDoOutput(true);
-            con.setDoInput(true);
-            con.setUseCaches(false);
-            //application/x-www-form-urlencoded
-            con.setRequestProperty("content-type", "application/json;charset=UTF-8");
-            con.setConnectTimeout(timeout);
-            con.setReadTimeout(timeout);
-            //con.setRequestProperty("content-type", "application/x-www-form-urlencoded");
-            if (jsonStr != null && !"".equals(jsonStr)) {
-                OutputStreamWriter osw = new OutputStreamWriter(
-                        con.getOutputStream(), "UTF-8");
-                log.debug("即将发送参数:{}", jsonStr);
-                osw.write(jsonStr);
-                osw.flush();
-                osw.close();
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), new IllegalStateException(e));
-        } finally {
-            if (con != null) {
-                con.disconnect();
-            }
-        }
-        // 读取返回内容
-        StringBuffer buffer = new StringBuffer();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(
-                    con.getInputStream(), "UTF-8"));
-            String temp = "";
-            while ((temp = br.readLine()) != null) {
-                buffer.append(temp);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), new IllegalStateException(e));
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                	log.error("", e);
-                }
-            }
-        }
-        String result = buffer.toString();
-        log.debug("Payload: {}", result);
-        log.debug("========= Call [{}] End ==========", url);
-        return result;
-    }
 
     /**
      * @return the timeout

@@ -56,6 +56,7 @@ public class EventProcesser {
 	public static final int   EVENT_BENZBMW_DRAW=24; // 奔驰宝马中奖
 	public static final int   EVENT_EXTRACT_REBATES=25; // 提取邀请反水
 	public static final int   EVENT_ROULETTE_DRAW=26; // 转盘中奖
+	public static final int   EVENT_DAILY_ACTIVE=27; // 转盘中奖
 	private static final Logger log = LoggerFactory.getLogger(EventProcesser.class);
 	//  Event={obj,[{"uid",Uid},{"E",?EVENT_WIN},{"price",Price},{"game",GameId},{"desc","play_game"}]},
 	//	Event={obj,[{"uid",Uid},{"E",?EVENT_PAY},{"pay",Coin},{"game","GameId"},{"desc","play_game"}]},

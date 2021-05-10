@@ -5,6 +5,8 @@ import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.druid.util.StringUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -36,7 +38,11 @@ public class MD5Util {
         Iterator<String> iterator = paramKeys.iterator();
         while (iterator.hasNext()){
             String key = iterator.next();
-            sb.append("&").append(key).append("=").append(MapUtils.getString(params,key, ""));
+            String val = params.get(key);
+            if(StringUtils.isEmpty(val)){
+            	continue;
+            }
+            sb.append("&").append(key).append("=").append(val);
         }
         String data = sb.toString();
         data = data.substring(1, data.length());
@@ -105,8 +111,8 @@ public class MD5Util {
         // 获取加盐后的MD5值
         String ciphertext = getSaltMD5(plaintext, SALT);
 
-        System.out.println("加盐后MD5：" + ciphertext);
-        System.out.println("是否是同一字符串:" + getSaltverifyMD5(plaintext, ciphertext));
+//        System.out.println("加盐后MD5：" + ciphertext);
+//        System.out.println("是否是同一字符串:" + getSaltverifyMD5(plaintext, ciphertext));
     }
 
     public static String encrypt(String data, String salt) {

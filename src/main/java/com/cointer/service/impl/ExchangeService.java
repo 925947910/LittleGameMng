@@ -8,7 +8,6 @@ package com.cointer.service.impl;
 
 
 
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -34,7 +33,7 @@ import com.cointer.service.otPay.OtPayService;
 import com.cointer.trans.TransExchange;
 import com.cointer.util.CommTypeUtils;
 import com.cointer.service.tikPay.TikPayService;
-
+import com.cointer.service.amPay.AmPayService;
 
 
 
@@ -45,11 +44,9 @@ import com.cointer.service.tikPay.TikPayService;
 @Service
 public class ExchangeService  implements IExchangeService{
 
-	public static final int			PAY_BANK       = 907;
-	public static final int			PAY_TM       = 931;
-	public static final int			PAY_UPI       = 936;
 
-	public static final int			SUCC_       = 10000;
+
+
 
 
 
@@ -63,14 +60,15 @@ public class ExchangeService  implements IExchangeService{
 	private   TransExchange TransExchange;
 	@Autowired
 	private   tradeOrderMapper tradeOrderMapper;
-	@Autowired
-	private   freezeMapper freezeMapper;
+
 	@Autowired
 	private   GameTaskService GameTaskService;
 	@Autowired
+	private   AmPayService  AmPayService;
+	@Autowired
 	private   TikPayService TikPayService;
 	@Autowired
-	private   OtPayService OtPayService;
+	private   OtPayService  OtPayService;
 
 	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 30,"bank_code":"IDPT0001","cost": 100}
 	@Override
@@ -98,6 +96,10 @@ public class ExchangeService  implements IExchangeService{
 			plat=2;
 			AuthData=TikPayService.chargeOrder(reqData,orderLocal);
 			break;
+		case "AmPay":
+			plat=3;
+			AuthData=AmPayService.chargeOrder(reqData,orderLocal);
+			break;
 		default:
 			break;
 		}
@@ -112,7 +114,7 @@ public class ExchangeService  implements IExchangeService{
 		return resData;
 	}
 
-	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "isfc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
+	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "ifsc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
 	@Override
 	public   JSONObject  extractOrder(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
@@ -141,6 +143,9 @@ public class ExchangeService  implements IExchangeService{
 			break;
 		case "TikPay":
 			AccountOut=TikPayService.accountInfo(reqData);
+			break;
+		case "AmPay":
+			AccountOut=AmPayService.accountInfo(reqData);
 			break;
 		default:
 			break;
@@ -178,6 +183,10 @@ public class ExchangeService  implements IExchangeService{
 		case "TikPay":
 			plat=2;
 			AuthData=TikPayService.verifyExtract(tradeOrder);
+			break;
+		case "AmPay":
+			plat=3;
+			AuthData=AmPayService.verifyExtract(tradeOrder);
 			break;
 		default:
 			break;
@@ -259,7 +268,7 @@ public class ExchangeService  implements IExchangeService{
 			return;
 		}
 		int per= Integer.parseInt(RedisData.userField(jedisClient, uid, "isLeader"));
-		int rebatesCoin=coin*per/100;
+		int rebatesCoin=coin*per/1000;
 		RedisData.addChargeRebates(jedisClient, uid, rebatesCoin);
 	}
 

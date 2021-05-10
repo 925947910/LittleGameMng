@@ -17,6 +17,11 @@ public interface ICoinInfoService   {
 	Object currCoin(String RequestJsonData) throws Exception;
 
 
+	Object dailySignInfo(String RequestJsonData) throws Exception;
+
+	Object dailyCheck(String RequestJsonData) throws Exception;
+
+
 
 	
 }
