@@ -108,7 +108,7 @@ public class TransDeal {
 		
 	}
 	@Transactional
-	public   int  BenzBmwBet(int uid ,int totalCoin,Map bets) throws Exception {
+	public   int  BenzBmwBet(int uid ,int totalCoin,Map<String,String> bets) throws Exception {
 		int PresenterId=0;
 			List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
 			gameUser DBUser=DBUsers.get(0);
@@ -127,7 +127,7 @@ public class TransDeal {
 		return  PresenterId;
 	}
 	@Transactional
-	public   int  RouletteBet(int uid ,int totalCoin,Map bets) throws Exception {
+	public   int  RouletteBet(int uid ,int totalCoin,Map<String,String> bets) throws Exception {
 		int PresenterId=0;
 			List<gameUser> DBUsers=gameUserMapper.checkCoin(uid);
 			gameUser DBUser=DBUsers.get(0);

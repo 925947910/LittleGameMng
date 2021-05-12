@@ -126,7 +126,14 @@ public class UserService implements IUserService {
 	@Override
 	public  Object   login(String  RequestJsonData) throws Exception  {
 		int platFrom=0;
-		JSONObject reqData=JSON.parseObject(RequestJsonData);
+		JSONObject reqData;
+	     try {
+	    	 reqData=JSON.parseObject(RequestJsonData);
+		} catch (Exception e) {
+			 log.warn("============login_error  RequestJsonData:"+RequestJsonData);
+			 throw new ServiceException(StatusCode.FAILED,"RequestJsonData  error", null);
+		}
+		
 		String token=reqData.getString(Constant._TOKEN);
 		Map<String,String> tokenInfo=RedisData.getSessionInfo(jedisClient,token);
 		if(tokenInfo.get("uid")!=null) {
