@@ -2,6 +2,7 @@ package com.cointer.controller.base;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public abstract class BaseController {
 		try {
 			 Method method = null;
 			 method = Service.getClass().getMethod(func,String.class);
-			 Object resultParam = method.invoke(Service, param);
+			 Object resultParam = method.invoke(Service, URLDecoder.decode(param,"UTF-8"));
 			return succ(StatusCode.SUCC, "", resultParam);
 		}catch (InvocationTargetException e) {
 			Throwable excpetion=e.getTargetException();
