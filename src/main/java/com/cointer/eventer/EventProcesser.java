@@ -52,11 +52,13 @@ public class EventProcesser {
 	public static final int   EVENT_REDGREENBALL_BET=20; // 红绿球下注
 	public static final int   EVENT_BENZBMW_BET=21; // 奔驰宝马下注
 	public static final int   EVENT_CROWDFUND_BET=22; // 一元购下注
-	public static final int   EVENT_REDGREENBALL_DRAW=23; // 红绿球中奖
+	public static final int   EVENT_3MIN_REDGREENBALL_DRAW=23; // 红绿球中奖
 	public static final int   EVENT_BENZBMW_DRAW=24; // 奔驰宝马中奖
 	public static final int   EVENT_EXTRACT_REBATES=25; // 提取邀请反水
 	public static final int   EVENT_ROULETTE_DRAW=26; // 转盘中奖
 	public static final int   EVENT_DAILY_ACTIVE=27; // 转盘中奖
+	public static final int   EVENT_5MIN_REDGREENBALL_DRAW=28; // 红绿球中奖
+	public static final int   EVENT_10MIN_REDGREENBALL_DRAW=29; // 红绿球中奖
 	private static final Logger log = LoggerFactory.getLogger(EventProcesser.class);
 	//  Event={obj,[{"uid",Uid},{"E",?EVENT_WIN},{"price",Price},{"game",GameId},{"desc","play_game"}]},
 	//	Event={obj,[{"uid",Uid},{"E",?EVENT_PAY},{"pay",Coin},{"game","GameId"},{"desc","play_game"}]},
@@ -109,9 +111,9 @@ public class EventProcesser {
 		switch (event) {
 
 
-
-
-		case EVENT_REDGREENBALL_DRAW:
+		case EVENT_3MIN_REDGREENBALL_DRAW:
+		case EVENT_5MIN_REDGREENBALL_DRAW:
+		case EVENT_10MIN_REDGREENBALL_DRAW:
 			 uid = data.getIntValue("uid");
 			 result = data.getString("result");
 			 issue = data.getLongValue("issue");
@@ -119,14 +121,14 @@ public class EventProcesser {
 				if (cost != 0) {
 					for (int i = 0; i < 10; i++) {
 						try {
-							remain = gameCoinChange(uid, cost, EVENT_REDGREENBALL_DRAW, 0, "Lottery Ball issue:"+issue);
+							remain = gameCoinChange(uid, cost, event, 0, "Lottery Ball issue:"+issue);
 							break;
 						} catch (Exception e) {
 							log.error("EVENT_REDGREENBALL_DRAW",e);
 						}
 					}
 					if (remain == null) {
-						writeCoinFailed(uid, cost, EVENT_REDGREENBALL_DRAW, 0, "Lottery Ball issue:"+issue);
+						writeCoinFailed(uid, cost, event, 0, "Lottery Ball issue:"+issue);
 						log.warn("EVENT_REDGREENBALL_DRAW_FAILED uid:" + uid + "===cost:" + cost);
 					}
 				}

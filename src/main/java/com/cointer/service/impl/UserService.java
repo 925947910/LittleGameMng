@@ -262,7 +262,7 @@ public class UserService implements IUserService {
 		
 		Map<String,String> MapResult=RedisData.userInfo(jedisClient, uid);
 		String url=RedisData.getUri(jedisClient, 0, "shareUrl");
-		List<billsInfo> bills=billsMapper.billsListByTypes(uid, EventProcesser.EVENT_REDGREENBALL_DRAW,EventProcesser.EVENT_BENZBMW_DRAW);
+		List<billsInfo> bills=billsMapper.billsListByTypes(uid,EventProcesser.EVENT_3MIN_REDGREENBALL_DRAW, EventProcesser.EVENT_5MIN_REDGREENBALL_DRAW, EventProcesser.EVENT_10MIN_REDGREENBALL_DRAW,EventProcesser.EVENT_BENZBMW_DRAW);
 		resData.put("userInfo", MapResult);
 		resData.put("bills", bills);
 //		resData.put("isLeader", isLeader);

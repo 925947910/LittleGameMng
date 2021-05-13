@@ -26,6 +26,7 @@ import com.cointer.pojo.po.tradeOrder;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 import com.cointer.service.impl.BenzBmwService;
+import com.cointer.service.impl.RedGreenBallService;
 import com.cointer.service.impl.RouletteService;
 import com.cointer.util.CommTypeUtils;
 @Component
@@ -61,7 +62,8 @@ public class TransDeal {
 		if(rbBallBMapper.laid(rbBallBet)!=1) {
 			throw new TransException("bet_failed");
 		}	
-		EventProcesser.writeBill(rbBallBet.getUid(),DBUser.getNick(),DBUser.getAgentId(),-rbBallBet.getCoin(), newCoin, EventProcesser.EVENT_REDGREENBALL_BET, rbBallBet.getUid(),"红绿球下注issue:"+rbBallBet.getIssue()+"==bet:"+rbBallBet.getBet()+"==coin"+rbBallBet.getCoin(),"","");
+		int type=RedGreenBallService.matchEvent(rbBallBet.getPeriod());
+		EventProcesser.writeBill(rbBallBet.getUid(),DBUser.getNick(),DBUser.getAgentId(),-rbBallBet.getCoin(), newCoin, type, rbBallBet.getUid(),"红绿球下注Period:"+rbBallBet.getPeriod()+"issue:"+rbBallBet.getIssue()+"==bet:"+rbBallBet.getBet()+"==coin"+rbBallBet.getCoin(),"","");
 	    return DBUser.getPresenterId();
 	}
 	

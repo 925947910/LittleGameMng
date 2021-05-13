@@ -83,22 +83,22 @@ public class CoinInfoService implements ICoinInfoService {
 	@Override
 	public Object personalInfo(String  RequestJsonData) throws Exception {
 		JSONObject reqData=JSON.parseObject(RequestJsonData);
-	
+
 		int uid=reqData.getIntValue("uid");
 
-		List<billsInfo> bills=billsMapper.billsListByTypes(uid, EventProcesser.EVENT_REDGREENBALL_DRAW,EventProcesser.EVENT_BENZBMW_DRAW);
-		
-//		String isLeader=RedisData.userField(jedisClient, uid, "isLeader");
+		List<billsInfo> bills=billsMapper.billsListByTypes(uid, EventProcesser.EVENT_3MIN_REDGREENBALL_DRAW, EventProcesser.EVENT_5MIN_REDGREENBALL_DRAW, EventProcesser.EVENT_10MIN_REDGREENBALL_DRAW,EventProcesser.EVENT_BENZBMW_DRAW);
+
+		//		String isLeader=RedisData.userField(jedisClient, uid, "isLeader");
 		String agentId=RedisData.userField(jedisClient, uid, "agentId");
-		
+
 		String url=RedisData.getUri(jedisClient, 0, "shareUrl");
-		
+
 		JSONObject resData=new JSONObject();
 		resData.put("bills", bills);
-//		resData.put("isLeader", isLeader);
+		//		resData.put("isLeader", isLeader);
 		resData.put("shareUrl", url+"?agentId="+agentId+"&presenterId="+uid);
 		return resData;
-		}
+	}
 	
 	@Override
 	public Object billsList(String  RequestJsonData) throws Exception {

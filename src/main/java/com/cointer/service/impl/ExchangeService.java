@@ -224,7 +224,9 @@ public class ExchangeService  implements IExchangeService{
 				chargeRebates(res.getInteger("presenterId"),tradeOrder.getCoin());
 				if(res.getBoolean("firstCharge")){
 					GameTaskService.updateSchedul(res.getInteger("presenterId"), GameTaskService.TASK2, 1);	
-					RedGreenBallService.delRbBallBeter(jedisClient, tradeOrder.getUid());
+					RedGreenBallService.delRbBallBeter(jedisClient,3, tradeOrder.getUid());
+					RedGreenBallService.delRbBallBeter(jedisClient,5, tradeOrder.getUid());
+					RedGreenBallService.delRbBallBeter(jedisClient,10, tradeOrder.getUid());
 					BenzBmwService.BenzBmwCleanBet(jedisClient, tradeOrder.getUid());
 				} 
 			} catch (TransException TransException) {

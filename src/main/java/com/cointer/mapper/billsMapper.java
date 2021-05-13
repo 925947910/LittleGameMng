@@ -19,8 +19,8 @@ public interface billsMapper {
 	@Select("select * from bills where  uid=#{uid} and type=#{type} ")    
 	List<billsInfo> billsByType(int uid,int type);
 	
-	@Select("select * from bills where  uid=#{uid} and (type=#{type1} or type=#{type2})")    
-	List<billsInfo> billsListByTypes(int uid,int type1,int type2);
+	@Select("select * from bills where  uid=#{uid} and (type=#{type1} or type=#{type2} or type=#{type3} or type=#{type4})")    
+	List<billsInfo> billsListByTypes(int uid,int type1,int type2,int type3,int type4);
 	
 	@Select("select * from bills where  uid=#{uid} and time BETWEEN #{begin} and #{end} order by time DESC")    
 	List<billsInfo> billsList(int uid,long begin, long end);

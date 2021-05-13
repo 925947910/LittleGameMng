@@ -4,6 +4,7 @@ public class rbBallBet {
 	private   Integer  id;
 	private   Integer  uid;
 	private   Integer  coin;
+	private   Integer  period;
 	private   Long     issue;
 	private   String   bet;
 	private   Long     time;
@@ -24,6 +25,12 @@ public class rbBallBet {
 	}
 	public void setCoin(Integer coin) {
 		this.coin = coin;
+	}
+	public Integer getPeriod() {
+		return period;
+	}
+	public void setPeriod(Integer period) {
+		this.period = period;
 	}
 	public Long getIssue() {
 		return issue;

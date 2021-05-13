@@ -2,6 +2,7 @@ package com.cointer.pojo.po;
 
 public class rbBall {
 	private   Integer  id;
+	private   Integer     period;
 	private   Long     issue;
 	private   String   lotteryResult; 
 	private   Integer  lotteryPool;
@@ -9,6 +10,13 @@ public class rbBall {
 	private   Integer  totalWin;
 	private   Integer  isDraw;
 	private   Long     time;
+	
+	public Integer getPeriod() {
+		return period;
+	}
+	public void setPeriod(Integer period) {
+		this.period = period;
+	}
 	public Long getTime() {
 		return time;
 	}
