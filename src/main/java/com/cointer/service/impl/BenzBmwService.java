@@ -543,7 +543,11 @@ public class BenzBmwService implements IBenzBmwService {
 	}
 	public static final int  BenzBmwFallbank(IJedisClient client,int uid){
 		String key=BenzBmw+uid;
-		int bank=Integer.parseInt(client.hget(RedisData.DB1_3, key, Bank));
+		String bankStr=client.hget(RedisData.DB1_3, key, Bank);
+		if (bankStr==null){
+			return 0;
+		}
+		int bank=Integer.parseInt(bankStr);
 		boolean result = bank!=0;
 		if(result){
 			client.hset(RedisData.DB1_3, key, Bank,"0");

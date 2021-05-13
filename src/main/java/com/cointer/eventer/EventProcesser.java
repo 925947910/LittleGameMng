@@ -233,6 +233,6 @@ public class EventProcesser {
 		return num*95/100;
 	}
 	public static  float chargeExtract(float num,int chargeExtract){
-		return num*(100-chargeExtract)/100;
+		return num*(1000-chargeExtract)/1000;
 	}
 }
