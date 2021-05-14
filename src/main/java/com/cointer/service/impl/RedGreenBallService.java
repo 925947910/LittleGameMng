@@ -221,15 +221,15 @@ public class RedGreenBallService implements IRedGreenBallService {
     		Map<String,String> issueMap=getIssue(period);
     		issueMap.put(IsDraw,"0");
             setCurrRbBall(jedisClient,period,issueMap);
-            rbBall rbBall=new rbBall();
-            rbBall.setIssue( Long.parseLong(issueMap.get(Issue)));
-            rbBall.setTime(Long.parseLong(issueMap.get(BetStart)));
-            rbBall.setPeriod(period);
-            rbBall.setLotteryPool(0);
-            rbBall.setLotteryPrice(0);
-            rbBall.setTotalWin(0);
-            rbBall.setIsDraw(0);
            if(rbBallMapper.currRbBall(period,Long.parseLong(issueMap.get(Issue))).isEmpty()){
+               rbBall rbBall=new rbBall();
+               rbBall.setIssue( Long.parseLong(issueMap.get(Issue)));
+               rbBall.setTime(Long.parseLong(issueMap.get(BetStart)));
+               rbBall.setPeriod(period);
+               rbBall.setLotteryPool(0);
+               rbBall.setLotteryPrice(0);
+               rbBall.setTotalWin(0);
+               rbBall.setIsDraw(0);
         	  rbBallMapper.initRbBall(rbBall); 
            } 
 		} catch (Exception e) {
@@ -451,7 +451,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 	public static final void  setRbBallBeter(IJedisClient client, int period,Long issue,String bet,int uid){
 		String key="rbBall:"+period+"issue:"+issue+"bet:"+bet;
 		client.sadd(RedisData.DB1_2,key, uid+"");
-		client.expire(RedisData.DB1_2, key, 200);
+		client.expire(RedisData.DB1_2, key, period*60+5);
 	}
 	public static final Set<String>  getRbBallBeter(IJedisClient client, int period,Long issue,String bet){
 		String key="rbBall:"+period+"issue:"+issue+"bet:"+bet;
@@ -462,7 +462,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 	}
 	public static final void  setCurrRbBall(IJedisClient client, int period,Map<String,String> issue){
 		client.hmset(RedisData.DB1_2, CurrRbBall+period,issue);
-		client.expire(RedisData.DB1_2, CurrRbBall+period, 200);
+		client.expire(RedisData.DB1_2, CurrRbBall+period, period*60+5);
 	}
 	public static final Map<String,String>  getCurrRbBall(IJedisClient client, int period){
 		Map<String,String> mapData=client.hgetAll(RedisData.DB1_2, CurrRbBall+period);
