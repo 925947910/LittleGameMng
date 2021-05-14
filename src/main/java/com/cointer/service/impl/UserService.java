@@ -146,6 +146,7 @@ public class UserService implements IUserService {
 		gameUser DBUser=new gameUser();
 		DBUser=DBUsers.get(0);
 		 if(!DBUser.getPwd().equals(reqData.getString("pwd"))){
+			    log.warn("==========LOGIN_AUTH_FAILED====pwd:"+reqData.getString("pwd")+"==getPwd:"+DBUser.getPwd());
 				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"password_error", null);
 			}
 		 RedisData.updateUser(jedisClient,DBUser); 

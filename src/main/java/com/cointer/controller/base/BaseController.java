@@ -33,7 +33,10 @@ public abstract class BaseController {
 		try {
 			 Method method = null;
 			 method = Service.getClass().getMethod(func,String.class);
-			 Object resultParam = method.invoke(Service, URLDecoder.decode(param,"UTF-8"));
+//			 System.out.println("!!!!!!!!!!!!!!param:"+param);
+//			 System.out.println("!!!!!!!!!!!!!!paramdecode:"+URLDecoder.decode(param,"UTF-8"));
+			 Object resultParam = method.invoke(Service, param);
+//			 Object resultParam = method.invoke(Service, URLDecoder.decode(param,"UTF-8"));
 			return succ(StatusCode.SUCC, "", resultParam);
 		}catch (InvocationTargetException e) {
 			Throwable excpetion=e.getTargetException();

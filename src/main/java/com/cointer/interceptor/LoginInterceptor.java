@@ -48,11 +48,13 @@ public class LoginInterceptor extends BaseInterceptor implements HandlerIntercep
 		}
 		String  session=request.getParameter(Constant._SESSION);
 		if(session == null) {
+			log.warn("===============User login failed SESSION:"+null);
 			send(response, BaseController.failed(StatusCode.NO_LOGIN, "User login failed please login again", null));
 			return false;
 		}
 		Map<String,String> sessionData=RedisData.getSessionInfo(jedisClient, session);
 		if(sessionData==null||sessionData.size()==0) {
+			log.warn("===============User login failed SESSION:"+session);
 			send(response, BaseController.failed(StatusCode.NO_LOGIN, "User login failed please login again", null));
 			return false;
 		}
