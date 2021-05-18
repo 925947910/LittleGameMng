@@ -62,8 +62,7 @@ public class TransDeal {
 		if(rbBallBMapper.laid(rbBallBet)!=1) {
 			throw new TransException("bet_failed");
 		}	
-		int type=RedGreenBallService.matchEvent(rbBallBet.getPeriod());
-		EventProcesser.writeBill(rbBallBet.getUid(),DBUser.getNick(),DBUser.getAgentId(),-rbBallBet.getCoin(), newCoin, type, rbBallBet.getUid(),"红绿球下注Period:"+rbBallBet.getPeriod()+"issue:"+rbBallBet.getIssue()+"==bet:"+rbBallBet.getBet()+"==coin"+rbBallBet.getCoin(),"","");
+		EventProcesser.writeBill(rbBallBet.getUid(),DBUser.getNick(),DBUser.getAgentId(),-rbBallBet.getCoin(), newCoin, EventProcesser.EVENT_REDGREENBALL_BET, rbBallBet.getUid(),"红绿球下注Period:"+rbBallBet.getPeriod()+"issue:"+rbBallBet.getIssue()+"==bet:"+rbBallBet.getBet()+"==coin"+rbBallBet.getCoin(),"","");
 	    return DBUser.getPresenterId();
 	}
 	

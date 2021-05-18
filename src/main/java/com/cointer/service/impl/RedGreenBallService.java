@@ -240,7 +240,7 @@ public class RedGreenBallService implements IRedGreenBallService {
     //  封盘算结果
     public void RedGreenBallResult(int period) {
     	try {
-    		Map<String,String> issueMap=lotteryResult( period);
+    		Map<String,String> issueMap=lotteryResult(period);
     		Long issue=Long.parseLong(issueMap.get(Issue));
 			String lotteryResult=issueMap.get(LotteryResult);
 			int lotteryPool= Integer.parseInt(issueMap.get(LotteryPool));
@@ -341,7 +341,7 @@ public class RedGreenBallService implements IRedGreenBallService {
           
           long zeroSec=calendar.getTimeInMillis()/1000;
          
-         long issueToday=1+(nowSec-zeroSec+1)/period*60;
+         long issueToday=1+(nowSec-zeroSec+1)/(period*60);
          long issue= year*10000000+month*100000+day*1000+issueToday;
          
          Map<String,String> result= new HashMap<String,String>();
@@ -372,6 +372,7 @@ public class RedGreenBallService implements IRedGreenBallService {
     	if(issueMap.isEmpty()){
     		return null;
     	}
+//    	System.out.println("==========lotteryResult:"+period+" issueMap:"+issueMap.toString());
     	Long issue=Long.parseLong(issueMap.get(Issue));
     	List<rbBall> rbBallList=rbBallMapper.currRbBall(period,issue);
     	String Resutl=null;
@@ -416,6 +417,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 
 		rbBall rbBall=rbBallList.get(0);
 		Resutl=rbBall.getLotteryResult();
+//		System.out.println("==========lotteryResult:"+period+" Resutl:"+Resutl);
 		
 		if(Resutl==null){
 			for (int i = 0; i < prices.length; i++) {
@@ -433,7 +435,7 @@ public class RedGreenBallService implements IRedGreenBallService {
     	 issueMap.put(LotteryResult, Resutl+"");
     	 issueMap.put(LotteryPool, total+"");
     	 issueMap.put(TotalWin, price+"");
-
+//    	 System.out.println("==========lotteryResult:"+period+" FinalResutl:"+Resutl);
     	return issueMap;
     }
     
