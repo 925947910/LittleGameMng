@@ -85,9 +85,9 @@ public class UserService implements IUserService {
 		gameUser DBUser=new gameUser();
 		Integer id;
 			//注册用户
-			if(!StringUtil.MobileNumber("+55",loginDto.getPhone())) {
-				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"phone_number_illegal", null);
-			}
+//			if(!StringUtil.MobileNumber("+55",loginDto.getPhone())) {
+//				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"phone_number_illegal", null);
+//			}
 			if(StringUtils.isBlank(loginDto.getNick())) {
 				throw new ServiceException(StatusCode.REGIST_FAILED,"nick_not_null", null);
 			}
@@ -107,7 +107,7 @@ public class UserService implements IUserService {
 			DBUser.setAcc(loginDto.getAcc());
 			DBUser.setPwd(loginDto.getPwd());
 			DBUser.setNick(loginDto.getNick());
-			DBUser.setCoin(8888);
+			DBUser.setCoin(88);
 			DBUser.setPhoto("");
 			DBUser.setPhone(loginDto.getPhone());
 			DBUser.setAgentId(loginDto.getAgentId());
