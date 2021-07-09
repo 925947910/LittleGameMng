@@ -270,7 +270,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 	        String botName=botObj.getString("name");
 		     int num=100000*rand.nextInt(10)+10000*rand.nextInt(10);
 	        
-		     addRbBallNotice(jedisClient,period, "Congratulations to player "+botName+" for winning "+num+" rupees in the "+issue+"nd issue of the red and green ball game!");
+		     addRbBallNotice(jedisClient,period, "Congratulations to player "+botName+" for winning "+num+" R$ in the "+issue+"nd issue of the red and green ball game!");
 			
 			
     	} catch (Exception e) {
@@ -312,6 +312,7 @@ public class RedGreenBallService implements IRedGreenBallService {
 					RedisData.addEvent(jedisClient, uid, jsonEvent.toString());
 					String key=RbBallPrice+period+"usr:"+uid;
 					jedisClient.rpush(RedisData.DB1_2,key,jsonEvent.toString());
+					jedisClient.expire(RedisData.DB1_2,key,600);
 				}
 			}
     		

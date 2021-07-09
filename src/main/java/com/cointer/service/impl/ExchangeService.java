@@ -21,7 +21,6 @@ import com.cointer.constant.StatusCode;
 import com.cointer.eventer.EventProcesser;
 import com.cointer.exception.ServiceException;
 import com.cointer.exception.TransException;
-import com.cointer.mapper.freezeMapper;
 import com.cointer.mapper.gameUserMapper;
 import com.cointer.mapper.tradeOrderMapper;
 import com.cointer.pojo.po.gameUser;
@@ -34,8 +33,7 @@ import com.cointer.trans.TransExchange;
 import com.cointer.util.CommTypeUtils;
 import com.cointer.service.tikPay.TikPayService;
 import com.cointer.service.amPay.AmPayService;
-
-
+import com.cointer.service.sepPay.SepPayService;
 
 
 
@@ -69,6 +67,9 @@ public class ExchangeService  implements IExchangeService{
 	private   TikPayService TikPayService;
 	@Autowired
 	private   OtPayService  OtPayService;
+	@Autowired
+	private   SepPayService  SepPayService;
+	
 
 	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 30,"bank_code":"IDPT0001","cost": 100}
 	@Override
@@ -88,6 +89,7 @@ public class ExchangeService  implements IExchangeService{
 		JSONObject	AuthData=null;
 		int plat=0;
 		switch (channel) {
+		
 		case "OtPay":
 			plat=1;
 			AuthData=OtPayService.chargeOrder(reqData,orderLocal);
@@ -100,6 +102,10 @@ public class ExchangeService  implements IExchangeService{
 			plat=3;
 			AuthData=AmPayService.chargeOrder(reqData,orderLocal);
 			break;
+		case "SepPay":
+			plat=4;
+			AuthData=SepPayService.chargeOrder(reqData,orderLocal);
+			break;	
 		default:
 			break;
 		}
@@ -147,6 +153,9 @@ public class ExchangeService  implements IExchangeService{
 		case "AmPay":
 			AccountOut=AmPayService.accountInfo(reqData);
 			break;
+		case "SepPay":
+			AccountOut=SepPayService.accountInfo(reqData);
+			break;		
 		default:
 			break;
 		}
@@ -188,6 +197,9 @@ public class ExchangeService  implements IExchangeService{
 			plat=3;
 			AuthData=AmPayService.verifyExtract(tradeOrder);
 			break;
+		case "SepPay":
+			plat=4;
+			AuthData=SepPayService.verifyExtract(tradeOrder);	
 		default:
 			break;
 		}

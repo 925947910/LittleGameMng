@@ -85,7 +85,7 @@ public class UserService implements IUserService {
 		gameUser DBUser=new gameUser();
 		Integer id;
 			//注册用户
-			if(!StringUtil.MobileNumber("+91",loginDto.getPhone())) {
+			if(!StringUtil.MobileNumber("+55",loginDto.getPhone())) {
 				throw new ServiceException(StatusCode.LOGIN_AUTH_FAILED,"phone_number_illegal", null);
 			}
 			if(StringUtils.isBlank(loginDto.getNick())) {

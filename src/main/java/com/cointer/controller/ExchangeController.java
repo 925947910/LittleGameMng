@@ -20,10 +20,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.cointer.controller.base.BaseController;
+import com.cointer.pojo.dto.sepChargeCbDto;
 import com.cointer.pojo.tikPay.*;
 import com.cointer.service.IExchangeService;
 import com.cointer.service.tikPay.TikPayService;
 import com.cointer.service.otPay.OtPayService;
+import com.cointer.service.sepPay.SepPayService;
 import com.cointer.util.HttpClientUtil;
 import com.cointer.util.tikPay.AESOperator;
 import com.cointer.service.amPay.AmPayService; 
@@ -47,6 +49,10 @@ public class ExchangeController extends  BaseController{
 	private OtPayService OtPayService;
 	@Autowired 
 	private AmPayService AmPayService;
+	@Autowired 
+	private SepPayService SepPayService;
+	
+	
 	@RequestMapping("/chargeOrder")
 	@ResponseBody
 	public String chargeOrder(@RequestParam String param) {
@@ -128,7 +134,43 @@ public class ExchangeController extends  BaseController{
 		}
 		return res;
 	}	
-
+	@RequestMapping("/sepPayChargeCallBack")
+	@ResponseBody
+	public String sepPayChargeCallBack(@RequestBody sepChargeCbDto sepChargeCbDto) {
+		
+//		merchantId string 商户号
+//		orderId string 订单号
+//		amount string 订单⾦额，单位雷亚尔R$
+//		remark string 商品名称(不参与签名)
+//		orderStatus int 订单状态，1成功，-1失败
+//		sign string 签名，签名规则请看下⾯说明
+		
+		
+		String res="SUCCESS";
+		  try {
+			    JSONObject obj = (JSONObject) JSONObject.toJSON(sepChargeCbDto);
+				SepPayService.chargeCallBack(obj);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			  res="FAILED";
+		}
+		return res;
+	}
+	@RequestMapping("/sepPayExtractCallBack")
+	@ResponseBody
+	public String sepPayExtractCallBack(@RequestBody String str) {
+		String res="SUCCESS";
+		  try {
+				JSONObject  obj=JSONObject.parseObject(str);
+			  SepPayService.extractCallBack(obj);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			  res="FAILED";
+		}
+		return res;
+	}
 
 
 	@RequestMapping("/orderInfo")

@@ -43,9 +43,9 @@ public class UserController extends  BaseController{
 		     model.addAttribute("messageIos", obj.getJSONObject("param").getString("messageIos"));
 		     model.addAttribute("gameUrlIos", obj.getJSONObject("param").getString("gameUrlIos"));
 		 }else{
-			 model.addAttribute("messageAndroid", obj.getString("messageAndroid"));
+			 model.addAttribute("messageAndroid", obj.getString("message"));
 		     model.addAttribute("gameUrlAndroid", "");
-		     model.addAttribute("messageIos", obj.getString("messageIos"));
+		     model.addAttribute("messageIos", obj.getString("message"));
 		     model.addAttribute("gameUrlIos", "");
 		 }
 		 
