@@ -1,4 +1,4 @@
-package com.cointer.service.sepPay;
+package com.cointer.service.nibPay;
 
 
 
@@ -7,6 +7,7 @@ package com.cointer.service.sepPay;
 
 
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -16,12 +17,18 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.cointer.config.StaticDataCache;
 import com.cointer.constant.StatusCode;
 import com.cointer.exception.ServiceException;
+import com.cointer.exception.TransException;
+import com.cointer.mapper.tradeOrderMapper;
+import com.cointer.pojo.po.gameUser;
 import com.cointer.pojo.po.tradeOrder;
 import com.cointer.redis.IJedisClient;
 import com.cointer.redis.RedisData;
 import com.cointer.service.impl.ExchangeService;
+import com.cointer.mapper.gameUserMapper;
+import com.cointer.trans.TransExchange;
 import com.cointer.util.HttpClientUtil;
 import com.cointer.util.MD5Util;
 import com.cointer.util.SpringContextUtil;
@@ -34,88 +41,106 @@ import com.cointer.util.SpringContextUtil;
 
 
 @Service
-public class SepPayService  {
+public class NibPayService  {
 
 
-	private   static int channelIndex =4;
+	private   static int channelIndex =5;
 
 
-	private static final Logger log = LoggerFactory.getLogger(SepPayService.class);
+	private static final Logger log = LoggerFactory.getLogger(NibPayService.class);
 	
 	private static String CHARGEURL="chargeUrl";
 	private static String CHARGECALLBACKURL="chargeCallbackUrl";
 	private static String EXTRACTURL="extractUrl";
 	private static String EXTRACTCALLBACKURL="extractCallbackUrl";
 	private static String EXTRACTPER="extractPer";
-	private static String MERCHANTID="merchantId";
+	private static String MER_NO="mer_no";
 	private static String KEY="Key";
-	private static String PAYTYPE="payType";
-	private static String REDIRECTURL="redirectURL";
-	private static String ACCOUNTTYPE="accountType";
 	
 
-	@Autowired
 	private   IJedisClient jedisClient;
 
 	@Autowired
 	private   ExchangeService ExchangeService;
-
+	@Autowired
+	private   TransExchange TransExchange;
+	@Autowired
+	private   tradeOrderMapper  tradeOrderMapper;
+	@Autowired
+	private   gameUserMapper  gameUserMapper;
+	
+	
+	
 	//客户端发起充值 http://127.0.0.1:8085/GameUser/exchange/chargeOrder?param={"uid": 30, "channel": 102,"bank_code":"IDPT0001","cost": 100}
 
 	public   JSONObject  chargeOrder(JSONObject reqData,String orderLocal) throws Exception {
-		JSONObject result=null;
-		long now=	System.currentTimeMillis()/1000;
-		
-		
-		String chargeUrl=RedisData.getUri(jedisClient,channelIndex,CHARGEURL);
-		String key=RedisData.getConf(jedisClient,channelIndex,KEY);
-		String merchantId=RedisData.getConf(jedisClient,channelIndex,MERCHANTID);
-		int    payType=Integer.parseInt(RedisData.getConf(jedisClient,channelIndex,PAYTYPE));
-		
 		String amount= reqData.getIntValue("cost")+"";
-		String redirectURL=RedisData.getUri(jedisClient,channelIndex,REDIRECTURL);
-		String notifyUrl= RedisData.getUri(jedisClient,channelIndex,CHARGECALLBACKURL);
-		String sign="payType="+payType+"&merchantId="+merchantId+"&amount="+amount+"&orderId="+orderLocal+"&notifyUrl="+notifyUrl+"&key="+key;
-		sign= MD5Util.getMD5(sign);
+		long cost=reqData.getIntValue("cost")*100;
+		int customer= reqData.getIntValue("customer");
+		int uid= reqData.getIntValue("uid");
+		String buy_currency= reqData.getString("buy_currency");
+		String currency=reqData.getString("currency");
+		long now=	System.currentTimeMillis()/1000;
+		JSONObject 	result=new JSONObject();
 		
-
+		 StaticDataCache StaticDataCache=SpringContextUtil.getBean(StaticDataCache.class);
+		 JSONObject NibPay=StaticDataCache.getData("NibPay",customer);
+		 
+		String chargeUrl= NibPay.getString("chargeUrl");
+		String key= NibPay.getString("key");
+		String merchant_id= NibPay.getString("merchant_id");
+		String notifyUrl= NibPay.getString("chargeCallBack");
+	
+		List <gameUser> DBUsers=gameUserMapper.userById(uid);
+		if(DBUsers==null || DBUsers.size()==0) {
+			throw new ServiceException(StatusCode.GEN_ORDER_FAILED,"user_not_exist", null);
+		}
+		
 //		{
-//		"chargeUrl":"https://pay.speedlyp.com/pay/recharge/order","chargeCallBack":"http://377u408z76.wicp.vip:80/GameUser/exchange/sepPayChargeCallBack",
-//		"extractUrl":"https://pay.speedlyp.com/api/withdrawal/order/add","extractCallBack":"http://377u408z76.wicp.vip:80/GameUser/exchange/sepPayExtractCallBack",
-//		"redirectURL":"https://www.baidu.com/",
-//		"key":"94b86d2bc94e6765ff085fe76c1c38e7","merchantId":"10002","payType":101,"extractPer":1000,
-//			}
-		
-//		merchantId 是 string 商户号
-//		payType 是 int ⽀付⽅式，具体⻅⽀付⽅式表格
-//		orderId 是 string 订单号（唯⼀，不能
-//		重复）
-//		cpf 否 string cpf 税号(填了会员不
-//		需要再次填写)
-//		email 否 String 邮箱
-//		phone 否 string 电话号码
-//		name 否 string 姓名(填了会员不需
-//		要再次填写)
-//		amount 是 string 订单⾦额，单位雷亚
-//		尔R$
-//		redirectURL 是 string 付款完成后跳转地址
-//		remark 否 string 订单备注
-//		notifyUrl 否 string 异步通知地址
-//		sign 是 string 签名，签名规则看下方说明
-//		payType=⽀付⽅式&merchantId=商户号&amount=订单⾦额&orderId=订单号&notifyUrl=通知地址&key=商户私钥
-		JSONObject paramsMap=  new JSONObject();
-		paramsMap.put("merchantId",merchantId);
-		paramsMap.put("payType",payType);
-		paramsMap.put("orderId",orderLocal);
-		paramsMap.put("amount", amount);
-		paramsMap.put("redirectURL", redirectURL);
-		paramsMap.put("notifyUrl",notifyUrl);
+//			“service”:”Pay.GatewayPay”
+//			“channel_id”:”100000001”
+//			“amount":"1",
+//			"merchant_id":"100520000001",
+//			“out_order_id”:"1111111111",
+//			“timestamp":"14904528822",
+//			“nonce”:”123123123123",
+//			“notify_url”:”http://www.xxx.com”,
+//			“pay_currency”:“USD”,
+//			“buy_currency”:“USDT”,
+//			“email”:”123456@qq.com ",
+//			“attach”:"",
+//			“sign":"SDGHYGHJ467FHJBNGCC",
+//		}
+
+		JSONObject ReqParam=  new JSONObject();
+
+		ReqParam.put("service","Pay.GatewayPay");
+		ReqParam.put("channel_id","1000000007");
+//		ReqParam.put("s","\\\\/Pay.GatewayPay");
+		ReqParam.put("s","s");
+		ReqParam.put("amount",amount);
+		ReqParam.put("merchant_id",merchant_id);
+		ReqParam.put("out_order_id", orderLocal);
+		ReqParam.put("timestamp",now+"");
+		ReqParam.put("nonce",orderLocal);
+		ReqParam.put("attach",customer+"");
+		ReqParam.put("notify_url", notifyUrl);
+		ReqParam.put("pay_currency",currency);
+		ReqParam.put("buy_currency",buy_currency);
+
+		Map<String, String> paramsMap = JSONObject.toJavaObject(ReqParam, Map.class);
+		String sign=MD5Util.paramsSort(paramsMap)+"&secret="+key;
+//		sign= sign.replaceAll("/", "\\\\/");
+		log.info("=====================signStr:"+sign);
+		sign= MD5Util.getMD5(sign).toUpperCase();
+		log.info("=====================signResult:"+sign);
 		paramsMap.put("sign", sign);
+//		paramsMap.remove("s");
 		log.info("=====================chargeOrder:"+paramsMap.toString());
 		String	JsonAuth;
 		try{
 			HttpClientUtil  client=HttpClientUtil.getInstance();
-			JsonAuth=client.doPostWithJsonResult(chargeUrl, paramsMap.toString());
+			JsonAuth=client.doPostWithJsonResult(chargeUrl, paramsMap);
 		} catch (Exception e) {
 			throw new ServiceException(StatusCode.FAILED,"request_time_out", null);
 		}
@@ -125,82 +150,92 @@ public class SepPayService  {
 		log.info("=====================JsonAuth:"+JsonAuth);
 		
 //		{
-//			"data":{
-//			"amount":"100",
-//			"merchantId":10001,
-//			"orderId":"123456",
-//			"payUrl":http://www.pay.com 
-//		           },
-//			"status":0,
-//			"message":"请求成功" 
-//		}
+//		"ret":200，
+//		“data":{
+//			“out_order_id”:"2154648931213456",
+//			“gateway_url”:”http://www.xxx.cm/#/f9f6f194eaa6ffee96b5dcb31c4c12bb”,
+//			“merchant_id":"15000001001"
+//	"order_status":"1"
+//		},
+//		“msg":"success"
+
+//}
 		
 		JSONObject AuthData =JSON.parseObject(JsonAuth);
 		
-		if(0==AuthData.getInteger("status")){
-
+		if(200==AuthData.getInteger("ret")){
 			JSONObject data=AuthData.getJSONObject("data");
-			String payurl=data.getString("payUrl");
-			String orderRemote=data.getString("orderId");
-			result=new JSONObject();
+			String payurl=data.getString("gateway_url");
+			String orderRemote=data.getString("out_order_id");
 			result.put("orderRemote",orderRemote);
 			result.put("payurl", payurl);
 			result.put("now", now);
+			
+//			TransExchange.tranGenOrderIn(now,uid, orderLocal, orderRemote, "NibPay", "", cost, cost, currency);
 			log.info("call:"+chargeUrl+"==============result:"+payurl);
 		}else{
-			log.info("call:"+chargeUrl+"failed===========err_msg:"+AuthData.getString("message"));
+			log.info("call:"+chargeUrl+"failed===========err_msg:"+AuthData.getString("msg"));
 		}
 		return result;
 	}
 
-	public void chargeCallBack(JSONObject reqData)throws Exception{
-		log.info("------------------------chargeCallBackData:"+reqData.toString());
-		 String extractPer=RedisData.getConf(jedisClient,channelIndex,EXTRACTPER);
-		 String key=RedisData.getConf(jedisClient,channelIndex,KEY);
-		 
-		 
-//		merchantId string 商户号
-//		orderId string 订单号
-//		amount string 订单⾦额，单位雷亚尔R$
-//		remark string 商品名称(不参与签名)
-//		orderStatus int 订单状态，1成功，-1失败
-//		sign string 签名，签名规则请看下⾯说明
-		 
-//		 sign = md5(merchantId=商户号&amount=订单⾦额&orderId=订单号&orderStatus=订单状
-//				 态&key=商户私钥)
-//				 注意：商户收到回调后，请返回SUCCESS字符串。
-		 
-			String merchantId= reqData.getString("merchantId");
-			String orderId=reqData.getString("orderId");
-			String amount= reqData.getString("amount");
-			int orderStatus= reqData.getIntValue("orderStatus"); 
-		    String remoteSign=reqData.getString("sign");
-		
-		//		sign= sign.replaceAll("/", "\\\\/");
-		
-		String sign="merchantId="+merchantId+"&amount="+amount+"&orderId="+orderId+"&orderStatus="+orderStatus+"&key="+key;
-		sign= MD5Util.getMD5(sign);
-		if(!remoteSign.equals(sign)){
-			throw new ServiceException(StatusCode.FAILED,"chargeCallBack:sign_error remoteSign:"+remoteSign+"****sign:"+sign, null);
-		}
-		JSONObject  AuthData=new JSONObject();
-		switch (orderStatus) {
-		case 1:
-			AuthData.put("succ", true);
-			AuthData.put("orderLocal", orderId);
-			AuthData.put("extractPer", extractPer);
-			log.info("chargeCallBack========orderLocal:"+orderId);
-			break;
-		default:
-			AuthData.put("succ", false);
-			AuthData.put("orderLocal", orderId);
-			AuthData.put("extractPer", extractPer);
-			log.info("chargeCallBack:failed========orderLocal:"+orderId);
-			break;
-		}
-		ExchangeService.processCharge(AuthData);
+//	public void chargeCallBack(JSONObject reqData)throws Exception{
+//		log.info("------------------------chargeCallBackData:"+reqData.toString());
+//		StaticDataCache StaticDataCache=SpringContextUtil.getBean(StaticDataCache.class);
+//		 JSONObject NibPay=StaticDataCache.getData("NibPay",reqData.getIntValue("attach"));
+//		 String key=NibPay.getString("key");
+//		 
+////		 {
+////				“order_id":"132154987",
+////				“amount":"70.2",
+////				“usd_amount”:”70.2”
+////				“fee_amount":"2",
+////				“fee_usd_amount":"2",
+////				“value”:”10”,
+////				“settle_value”:”9.8”,
+////				“buy_currency”:”USDT”,
+////				“pay_currency”:”USD”,
+////				"merchant_id":"100520000001",
+////				“out_order_id”:"1111111111",
+////				"create_time":"14904528822",
+////			    "order_status":"1"
+////				“attach”:"",
+////				“sign”:”",
+////			}
+//		 
+//		 String remoteSign=reqData.getString("sign");
+//		 reqData.remove("sign");
+//		 Map<String, String> paramsMap = JSONObject.toJavaObject(reqData, Map.class);
+//			String sign=MD5Util.paramsSort(paramsMap)+"&secret="+key;
+//			sign= MD5Util.getMD5(sign);
+//		if(!remoteSign.equals(sign)){
+//			throw new ServiceException(StatusCode.FAILED,"chargeCallBack:sign_error remoteSign:"+remoteSign+"****sign:"+sign, null);
+//		}
+//		String orderLocal=reqData.getString("out_order_id");
+//		String orderRemote=reqData.getString("order_id");
+//		Double usd_amount =Double.valueOf(reqData.getString("usd_amount"))*100;//转换为Int类型
+//		Double fee_usd_amount =Double.valueOf(reqData.getString("fee_usd_amount"))*100;//转换为Int类型
+//		switch (reqData.getInteger("order_status")) {
+//		case 1:
+//			if(tradeOrderMapper.orderCallBack(orderLocal,orderRemote, usd_amount.longValue()-fee_usd_amount.longValue(),TransExchange.ORDER_PROCESSING, TransExchange.ORDER_SUCC)!=1) {
+//				throw new TransException("status_update_failed");
+//			}
+//			log.info("chargeCallBack========orderRemote:"+orderRemote);
+//			break;
+//		default:
+//			if(tradeOrderMapper.orderCallBack(orderLocal,orderRemote, usd_amount.longValue()-fee_usd_amount.longValue(),TransExchange.ORDER_PROCESSING, TransExchange.ORDER_FAILED)!=1) {
+//				throw new TransException("status_update_failed");
+//			}
+//	
+//			log.info("chargeCallBack:failed========orderRemote:"+orderRemote);
+//			break;
+//		}
+//
+//	}
 
-	}
+
+	
+	
 	//客户端发起提现 http://127.0.0.1:8085/GameUser/exchange/extractOrder?param={"uid": 30, "coin": 100, "name": "yeah", "account": "6262662666662666", "ifsc": "HDFC0000027","bank_name":"indbank", "bank_code": "IDPT0001"}
 	public   String accountInfo(JSONObject reqData) throws Exception {
 		String name= reqData.getString("name");
@@ -212,12 +247,13 @@ public class SepPayService  {
 	}
 	public   JSONObject  verifyExtract(tradeOrder  tradeOrder) throws Exception {
 		JSONObject result=null;
-	
-		String merchantId=RedisData.getConf(jedisClient,channelIndex,MERCHANTID);
-		 String extractUrl=RedisData.getUri(jedisClient,channelIndex,EXTRACTURL);
-		 Integer accountType=Integer.parseInt(RedisData.getConf(jedisClient,channelIndex,ACCOUNTTYPE));
-		 String notifyUrl=RedisData.getUri(jedisClient,channelIndex,EXTRACTCALLBACKURL);
-		 String key=RedisData.getConf(jedisClient,channelIndex,KEY);
+		StaticDataCache StaticDataCache=SpringContextUtil.getBean(StaticDataCache.class);
+		 JSONObject SepPay=StaticDataCache.getData("SepPay",1);
+		 String merchantId=SepPay.getString("merchantId");
+		 String extractUrl=SepPay.getString("extractUrl");
+		 Integer accountType=SepPay.getInteger("accountType");
+		 String notifyUrl=SepPay.getString("extractCallBack");
+		 String key=SepPay.getString("key");
 		String AccountOut=tradeOrder.getAccountOut();
 		JSONObject outInfo=JSONObject.parseObject(AccountOut);
 		
@@ -225,7 +261,7 @@ public class SepPayService  {
 		 String bankName="BANCO BRADESCO S.A., SAO PAULO";
 		 String name=outInfo.getString("name");
 		 String accountNumber=outInfo.getString("accountNumber");
-		 String sign="merchantId="+merchantId+"&bankNumber="+bankNumber+"&amount="+tradeOrder.getCoin()+"&orderId="+tradeOrder.getOrderLocal()+"&accountNumber="+accountNumber+"&key="+key;
+		 String sign="merchantId="+merchantId+"&bankNumber="+bankNumber+"&amount="+tradeOrder.getCoin()/100+"&orderId="+tradeOrder.getOrderLocal()+"&accountNumber="+accountNumber+"&key="+key;
 		 sign= MD5Util.getMD5(sign);
 		
 //		merchantId 是 string 商户号
@@ -248,7 +284,7 @@ public class SepPayService  {
 		JSONObject paramsMap=  new JSONObject();
 		paramsMap.put("merchantId",merchantId);
 		paramsMap.put("orderId",tradeOrder.getOrderLocal());
-		paramsMap.put("amount",tradeOrder.getCoin());
+		paramsMap.put("amount",tradeOrder.getCoin()/100);
 		paramsMap.put("bankNumber",bankNumber);
 		paramsMap.put("bankName",bankName);
 		
@@ -319,7 +355,9 @@ public class SepPayService  {
 //		sign string 签名
 //		sign = md5(amount= 代付⾦额&orderId=代付单号&transferStatus= 代
 //				付状态&key=⽀付秘钥)
-		 String key=RedisData.getConf(jedisClient,channelIndex,KEY);
+		StaticDataCache StaticDataCache=SpringContextUtil.getBean(StaticDataCache.class);
+		 JSONObject SepPay=StaticDataCache.getData("SepPay",1);
+		 String key=SepPay.getString("key");
 		 if(0!=reqData.getIntValue("status")){
 				throw new ServiceException(StatusCode.FAILED,"extractCallBackError status:"+reqData.getIntValue("status")+"****message:"+reqData.getString("message"), null);
 			}
@@ -352,7 +390,6 @@ public class SepPayService  {
 
 
 	}	
-
 
 
 

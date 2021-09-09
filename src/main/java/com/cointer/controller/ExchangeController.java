@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,9 +27,11 @@ import com.cointer.service.IExchangeService;
 import com.cointer.service.tikPay.TikPayService;
 import com.cointer.service.otPay.OtPayService;
 import com.cointer.service.sepPay.SepPayService;
+import com.cointer.util.CommTypeUtils;
 import com.cointer.util.HttpClientUtil;
 import com.cointer.util.tikPay.AESOperator;
-import com.cointer.service.amPay.AmPayService; 
+import com.cointer.service.amPay.AmPayService;
+import com.cointer.service.nibPay.NibPayService; 
 
 
 
@@ -51,7 +54,8 @@ public class ExchangeController extends  BaseController{
 	private AmPayService AmPayService;
 	@Autowired 
 	private SepPayService SepPayService;
-	
+	@Autowired 
+	private NibPayService NibPayService;
 	
 	@RequestMapping("/chargeOrder")
 	@ResponseBody
@@ -285,6 +289,50 @@ public class ExchangeController extends  BaseController{
 
 
 	    }
-
+	    @RequestMapping("/shop")
+	    public String enterShop(Model model,@RequestParam int uid,@RequestParam int customer,@RequestParam String buy_currency){
+	    	 model.addAttribute("uid", uid);
+	    	 model.addAttribute("customer", customer);
+	    	 model.addAttribute("buy_currency",buy_currency);
+	        return "shop";
+	    }   
+		@RequestMapping("/genOrder")
+		public String genOrder(Model model,@RequestParam int uid,@RequestParam String currency,@RequestParam int cost,@RequestParam int customer,@RequestParam String buy_currency) {
+			JSONObject obj=new JSONObject();
+			obj.put("uid",uid);
+			obj.put("customer",customer);
+			obj.put("buy_currency",buy_currency);
+			obj.put("currency",currency);
+			obj.put("cost",cost);
+			String orderLocal=CommTypeUtils.getOrderNo("gs");
+		    JSONObject AuthData;
+			try {
+				 AuthData = NibPayService.chargeOrder(obj, orderLocal);
+				 model.addAttribute("payurl", AuthData.getString("payurl"));
+				 model.addAttribute("message", "点击跳转支付页面");
+				 return "shopPay";
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			model.addAttribute("message", "生成订单失败请重新下单");
+			return "shopPay";
+			
+		}
+//		@RequestMapping("/nibPayChargeCallBack")
+//		@ResponseBody
+//		public String nibPayChargeCallBack(@RequestBody nibChargeCbDto nibChargeCbDto) {
+//
+//			String res="success";
+//			  try {
+//				    JSONObject obj = (JSONObject) JSONObject.toJSON(nibChargeCbDto);
+//					NibPayService.chargeCallBack(obj);
+//			} catch (Exception e) {
+//				// TODO: handle exception
+//				e.printStackTrace();
+//				  res="FAILED";
+//			}
+//			return res;
+//		}
 
 }
